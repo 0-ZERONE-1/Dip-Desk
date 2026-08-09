@@ -1,5 +1,4 @@
 import { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/dbConnect';
@@ -9,10 +8,7 @@ import { findUserByEmailStore } from '@/lib/store';
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-    }),
+    // --- STUDENT LOGIN ---
     CredentialsProvider({
       id: 'user-credentials',
       name: 'Student Login',
@@ -25,21 +21,7 @@ export const authOptions: NextAuthOptions = {
 
         const inputEmail = credentials.email.toLowerCase().trim();
 
-        // 1. Check Demo / Default Student Account
-        if (
-          (inputEmail === 'student@diplomahub.com' || inputEmail === 'demo@diplomahub.com' || inputEmail === 'student@dipdesk.com' || inputEmail === 'demo@dipdesk.com') &&
-          (credentials.password === 'Student@123' || credentials.password === 'student123' || credentials.password === 'Demo@123')
-        ) {
-          return {
-            id: 'demo_student_id',
-            email: 'student@dipdesk.com',
-            name: 'Demo Student',
-            role: 'student',
-            isProfileComplete: true,
-          };
-        }
-
-        // 2. Check local store users (fallback & registered users)
+        // 1. Check local store registered users
         try {
           const storeUser = await findUserByEmailStore(inputEmail);
           if (storeUser) {
@@ -48,8 +30,6 @@ export const authOptions: NextAuthOptions = {
               isValid = await bcrypt.compare(credentials.password, storeUser.hashedPassword);
             } else if (storeUser.password) {
               isValid = credentials.password === storeUser.password;
-            } else {
-              isValid = true; // demo accounts
             }
             if (isValid) {
               return {
@@ -63,7 +43,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch {}
 
-        // 3. Check MongoDB Users
+        // 2. Check MongoDB registered users
         try {
           await dbConnect();
           const user = await User.findOne({ email: inputEmail });
@@ -79,7 +59,7 @@ export const authOptions: NextAuthOptions = {
                 email: user.email,
                 name: user.name,
                 role: user.role || 'student',
-                isProfileComplete: user.isProfileComplete,
+                isProfileComplete: user.isProfileComplete ?? true,
               };
             }
           }
@@ -90,6 +70,8 @@ export const authOptions: NextAuthOptions = {
         return null;
       },
     }),
+
+    // --- ADMIN LOGIN ---
     CredentialsProvider({
       id: 'admin-credentials',
       name: 'Admin Login',
@@ -100,16 +82,10 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const defaultAdminEmail = (process.env.ADMIN_EMAIL || 'admin@diplomahub.com').toLowerCase();
-        const defaultAdminPass = process.env.ADMIN_PASSWORD || 'Admin@123';
-
         const inputEmail = credentials.email.toLowerCase().trim();
 
-        // Default admin credentials fallback for instant login
-        if (
-          (inputEmail === defaultAdminEmail || inputEmail === 'admin@dipdesk.com' || inputEmail === 'admin@diplomahub.com') &&
-          credentials.password === defaultAdminPass
-        ) {
+        // Strict Admin Credentials
+        if (inputEmail === 'admin@dipdesk.com' && credentials.password === 'Admin.dipdesk') {
           return {
             id: 'admin_default_id',
             email: 'admin@dipdesk.com',
@@ -118,6 +94,7 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
+        // Check MongoDB Admin model if present
         try {
           await dbConnect();
           const admin = await Admin.findOne({ email: inputEmail });
@@ -142,47 +119,19 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === 'google') {
-        await dbConnect();
-        const existingUser = await User.findOne({ email: user.email });
-
-        if (!existingUser) {
-          await User.create({
-            googleId: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            role: 'student',
-            isProfileComplete: false,
-          });
-        } else if (existingUser.isBanned) {
-          return false; // Block banned users
-        }
-        return true;
-      }
-      return true;
-    },
-
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
-        token.role = (user as any).role;
+        token.id = (user as any).id || token.id;
+        token.role = (user as any).role || 'student';
+        token.isProfileComplete = (user as any).isProfileComplete ?? true;
       }
 
-      if (account?.provider === 'google' && token.email) {
-        await dbConnect();
-        const dbUser = await User.findOne({ email: token.email });
-        if (dbUser) {
-          token.id = dbUser._id.toString();
-          token.role = dbUser.role;
-          token.isProfileComplete = dbUser.isProfileComplete;
-          token.isBanned = dbUser.isBanned;
-        }
+      if (trigger === 'update') {
+        token.isProfileComplete = true;
       }
 
-      if ((user as any)?.role === 'admin') {
+      if ((user as any)?.role === 'admin' || token.role === 'admin') {
         token.role = 'admin';
-        token.id = user.id;
       }
 
       return token;

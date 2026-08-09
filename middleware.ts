@@ -25,8 +25,8 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // Force profile completion for students
-  if (token && token.role === 'student' && !token.isProfileComplete) {
+  // Force profile completion for students if profile is explicitly incomplete
+  if (token && token.role === 'student' && token.isProfileComplete === false) {
     if (!pathname.startsWith('/complete-profile') && !pathname.startsWith('/api')) {
       return NextResponse.redirect(new URL('/complete-profile', req.url));
     }

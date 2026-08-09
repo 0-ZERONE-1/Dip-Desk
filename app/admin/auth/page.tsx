@@ -72,7 +72,7 @@ export default function AdminAuthPage() {
                 <input
                   id="admin-email"
                   type="email"
-                  placeholder="admin@diplomahub.com"
+                  placeholder="admin@example.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
