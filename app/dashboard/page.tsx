@@ -169,7 +169,7 @@ export default function StudentPanelPage() {
         <div className="mb-6 pb-4 border-b border-surface-200 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2.5">
-              <span className="w-8 h-8 rounded-xl bg-primary-600 text-white flex items-center justify-center text-sm">
+              <span className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-sm">
                 🎓
               </span>
               Student Panel
@@ -181,9 +181,9 @@ export default function StudentPanelPage() {
         </div>
 
         {/* Grid Layout: Left Sidebar + Right Main Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 
-          {/* ===== LEFT SIDEBAR ===== */}
+          {/* ===== LEFT SIDEBAR (Fixed Width / Aspect Ratio) ===== */}
           <aside className="lg:col-span-1 space-y-4">
 
             {/* Profile Avatar Card */}
@@ -193,8 +193,8 @@ export default function StudentPanelPage() {
               </div>
               <h2 className="font-bold text-gray-900 text-base">{profile?.name || session?.user?.name || 'Student User'}</h2>
               <p className="text-xs text-gray-500 truncate mt-0.5">{profile?.email || session?.user?.email}</p>
-              <p className="text-xs font-semibold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full inline-block mt-2 border border-primary-100">
-                {profile?.title || 'Diploma Student'}
+              <p className="text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full inline-block mt-2 border border-blue-100">
+                {profile?.title || 'Student'}
               </p>
             </div>
 
@@ -237,139 +237,147 @@ export default function StudentPanelPage() {
           </aside>
 
 
-          {/* ===== RIGHT CONTENT PANEL ===== */}
+          {/* ===== RIGHT CONTENT PANEL (Consistent Top Ratio & Alignment) ===== */}
           <div className="lg:col-span-3 space-y-6">
 
-            {/* TAB 1: MY PROFILE & EDIT */}
-            {activeTab === 'profile' && (
-              <div className="space-y-6">
-                <div className="card p-6">
-                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-surface-100">
+            {/* 1. FIXED TOP STUDENT INFORMATION CARD (Keeps ratio identical across ALL tabs) */}
+            <div className="card p-6">
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-surface-100">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <User className="w-5 h-5 text-blue-600" />
+                    Student Information
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">You can update your personal details anytime</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsEditing(!isEditing);
+                    if (activeTab !== 'profile') setActiveTab('profile');
+                  }}
+                  className="btn-secondary text-xs px-3.5 py-2"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>{isEditing ? 'Cancel Editing' : 'Edit Profile'}</span>
+                </button>
+              </div>
+
+              {isEditing ? (
+                /* Edit Form */
+                <form onSubmit={handleSaveProfile} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <User className="w-5 h-5 text-blue-600" />
-                        Student Information
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">You can update your personal details anytime</p>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        className="input"
+                        required
+                      />
                     </div>
-                    <button
-                      onClick={() => setIsEditing(!isEditing)}
-                      className="btn-secondary text-xs px-3.5 py-2"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>{isEditing ? 'Cancel Editing' : 'Edit Profile'}</span>
-                    </button>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Title / Designation</label>
+                      <input
+                        type="text"
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        className="input"
+                        placeholder="e.g. Student, CST Diploma"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Institute Name</label>
+                      <input
+                        type="text"
+                        value={editForm.institute}
+                        onChange={(e) => setEditForm({ ...editForm, institute: e.target.value })}
+                        className="input"
+                        placeholder="e.g. Government Polytechnic"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Registration / Roll Number</label>
+                      <input
+                        type="text"
+                        value={editForm.regNumber}
+                        onChange={(e) => setEditForm({ ...editForm, regNumber: e.target.value })}
+                        className="input"
+                        placeholder="e.g. D2425000"
+                        required
+                      />
+                    </div>
                   </div>
 
-                  {isEditing ? (
-                    /* Edit Form */
-                    <form onSubmit={handleSaveProfile} className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
-                          <input
-                            type="text"
-                            value={editForm.name}
-                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            className="input"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Title / Designation</label>
-                          <input
-                            type="text"
-                            value={editForm.title}
-                            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                            className="input"
-                            placeholder="e.g. Student, CST Diploma"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Institute Name</label>
-                          <input
-                            type="text"
-                            value={editForm.institute}
-                            onChange={(e) => setEditForm({ ...editForm, institute: e.target.value })}
-                            className="input"
-                            placeholder="e.g. Government Polytechnic"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Registration / Roll Number</label>
-                          <input
-                            type="text"
-                            value={editForm.regNumber}
-                            onChange={(e) => setEditForm({ ...editForm, regNumber: e.target.value })}
-                            className="input"
-                            placeholder="e.g. D2425000"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="pt-2 flex justify-end">
-                        <button
-                          type="submit"
-                          disabled={savingProfile}
-                          className="btn-primary py-2.5 px-6"
-                        >
-                          {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /><span>Save Changes</span></>}
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    /* Profile Display Grid */
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {[
-                        { label: 'Full Name', value: profile?.name || 'Not set' },
-                        { label: 'Title / Designation', value: profile?.title || 'Student' },
-                        { label: 'Institute Name', value: profile?.institute || 'Not set' },
-                        { label: 'Registration / Roll Number', value: profile?.regNumber || 'Not set' },
-                      ].map((item) => (
-                        <div key={item.label} className="p-4 bg-surface-50 rounded-xl border border-surface-200">
-                          <p className="text-xs text-gray-400 font-semibold">{item.label}</p>
-                          <p className="text-sm font-bold text-gray-900 mt-1">{item.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Profile Overview Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={savingProfile}
+                      className="btn-primary py-2.5 px-6"
+                    >
+                      {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /><span>Save Changes</span></>}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Profile Display Grid */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    { label: 'Saved Items', count: profile?.bookmarks?.length || 0, icon: Bookmark, color: 'text-blue-600 bg-blue-50' },
-                    { label: 'Liked Materials', count: likedResources.length, icon: ThumbsUp, color: 'text-emerald-600 bg-emerald-50' },
-                    { label: 'Disliked Materials', count: dislikedResources.length, icon: ThumbsDown, color: 'text-amber-600 bg-amber-50' },
-                    { label: 'Submitted Requests', count: myRequests.length, icon: MessageSquarePlus, color: 'text-purple-600 bg-purple-50' },
-                  ].map((stat) => {
-                    const Icon = stat.icon;
-                    return (
-                      <div key={stat.label} className="card p-4 flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-xl font-extrabold text-gray-900">{stat.count}</p>
-                          <p className="text-[11px] text-gray-500 font-medium">{stat.label}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                    { label: 'Full Name', value: profile?.name || 'Not set' },
+                    { label: 'Title / Designation', value: profile?.title || 'Student' },
+                    { label: 'Institute Name', value: profile?.institute || 'Not set' },
+                    { label: 'Registration / Roll Number', value: profile?.regNumber || 'Not set' },
+                  ].map((item) => (
+                    <div key={item.label} className="p-3.5 bg-surface-50 rounded-xl border border-surface-200">
+                      <p className="text-[11px] text-gray-400 font-semibold">{item.label}</p>
+                      <p className="text-sm font-bold text-gray-900 mt-0.5">{item.value}</p>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
+            {/* 2. FIXED OVERVIEW STATS CARDS (Keeps aspect ratio consistent) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { id: 'saved', label: 'Saved Items', count: profile?.bookmarks?.length || 0, icon: Bookmark, color: 'text-blue-600 bg-blue-50 border-blue-100' },
+                { id: 'liked', label: 'Liked Materials', count: likedResources.length, icon: ThumbsUp, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+                { id: 'disliked', label: 'Disliked Materials', count: dislikedResources.length, icon: ThumbsDown, color: 'text-amber-600 bg-amber-50 border-amber-100' },
+                { id: 'requests', label: 'Submitted Requests', count: myRequests.length, icon: MessageSquarePlus, color: 'text-purple-600 bg-purple-50 border-purple-100' },
+              ].map((stat) => {
+                const Icon = stat.icon;
+                const isCurrent = activeTab === stat.id;
+                return (
+                  <button
+                    key={stat.label}
+                    onClick={() => setActiveTab(stat.id as ActiveTab)}
+                    className={`card p-4 flex items-center gap-3 text-left transition-all ${
+                      isCurrent ? 'ring-2 ring-blue-600 shadow-md' : 'hover:shadow-card-hover'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${stat.color}`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xl font-extrabold text-gray-900">{stat.count}</p>
+                      <p className="text-[11px] text-gray-500 font-medium">{stat.label}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+
+            {/* 3. TAB SPECIFIC CONTENT (Renders smoothly underneath without changing top ratio) */}
 
             {/* TAB 2: SAVED RESOURCES */}
             {activeTab === 'saved' && (
-              <div>
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <Bookmark className="w-5 h-5 text-blue-600" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <Bookmark className="w-4 h-4 text-blue-600" />
                     Saved Resources ({profile?.bookmarks?.length || 0})
                   </h3>
                   <Link href="/browse" className="btn-ghost text-xs">Browse More →</Link>
@@ -380,8 +388,8 @@ export default function StudentPanelPage() {
                     {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-36 rounded-2xl" />)}
                   </div>
                 ) : !profile?.bookmarks?.length ? (
-                  <div className="card p-12 text-center">
-                    <Bookmark className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <div className="card p-10 text-center">
+                    <Bookmark className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                     <h4 className="text-base font-bold text-gray-700 mb-1">No saved resources yet</h4>
                     <p className="text-xs text-gray-400 mb-4">Click the bookmark icon on any resource while browsing to save it here.</p>
                     <Link href="/browse" className="btn-primary mx-auto text-xs px-5 py-2.5">Browse Resources</Link>
@@ -399,17 +407,17 @@ export default function StudentPanelPage() {
 
             {/* TAB 3: LIKED RESOURCES */}
             {activeTab === 'liked' && (
-              <div>
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <ThumbsUp className="w-5 h-5 text-emerald-600" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <ThumbsUp className="w-4 h-4 text-emerald-600" />
                     Liked Resources ({likedResources.length})
                   </h3>
                 </div>
 
                 {!likedResources.length ? (
-                  <div className="card p-12 text-center">
-                    <ThumbsUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <div className="card p-10 text-center">
+                    <ThumbsUp className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                     <h4 className="text-base font-bold text-gray-700 mb-1">No liked materials yet</h4>
                     <p className="text-xs text-gray-400 mb-4">Upvote study materials you find helpful while studying.</p>
                     <Link href="/browse" className="btn-primary mx-auto text-xs px-5 py-2.5">Explore Study Materials</Link>
@@ -427,17 +435,17 @@ export default function StudentPanelPage() {
 
             {/* TAB 4: DISLIKED RESOURCES */}
             {activeTab === 'disliked' && (
-              <div>
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <ThumbsDown className="w-5 h-5 text-amber-600" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <ThumbsDown className="w-4 h-4 text-amber-600" />
                     Disliked Resources ({dislikedResources.length})
                   </h3>
                 </div>
 
                 {!dislikedResources.length ? (
-                  <div className="card p-12 text-center">
-                    <ThumbsDown className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <div className="card p-10 text-center">
+                    <ThumbsDown className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                     <h4 className="text-base font-bold text-gray-700 mb-1">No downvoted materials</h4>
                     <p className="text-xs text-gray-400">Materials you downvote will show up here for your reference.</p>
                   </div>
@@ -458,8 +466,8 @@ export default function StudentPanelPage() {
 
                 {/* Submit New Request Form */}
                 <div className="card p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
-                    <MessageSquarePlus className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
+                    <MessageSquarePlus className="w-4 h-4 text-purple-600" />
                     Request a Resource
                   </h3>
                   <p className="text-xs text-gray-500 mb-4">Can&apos;t find notes or question papers? Request them from admins!</p>
@@ -517,7 +525,7 @@ export default function StudentPanelPage() {
 
                 {/* Submitted Requests List */}
                 <div>
-                  <h4 className="text-base font-bold text-gray-900 mb-3">Submitted Requests ({myRequests.length})</h4>
+                  <h4 className="text-sm font-bold text-gray-900 mb-3">Submitted Requests ({myRequests.length})</h4>
                   {!myRequests.length ? (
                     <div className="card p-8 text-center text-gray-400 text-xs">
                       You have not submitted any resource requests yet.
