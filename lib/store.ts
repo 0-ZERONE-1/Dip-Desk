@@ -33,16 +33,7 @@ function getInitialStore(): StoreData {
     subjects: [...defaultSubjects],
     resources: [...defaultResources],
     notices: [...defaultNotices],
-    users: [
-      {
-        _id: 'demo_student_id',
-        email: 'student@diplomahub.com',
-        name: 'Demo Student',
-        role: 'student',
-        isProfileComplete: true,
-        createdAt: new Date().toISOString(),
-      },
-    ],
+    users: [],
   };
 }
 
@@ -451,14 +442,15 @@ export async function findUserByEmailStore(email: string) {
 }
 
 export async function findUserByIdStore(id: string) {
+  if (!id) return null;
   const store = readLocalStore();
-  return (store.users || []).find((u: any) => u._id === id) || {
-    _id: id,
-    name: 'Demo Student',
-    email: 'student@diplomahub.com',
-    role: 'student',
-    isProfileComplete: true,
-  };
+  const lower = id.toLowerCase();
+  const found = (store.users || []).find(
+    (u: any) => u && (u._id === id || (u.email && typeof u.email === 'string' && u.email.toLowerCase() === lower))
+  );
+  if (found) return found;
+
+  return null;
 }
 
 export async function createUserStore(data: any) {
@@ -477,9 +469,13 @@ export async function createUserStore(data: any) {
 }
 
 export async function updateUserStore(id: string, data: any) {
+  if (!id) return null;
   const store = readLocalStore();
   if (!store.users) store.users = [];
-  const index = store.users.findIndex((u) => u._id === id);
+  const lower = id.toLowerCase();
+  const index = store.users.findIndex(
+    (u: any) => u && (u._id === id || (u.email && typeof u.email === 'string' && u.email.toLowerCase() === lower))
+  );
   if (index !== -1) {
     store.users[index] = { ...store.users[index], ...data };
     saveLocalStore(store);
@@ -589,9 +585,12 @@ export async function createRequestStore(data: any) {
 export async function toggleBookmarkStore(userId: string, resourceId: string) {
   const store = readLocalStore();
   if (!store.users) store.users = [];
-  let user = store.users.find((u) => u._id === userId || u.email === userId);
+  const lower = userId ? userId.toLowerCase() : '';
+  let user = store.users.find(
+    (u: any) => u && (u._id === userId || (u.email && typeof u.email === 'string' && u.email.toLowerCase() === lower))
+  );
   if (!user) {
-    user = { _id: userId, bookmarks: [] };
+    user = { _id: userId, email: userId, bookmarks: [] };
     store.users.push(user);
   }
   if (!user.bookmarks) user.bookmarks = [];

@@ -381,7 +381,6 @@ export default function StudentPanelPage() {
                     <Bookmark className="w-4 h-4 text-blue-600" />
                     Saved Resources ({profile?.bookmarks?.length || 0})
                   </h3>
-                  <Link href="/browse" className="btn-ghost text-xs">Browse More →</Link>
                 </div>
 
                 {loading ? (
