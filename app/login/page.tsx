@@ -65,8 +65,12 @@ export default function LoginPage() {
         // If already registered, attempt login directly
         if (data.error?.includes('already exists') || data.error?.includes('already registered')) {
           const signInRes = await signIn('user-credentials', { email, password, redirect: false });
-          if (signInRes?.error) toast.error('Account already exists with a different password');
-          else { toast.success('Signed in successfully!'); router.push('/'); }
+          if (signInRes?.error) {
+            toast.error('Account already registered! Please click "Sign In".');
+          } else {
+            toast.success('Signed in successfully!');
+            router.push('/');
+          }
           setLoading(false);
           return;
         }
@@ -76,8 +80,12 @@ export default function LoginPage() {
       }
       // Successfully registered, auto sign-in
       const signInRes = await signIn('user-credentials', { email, password, redirect: false });
-      if (signInRes?.error) toast.error('Account registered! Please sign in.');
-      else { toast.success('Account registered & signed in! 🎉'); router.push('/'); }
+      if (signInRes?.error) {
+        toast.success('Account created! Click "Sign In" to log in.');
+      } else {
+        toast.success('Account created & signed in! 🎉');
+        router.push('/');
+      }
     } catch {
       toast.error('Registration failed. Please try again.');
     } finally {
