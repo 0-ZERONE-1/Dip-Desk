@@ -82,7 +82,7 @@ export default function Navbar() {
               <Link href="/developers" className={cn('nav-item', pathname === '/developers' && 'nav-item-active')}>
                 Developers
               </Link>
-              {status === 'authenticated' && (
+              {status === 'authenticated' && !isAdmin && (
                 <Link href="/dashboard" className={cn('nav-item', pathname === '/dashboard' && 'nav-item-active')}>
                   Student Panel
                 </Link>
@@ -134,21 +134,23 @@ export default function Navbar() {
                           )}
                         </div>
                         <div className="py-1">
-                          <Link
-                            href="/dashboard"
-                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-surface-50 font-semibold"
-                            onClick={() => setProfileOpen(false)}
-                          >
-                            <User className="w-4 h-4 text-blue-600" />
-                            Student Panel
-                          </Link>
+                          {!isAdmin && (
+                            <Link
+                              href="/dashboard"
+                              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-surface-50 font-semibold"
+                              onClick={() => setProfileOpen(false)}
+                            >
+                              <User className="w-4 h-4 text-blue-600" />
+                              Student Panel
+                            </Link>
+                          )}
                           {isAdmin && (
                             <Link
                               href="/admin"
-                              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-surface-50"
+                              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-surface-50 font-semibold"
                               onClick={() => setProfileOpen(false)}
                             >
-                              <Settings className="w-4 h-4" />
+                              <Settings className="w-4 h-4 text-purple-600" />
                               Admin Panel
                             </Link>
                           )}

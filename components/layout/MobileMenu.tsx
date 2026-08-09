@@ -24,7 +24,7 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
     { href: '/browse', label: 'Browse Resources', icon: BookOpen },
     { href: '/notices', label: 'Notice Board', icon: Bell, hasBadge: hasRecentNotice },
     { href: '/developers', label: 'Developers', icon: Code2 },
-    ...(session ? [{ href: '/dashboard', label: 'Student Panel', icon: Bookmark }] : []),
+    ...(session && !isAdmin ? [{ href: '/dashboard', label: 'Student Panel', icon: Bookmark }] : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin Panel', icon: Settings }] : []),
   ];
 
