@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, BookOpen, LogOut, Settings, Bookmark } from 'lucide-react';
+import { Menu, X, BookOpen, LogOut, Settings, Bookmark, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NavbarSearch from '@/components/NavbarSearch';
 import MobileMenu from './MobileMenu';
@@ -136,11 +136,11 @@ export default function Navbar() {
                         <div className="py-1">
                           <Link
                             href="/dashboard"
-                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-surface-50"
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-surface-50 font-semibold"
                             onClick={() => setProfileOpen(false)}
                           >
-                            <Bookmark className="w-4 h-4" />
-                            My Bookmarks
+                            <User className="w-4 h-4 text-blue-600" />
+                            Student Panel
                           </Link>
                           {isAdmin && (
                             <Link

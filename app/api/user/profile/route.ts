@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
-import { updateUserStore, findUserByIdStore } from '@/lib/store';
+import { updateUserStore, findUserByIdStore, getResourcesStore } from '@/lib/store';
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,7 +58,16 @@ export async function GET(req: NextRequest) {
     }
 
     const storeUser = await findUserByIdStore(userId);
-    return NextResponse.json({ user: storeUser });
+    const allResources = await getResourcesStore();
+    const userBookmarkIds = (storeUser?.bookmarks || []).map((b: any) => (typeof b === 'string' ? b : b._id));
+    const populatedBookmarks = allResources.filter((r: any) => userBookmarkIds.includes(r._id));
+
+    return NextResponse.json({
+      user: {
+        ...storeUser,
+        bookmarks: populatedBookmarks,
+      },
+    });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
   }

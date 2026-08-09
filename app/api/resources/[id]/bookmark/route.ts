@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import mongoose from 'mongoose';
+import { toggleBookmarkStore } from '@/lib/store';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -11,23 +12,30 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const userId = (session.user as any).id;
-    const resourceId = new mongoose.Types.ObjectId(id);
+    const userId = (session.user as any).id || session.user?.email || 'demo_student_id';
 
-    await dbConnect();
-    const user = await User.findById(userId);
-    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    // 1. Always update in local/in-memory store
+    const isBookmarked = await toggleBookmarkStore(userId, id);
 
-    const isBookmarked = user.bookmarks.some((bId: any) => bId.toString() === id);
-
-    if (isBookmarked) {
-      user.bookmarks = user.bookmarks.filter((bId: any) => bId.toString() !== id);
-    } else {
-      user.bookmarks.push(resourceId);
+    // 2. Also try updating in MongoDB if available
+    if (userId.length === 24) {
+      try {
+        const resourceId = new mongoose.Types.ObjectId(id);
+        await dbConnect();
+        const user = await User.findById(userId);
+        if (user) {
+          const dbIsBookmarked = user.bookmarks.some((bId: any) => bId.toString() === id);
+          if (dbIsBookmarked) {
+            user.bookmarks = user.bookmarks.filter((bId: any) => bId.toString() !== id);
+          } else {
+            user.bookmarks.push(resourceId);
+          }
+          await user.save();
+        }
+      } catch {}
     }
 
-    await user.save();
-    return NextResponse.json({ isBookmarked: !isBookmarked });
+    return NextResponse.json({ isBookmarked });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update bookmark' }, { status: 500 });
   }

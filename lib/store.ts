@@ -584,3 +584,63 @@ export async function createRequestStore(data: any) {
   saveLocalStore(store);
   return newReq;
 }
+
+// --- BOOKMARKS & VOTES ---
+export async function toggleBookmarkStore(userId: string, resourceId: string) {
+  const store = readLocalStore();
+  if (!store.users) store.users = [];
+  let user = store.users.find((u) => u._id === userId || u.email === userId);
+  if (!user) {
+    user = { _id: userId, bookmarks: [] };
+    store.users.push(user);
+  }
+  if (!user.bookmarks) user.bookmarks = [];
+
+  const index = user.bookmarks.indexOf(resourceId);
+  let isBookmarked = false;
+  if (index !== -1) {
+    user.bookmarks.splice(index, 1);
+    isBookmarked = false;
+  } else {
+    user.bookmarks.push(resourceId);
+    isBookmarked = true;
+  }
+  saveLocalStore(store);
+  return isBookmarked;
+}
+
+export async function toggleVoteStore(userId: string, resourceId: string, vote: 'up' | 'down') {
+  const store = readLocalStore();
+  if (!store.resources) store.resources = defaultResources;
+  const resIndex = store.resources.findIndex((r) => r._id === resourceId);
+  if (resIndex !== -1) {
+    const resource = store.resources[resIndex];
+    if (!resource.ratings) resource.ratings = [];
+
+    const existingIndex = resource.ratings.findIndex((r: any) => r.userId === userId);
+    if (existingIndex !== -1) {
+      const existing = resource.ratings[existingIndex];
+      if (existing.vote === vote) {
+        if (vote === 'up') resource.upvotes = Math.max(0, (resource.upvotes || 1) - 1);
+        else resource.downvotes = Math.max(0, (resource.downvotes || 1) - 1);
+        resource.ratings.splice(existingIndex, 1);
+      } else {
+        if (vote === 'up') {
+          resource.upvotes = (resource.upvotes || 0) + 1;
+          resource.downvotes = Math.max(0, (resource.downvotes || 1) - 1);
+        } else {
+          resource.downvotes = (resource.downvotes || 0) + 1;
+          resource.upvotes = Math.max(0, (resource.upvotes || 1) - 1);
+        }
+        resource.ratings[existingIndex].vote = vote;
+      }
+    } else {
+      resource.ratings.push({ userId, vote });
+      if (vote === 'up') resource.upvotes = (resource.upvotes || 0) + 1;
+      else resource.downvotes = (resource.downvotes || 0) + 1;
+    }
+    saveLocalStore(store);
+    return { upvotes: resource.upvotes, downvotes: resource.downvotes };
+  }
+  return { upvotes: 0, downvotes: 0 };
+}

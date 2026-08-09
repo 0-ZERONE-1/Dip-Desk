@@ -125,15 +125,17 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger, session: updateData }) {
       if (user) {
         token.id = (user as any).id || token.id;
+        token.name = user.name || token.name;
         token.role = (user as any).role || 'student';
         token.isProfileComplete = (user as any).isProfileComplete ?? true;
       }
 
       if (trigger === 'update') {
         token.isProfileComplete = true;
+        if (updateData?.name) token.name = updateData.name;
       }
 
       if ((user as any)?.role === 'admin' || token.role === 'admin') {
@@ -146,6 +148,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id as string;
+        if (token.name) session.user.name = token.name as string;
         (session.user as any).role = token.role as string;
         (session.user as any).isProfileComplete = token.isProfileComplete as boolean;
         (session.user as any).isBanned = token.isBanned as boolean;

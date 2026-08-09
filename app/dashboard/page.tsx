@@ -111,7 +111,7 @@ export default function StudentPanelPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update profile');
       toast.success('Profile updated successfully! 🎉');
-      await updateSession();
+      await updateSession({ name: editForm.name });
       await fetchProfile();
       setIsEditing(false);
     } catch (err: any) {
@@ -148,16 +148,17 @@ export default function StudentPanelPage() {
   };
 
   const currentUserId = (session?.user as any)?.id || 'demo_student_id';
+  const userEmail = session?.user?.email;
 
   // Filtered resources
   const likedResources = allResources.filter((r) =>
-    r.ratings?.some((rt) => rt.userId === currentUserId && rt.vote === 'up')
+    r.ratings?.some((rt) => (rt.userId === currentUserId || (userEmail && rt.userId === userEmail)) && rt.vote === 'up')
   );
   const dislikedResources = allResources.filter((r) =>
-    r.ratings?.some((rt) => rt.userId === currentUserId && rt.vote === 'down')
+    r.ratings?.some((rt) => (rt.userId === currentUserId || (userEmail && rt.userId === userEmail)) && rt.vote === 'down')
   );
   const myRequests = requests.filter(
-    (rq) => rq.studentId === currentUserId || rq.studentEmail === session?.user?.email
+    (rq) => rq.studentId === currentUserId || (userEmail && rq.studentEmail === userEmail)
   );
 
   return (
@@ -418,8 +419,8 @@ export default function StudentPanelPage() {
                 {!likedResources.length ? (
                   <div className="card p-10 text-center">
                     <ThumbsUp className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                    <h4 className="text-base font-bold text-gray-700 mb-1">No liked materials yet</h4>
-                    <p className="text-xs text-gray-400 mb-4">Upvote study materials you find helpful while studying.</p>
+                    <h4 className="text-base font-bold text-gray-700 mb-1">No Upvoted Materials yet</h4>
+                    <p className="text-xs text-gray-400 mb-4">Materials you upvote will show up here for your reference.</p>
                     <Link href="/browse" className="btn-primary mx-auto text-xs px-5 py-2.5">Explore Study Materials</Link>
                   </div>
                 ) : (
@@ -446,8 +447,9 @@ export default function StudentPanelPage() {
                 {!dislikedResources.length ? (
                   <div className="card p-10 text-center">
                     <ThumbsDown className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                    <h4 className="text-base font-bold text-gray-700 mb-1">No downvoted materials</h4>
-                    <p className="text-xs text-gray-400">Materials you downvote will show up here for your reference.</p>
+                    <h4 className="text-base font-bold text-gray-700 mb-1">No Downvoted Materials yet</h4>
+                    <p className="text-xs text-gray-400 mb-4">Materials you downvote will show up here for your reference.</p>
+                    <Link href="/browse" className="btn-primary mx-auto text-xs px-5 py-2.5">Explore Study Materials</Link>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
