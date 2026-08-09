@@ -5,22 +5,23 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import mongoose from 'mongoose';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const userId = (session.user as any).id;
-    const resourceId = new mongoose.Types.ObjectId(params.id);
+    const resourceId = new mongoose.Types.ObjectId(id);
 
     await dbConnect();
     const user = await User.findById(userId);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-    const isBookmarked = user.bookmarks.some((id: any) => id.toString() === params.id);
+    const isBookmarked = user.bookmarks.some((bId: any) => bId.toString() === id);
 
     if (isBookmarked) {
-      user.bookmarks = user.bookmarks.filter((id: any) => id.toString() !== params.id);
+      user.bookmarks = user.bookmarks.filter((bId: any) => bId.toString() !== id);
     } else {
       user.bookmarks.push(resourceId);
     }

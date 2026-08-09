@@ -14,10 +14,16 @@ interface Notice {
   createdAt: string;
 }
 
-const emptyForm = {
+const emptyForm: {
+  title: string;
+  content: string;
+  badge: 'Important' | 'Exam' | 'Update' | 'Urgent' | 'General';
+  isPinned: boolean;
+  link: string;
+} = {
   title: '',
   content: '',
-  badge: 'Important' as const,
+  badge: 'Important',
   isPinned: false,
   link: '',
 };

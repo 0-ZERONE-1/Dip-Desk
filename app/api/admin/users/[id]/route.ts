@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -14,7 +15,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const body = await req.json();
     // Only allow toggling isBanned
     const user = await User.findByIdAndUpdate(
-      params.id,
+      id,
       { isBanned: body.isBanned },
       { new: true }
     );

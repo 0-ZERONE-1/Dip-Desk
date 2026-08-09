@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import {
   LayoutDashboard, BookOpen, Users, MessageSquare, Heart, Building2, BookMarked, LogOut, Menu, X, Code2, Bell
 } from 'lucide-react';
@@ -22,6 +22,8 @@ const navItems = [
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user;
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const NavContent = () => (

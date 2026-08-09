@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import Resource from '@/lib/models/Resource';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const { vote } = await req.json(); // 'up' | 'down'
 
     await dbConnect();
-    const resource = await Resource.findById(params.id);
+    const resource = await Resource.findById(id);
     if (!resource) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const existingRatingIndex = resource.ratings.findIndex(
