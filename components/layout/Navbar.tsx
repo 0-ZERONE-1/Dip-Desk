@@ -84,7 +84,7 @@ export default function Navbar() {
               </Link>
               {status === 'authenticated' && (
                 <Link href="/dashboard" className={cn('nav-item', pathname === '/dashboard' && 'nav-item-active')}>
-                  My Library
+                  Student Panel
                 </Link>
               )}
               {isAdmin && (

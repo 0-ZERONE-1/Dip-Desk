@@ -564,3 +564,23 @@ export async function deleteNoticeStore(id: string) {
   saveLocalStore(store);
   return true;
 }
+
+// --- REQUESTS ---
+export async function getRequestsStore() {
+  const store = readLocalStore();
+  return (store as any).requests || [];
+}
+
+export async function createRequestStore(data: any) {
+  const store = readLocalStore();
+  if (!(store as any).requests) (store as any).requests = [];
+  const newReq = {
+    _id: `req_${Date.now()}`,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    ...data,
+  };
+  (store as any).requests.unshift(newReq);
+  saveLocalStore(store);
+  return newReq;
+}

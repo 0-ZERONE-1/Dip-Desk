@@ -3,29 +3,50 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import ResourceRequest from '@/lib/models/ResourceRequest';
+import { createRequestStore, getRequestsStore } from '@/lib/store';
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const userId = (session.user as any).id;
-    await dbConnect();
-    const { subjectId, category, description } = await req.json();
+    const userId = (session.user as any).id || 'demo_student_id';
+    const { subjectTitle, category, description } = await req.json();
 
-    if (!subjectId || !category || !description) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    if (!category || !description) {
+      return NextResponse.json({ error: 'Category and description are required' }, { status: 400 });
     }
 
-    const request = await ResourceRequest.create({
+    try {
+      await dbConnect();
+      await ResourceRequest.create({
+        studentId: userId,
+        category,
+        description,
+      });
+    } catch {}
+
+    const newReq = await createRequestStore({
       studentId: userId,
-      subjectId,
+      studentEmail: session.user?.email,
+      subjectTitle: subjectTitle || 'General',
       category,
       description,
     });
 
-    return NextResponse.json({ request }, { status: 201 });
+    return NextResponse.json({ request: newReq }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Failed to submit request' }, { status: 500 });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const requests = await getRequestsStore();
+    return NextResponse.json({ requests });
+  } catch {
+    return NextResponse.json({ requests: [] });
   }
 }

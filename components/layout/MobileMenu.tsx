@@ -24,7 +24,7 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
     { href: '/browse', label: 'Browse Resources', icon: BookOpen },
     { href: '/notices', label: 'Notice Board', icon: Bell, hasBadge: hasRecentNotice },
     { href: '/developers', label: 'Developers', icon: Code2 },
-    ...(session ? [{ href: '/dashboard', label: 'My Library', icon: Bookmark }] : []),
+    ...(session ? [{ href: '/dashboard', label: 'Student Panel', icon: Bookmark }] : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin Panel', icon: Settings }] : []),
   ];
 
@@ -124,7 +124,7 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
                   className="btn-primary w-full"
                 >
                   <LogIn className="w-4 h-4" />
-                  Sign In with Google
+                  Sign In
                 </Link>
               )}
             </div>
