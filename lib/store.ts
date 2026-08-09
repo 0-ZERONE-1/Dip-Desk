@@ -427,9 +427,10 @@ export async function getUsersStore() {
 }
 
 export async function findUserByEmailStore(email: string) {
+  if (!email) return null;
   const store = readLocalStore();
   const lower = email.toLowerCase();
-  const found = (store.users || []).find((u: any) => u.email.toLowerCase() === lower);
+  const found = (store.users || []).find((u: any) => u && u.email && typeof u.email === 'string' && u.email.toLowerCase() === lower);
   if (found) return found;
 
   return null;

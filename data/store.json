@@ -563,6 +563,7 @@
   "users": [
     {
       "_id": "demo_student_id",
+      "email": "student@dipdesk.com",
       "name": "Nikhil Mandal",
       "title": "Student",
       "institute": "Itahar Gov Poly",
