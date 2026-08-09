@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     const localUser = await createUserStore({
       name,
       email: lowerEmail,
+      password,
       hashedPassword,
       role: 'student',
       isProfileComplete: true,

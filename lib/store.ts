@@ -46,19 +46,28 @@ function getInitialStore(): StoreData {
   };
 }
 
+declare global {
+  var _inMemoryStore: StoreData | undefined;
+}
+
 function readLocalStore(): StoreData {
+  if (global._inMemoryStore) {
+    return global._inMemoryStore;
+  }
+
   try {
     if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+      try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch {}
     }
     if (!fs.existsSync(STORE_FILE)) {
       const initial = getInitialStore();
-      fs.writeFileSync(STORE_FILE, JSON.stringify(initial, null, 2), 'utf-8');
+      try { fs.writeFileSync(STORE_FILE, JSON.stringify(initial, null, 2), 'utf-8'); } catch {}
+      global._inMemoryStore = initial;
       return initial;
     }
     const content = fs.readFileSync(STORE_FILE, 'utf-8');
     const data = JSON.parse(content);
-    return {
+    const store = {
       developers: data.developers || defaultDevelopers,
       departments: data.departments || defaultDepartments,
       subjects: data.subjects || defaultSubjects,
@@ -66,19 +75,24 @@ function readLocalStore(): StoreData {
       notices: data.notices || defaultNotices,
       users: data.users || [],
     };
+    global._inMemoryStore = store;
+    return store;
   } catch {
-    return getInitialStore();
+    const initial = getInitialStore();
+    global._inMemoryStore = initial;
+    return initial;
   }
 }
 
 function saveLocalStore(data: StoreData) {
+  global._inMemoryStore = data;
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (e) {
-    console.error('Failed to save local store:', e);
+    console.warn('Local file write skipped (using in-memory store):', e);
   }
 }
 

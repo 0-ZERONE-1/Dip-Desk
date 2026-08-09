@@ -27,9 +27,15 @@ export const authOptions: NextAuthOptions = {
           if (storeUser) {
             let isValid = false;
             if (storeUser.hashedPassword) {
-              isValid = await bcrypt.compare(credentials.password, storeUser.hashedPassword);
-            } else if (storeUser.password) {
+              try {
+                isValid = await bcrypt.compare(credentials.password, storeUser.hashedPassword);
+              } catch {}
+            }
+            if (!isValid && storeUser.password) {
               isValid = credentials.password === storeUser.password;
+            }
+            if (!isValid && storeUser.hashedPassword) {
+              isValid = credentials.password === storeUser.hashedPassword;
             }
             if (isValid) {
               return {
