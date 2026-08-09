@@ -1,16 +1,23 @@
 'use client';
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 export default function AdminAuthPage() {
+  const { data: session } = useSession();
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if ((session?.user as any)?.role === 'admin') {
+      router.replace('/admin');
+    }
+  }, [session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

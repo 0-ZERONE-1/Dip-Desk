@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+const AUTH_SECRET = process.env.NEXTAUTH_SECRET || 'dip-desk-super-secret-production-key-2026-xyz-987654321';
+
 export async function proxy(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({ req, secret: AUTH_SECRET });
   const { pathname } = req.nextUrl;
 
   // Admin route protection
   if (pathname.startsWith('/admin') && pathname !== '/admin/auth') {
     if (!token || token.role !== 'admin') {
-      return NextResponse.redirect(new URL('/admin/auth', req.url));
+      return NextResponse.redirect(new URL('/login', req.url));
     }
   }
 
