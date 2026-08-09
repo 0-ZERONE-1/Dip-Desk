@@ -432,10 +432,10 @@ export async function findUserByEmailStore(email: string) {
   const found = (store.users || []).find((u: any) => u.email.toLowerCase() === lower);
   if (found) return found;
 
-  if (lower === 'student@diplomahub.com' || lower === 'demo@diplomahub.com') {
+  if (lower === 'student@diplomahub.com' || lower === 'demo@diplomahub.com' || lower === 'student@dipdesk.com' || lower === 'demo@dipdesk.com') {
     return {
       _id: 'demo_student_id',
-      email: 'student@diplomahub.com',
+      email: 'student@dipdesk.com',
       name: 'Demo Student',
       role: 'student',
       isProfileComplete: true,

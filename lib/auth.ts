@@ -25,14 +25,14 @@ export const authOptions: NextAuthOptions = {
 
         const inputEmail = credentials.email.toLowerCase().trim();
 
-        // 1. Check Demo Student Account
+        // 1. Check Demo / Default Student Account
         if (
-          (inputEmail === 'student@diplomahub.com' || inputEmail === 'demo@diplomahub.com') &&
+          (inputEmail === 'student@diplomahub.com' || inputEmail === 'demo@diplomahub.com' || inputEmail === 'student@dipdesk.com' || inputEmail === 'demo@dipdesk.com') &&
           (credentials.password === 'Student@123' || credentials.password === 'student123' || credentials.password === 'Demo@123')
         ) {
           return {
             id: 'demo_student_id',
-            email: 'student@diplomahub.com',
+            email: 'student@dipdesk.com',
             name: 'Demo Student',
             role: 'student',
             isProfileComplete: true,
@@ -103,13 +103,16 @@ export const authOptions: NextAuthOptions = {
         const defaultAdminEmail = (process.env.ADMIN_EMAIL || 'admin@diplomahub.com').toLowerCase();
         const defaultAdminPass = process.env.ADMIN_PASSWORD || 'Admin@123';
 
-        const inputEmail = credentials.email.toLowerCase();
+        const inputEmail = credentials.email.toLowerCase().trim();
 
         // Default admin credentials fallback for instant login
-        if (inputEmail === defaultAdminEmail && credentials.password === defaultAdminPass) {
+        if (
+          (inputEmail === defaultAdminEmail || inputEmail === 'admin@dipdesk.com' || inputEmail === 'admin@diplomahub.com') &&
+          credentials.password === defaultAdminPass
+        ) {
           return {
             id: 'admin_default_id',
-            email: defaultAdminEmail,
+            email: 'admin@dipdesk.com',
             name: 'Administrator',
             role: 'admin',
           };
