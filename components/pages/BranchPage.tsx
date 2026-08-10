@@ -6,6 +6,8 @@ import Breadcrumb from '@/components/layout/Breadcrumb';
 import { BookOpen, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
 
+import { syncAndFilterItems } from '@/lib/clientStore';
+
 interface Department {
   _id: string;
   name: string;
@@ -32,10 +34,12 @@ export default function BranchPage({ branchSlug }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/departments')
+    fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        const found = data.departments?.find((d: Department) => d.slug === branchSlug);
+        const rawList = data.departments || [];
+        const filteredList = syncAndFilterItems<Department>('departments', rawList);
+        const found = filteredList.find((d: Department) => d.slug === branchSlug);
         setDept(found || null);
         setLoading(false);
       })

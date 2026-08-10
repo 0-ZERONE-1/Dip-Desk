@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { ArrowRight, BookOpen, Loader2, Plus } from 'lucide-react';
 
+import { syncAndFilterItems } from '@/lib/clientStore';
+
 interface Subject {
   _id: string;
   name: string;
@@ -25,21 +27,17 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setSubjects(data.subjects || []);
-        if (data.subjects?.[0]?.departmentId) {
-          setDeptName(data.subjects[0].departmentId.name);
-        } else {
-          // Fetch dept name separately
-          fetch('/api/departments')
-            .then((r) => r.json())
-            .then((d) => {
-              const found = d.departments?.find((dep: any) => dep.slug === branchSlug);
-              if (found) setDeptName(found.name);
-            });
-        }
+    const t = Date.now();
+    Promise.all([
+      fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
+    ])
+      .then(([subData, deptData]) => {
+        const subList = syncAndFilterItems<Subject>('subjects', subData.subjects || []);
+        const deptList = syncAndFilterItems<any>('departments', deptData.departments || []);
+        const deptFound = deptList.find((d: any) => d.slug === branchSlug);
+        if (deptFound) setDeptName(deptFound.name);
+        setSubjects(subList);
         setLoading(false);
       })
       .catch(() => setLoading(false));
