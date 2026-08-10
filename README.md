@@ -15,9 +15,9 @@
     <a href="https://github.com/0-ZERONE-1/Dip-Desk">
       <img src="https://img.shields.io/badge/GitHub-0--ZERONE--1%2FDip--Desk-2DBA4E?style=for-the-badge&logo=github&logoColor=white&labelColor=181717" alt="GitHub Repository" />
     </a>
-    <img src="https://img.shields.io/badge/TypeScript-95.6%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1E293B" alt="TypeScript 95.6%" />
-    <img src="https://img.shields.io/badge/Next.js-16.3-9333EA?style=for-the-badge&logo=next.js&logoColor=white&labelColor=0F172A" alt="Next.js 16" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0F172A" alt="TailwindCSS" />
+    <img src="https://img.shields.io/badge/Next.js-v16.3-9333EA?style=for-the-badge&logo=next.js&logoColor=white&labelColor=0F172A" alt="Next.js v16.3" />
+    <img src="https://img.shields.io/badge/TypeScript-v5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1E293B" alt="TypeScript v5.0" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-v3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0F172A" alt="TailwindCSS v3.4" />
   </p>
 
   <br />
@@ -26,7 +26,7 @@
 
 ---
 
-## 🌟 Overview
+##  Overview
 
 **Dip-Desk** is a state-of-the-art, high-performance web application engineered specifically for **Polytechnic & Diploma Engineering students**. It provides structured, instant access to syllabus-aligned **Lecture Notes**, **Reference Textbooks**, **Model Question Papers**, and **Practical Lab Manuals** grouped by branch, semester, and subject.
 
@@ -34,7 +34,7 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 ### 🎓 **Student Experience**
 * **Instant Global Search**: Blazing-fast inline search with dynamic suggestions dropdown across all departments, semesters, and subjects.
@@ -56,32 +56,21 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 
 ---
 
-## 📊 Language & Tech Breakdown
+## ⚙️ Software & Technologies Used
 
-| Technology / Language | Ratio / Version | Role |
+| Technology / Software | Version | Purpose & Function |
 | :--- | :--- | :--- |
-| 🔷 **TypeScript** | **95.6%** | Core Application Logic, Models & API Endpoints |
-| 🟡 **JavaScript** | **3.0%** | Config scripts & build helpers |
-| 🎨 **CSS (TailwindCSS)** | **1.4%** | Custom styling, glassmorphism & gradients |
-| ⚡ **Next.js** | **v16.3** | Full-stack React Framework (Turbopack) |
+| ⚡ **Next.js** | **v16.3.0** | Full-stack React Framework (App Router & Turbopack) |
+| 🔷 **TypeScript** | **v5.0.0** | Strongly-typed programming language for robust code |
+| 🎨 **Tailwind CSS** | **v3.4.0** | Utility-first CSS framework for modern responsive UI |
+| 🔐 **NextAuth.js** | **v4.24.0** | Authentication engine for Student & Admin login |
+| 🎭 **Framer Motion** | **v11.0.0** | Fluid layout animations & smooth theme switching |
+| 🍃 **MongoDB / Mongoose** | **v8.0.0** | NoSQL database with JSON in-memory fallback store |
+| 🎨 **Lucide React** | **v0.300.0** | Modern SVG icons set |
 
 ---
 
-## 🔑 Demo Access Credentials
-
-To test administrative capabilities, use the default administrator credentials below:
-
-| Role | Access URL | Email | Password |
-| :--- | :--- | :--- | :--- |
-| **Administrator** | `/login` ➔ **Admin Sign In** | `admin@dipdesk.com` | `Admin.dipdesk` |
-| **Student** | `/login` ➔ **Register / Sign In** | *Create any email & password* | *Any password* |
-
-> [!NOTE]
-> Students can register manually in seconds with just an email and password!
-
----
-
-## 🛠️ Tech Stack & Architecture
+## 🛠️ System Architecture
 
 ```mermaid
 graph TD
@@ -90,14 +79,6 @@ graph TD
     B -->|State & Database| D[MongoDB Atlas / In-Memory Store Fallback]
     B -->|Deployment| E[Vercel Serverless Platform]
 ```
-
-* **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
-* **Language**: [TypeScript](https://www.typescriptlang.org/)
-* **Styling**: [TailwindCSS](https://tailwindcss.com/) + Custom CSS Glassmorphism
-* **Animations**: [Framer Motion](https://www.framer.com/motion/)
-* **Authentication**: [NextAuth.js](https://next-auth.js.org/) (JWT Strategy)
-* **Database**: MongoDB Atlas (with automatic fallback to JSON In-Memory Store)
-* **Icons**: [Lucide React](https://lucide.dev/)
 
 ---
 
@@ -161,7 +142,7 @@ Dip-Desk/
 
 ## 👨‍💻 Author & Acknowledgements
 
-Created with ❤️ by **ZERONE** for diploma students worldwide.
+Created with ❤️ by **ZERONE** for diploma students.
 
 * **GitHub**: [@0-ZERONE-1](https://github.com/0-ZERONE-1)
 * **Project Repository**: [Dip-Desk](https://github.com/0-ZERONE-1/Dip-Desk)
