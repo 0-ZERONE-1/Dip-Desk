@@ -51,9 +51,9 @@ export default function AdminRequestsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold text-gray-900">Resource Requests</h1>
-        <p className="text-gray-500 mt-1">{requests.filter((r) => r.status === 'Pending').length} pending · {requests.length} total</p>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Resource Requests</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">{requests.filter((r) => r.status === 'Pending').length} pending · {requests.length} total</p>
       </div>
 
       {/* Filter tabs */}

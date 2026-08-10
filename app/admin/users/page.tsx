@@ -37,13 +37,13 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold text-gray-900">Student Users</h1>
-        <p className="text-gray-500 mt-1">{users.length} registered students</p>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Student Users</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">{users.length} registered students</p>
       </div>
 
-      <div className="mb-5 max-w-sm">
-        <input id="user-search" type="text" placeholder="Search by name, email or institute..." value={search} onChange={(e) => setSearch(e.target.value)} className="input" />
+      <div className="mb-4 sm:mb-5">
+        <input id="user-search" type="text" placeholder="Search by name, email or institute..." value={search} onChange={(e) => setSearch(e.target.value)} className="input text-sm" />
       </div>
 
       {loading ? (

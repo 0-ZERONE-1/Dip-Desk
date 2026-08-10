@@ -108,9 +108,6 @@ export default function AdminNav() {
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
-      {/* Mobile spacer */}
-      <div className="md:hidden h-14" />
-
       {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-40">

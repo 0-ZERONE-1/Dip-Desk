@@ -49,10 +49,10 @@ export default function AdminDepartmentsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="text-2xl font-extrabold text-gray-900">Departments / Branches</h1>
-        <button id="add-dept-btn" onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }} className="btn-primary">
-          <Plus className="w-4 h-4" /> Add Department
+      <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Departments / Branches</h1>
+        <button id="add-dept-btn" onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }} className="btn-primary flex-shrink-0 text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4">
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add Department
         </button>
       </div>
 

@@ -121,12 +121,12 @@ export default function AdminNoticesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-            <Bell className="w-6 h-6 text-primary-600" /> Manage Notices
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 flex items-center gap-2">
+            <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" /> Manage Notices
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 mt-1 hidden sm:block">
             Post, edit, or remove announcements and exam notices displayed on the home page.
           </p>
         </div>
@@ -136,9 +136,9 @@ export default function AdminNoticesPage() {
             setEditId(null);
             setForm(emptyForm);
           }}
-          className="btn-primary"
+          className="btn-primary flex-shrink-0 text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4"
         >
-          <Plus className="w-4 h-4" /> Add Notice
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add Notice
         </button>
       </div>
 
