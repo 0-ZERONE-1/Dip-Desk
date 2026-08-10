@@ -136,11 +136,11 @@ export default function NavbarSearch() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-44 sm:w-64 md:w-72 lg:w-80">
+    <div ref={containerRef} className="relative w-36 xs:w-44 sm:w-64 md:w-72 lg:w-80">
       {/* Search Input Box */}
       <div
         className={cn(
-          'flex items-center gap-2.5 px-3.5 py-2 rounded-xl border transition-all duration-200 bg-surface-50',
+          'flex items-center gap-2.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border transition-all duration-200 bg-surface-50',
           isOpen
             ? 'bg-white border-primary-500 ring-2 ring-primary-500/20 shadow-sm'
             : 'border-surface-200 hover:border-surface-300 hover:bg-surface-100/70'
@@ -156,7 +156,7 @@ export default function NavbarSearch() {
           ref={inputRef}
           type="text"
           id="global-search-input"
-          placeholder="Search resources, books..."
+          placeholder="Search resources..."
           value={query}
           onFocus={handleFocus}
           onChange={(e) => {
@@ -164,7 +164,7 @@ export default function NavbarSearch() {
             if (!isOpen) setIsOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          className="w-full text-sm text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none"
+          className="w-full text-xs sm:text-sm text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none"
         />
 
         {query ? (
@@ -194,7 +194,7 @@ export default function NavbarSearch() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full right-0 mt-2 w-[calc(100vw-32px)] sm:w-[400px] md:w-[440px] max-w-[92vw] bg-white rounded-2xl shadow-modal border border-surface-200 z-50 overflow-hidden"
+            className="fixed inset-x-3 top-16 sm:absolute sm:top-full sm:right-0 sm:left-auto sm:inset-x-auto sm:mt-2 w-auto sm:w-[400px] md:w-[440px] max-w-full bg-white rounded-2xl shadow-2xl border border-surface-200 z-50 overflow-hidden"
           >
             {/* Header / Status Bar */}
             <div className="px-4 py-2.5 bg-surface-50 border-b border-surface-100 flex items-center justify-between text-xs text-gray-500">

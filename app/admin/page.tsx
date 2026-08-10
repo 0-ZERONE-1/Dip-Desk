@@ -40,9 +40,9 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-500 mt-1">Overview of Dip-Desk platform activity</p>
+      <div className="mb-5 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Admin Dashboard</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">Overview of Dip-Desk platform activity</p>
       </div>
 
       {/* Stats Grid */}
