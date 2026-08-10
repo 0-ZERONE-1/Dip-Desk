@@ -15,28 +15,11 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [hasRecentNotice, setHasRecentNotice] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/notices')
-      .then((r) => r.json())
-      .then((data) => {
-        const notices = data.notices || [];
-        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        const recent = notices.some((n: any) => {
-          const created = new Date(n.createdAt).getTime();
-          return now - created <= threeDaysMs;
-        });
-        setHasRecentNotice(recent);
-      })
-      .catch(() => {});
   }, []);
 
   const user = session?.user as any;
@@ -73,11 +56,8 @@ export default function Navbar() {
               <Link href="/browse" className={cn('nav-item', pathname.startsWith('/browse') && 'nav-item-active')}>
                 Browse
               </Link>
-              <Link href="/notices" className={cn('nav-item relative', pathname.startsWith('/notices') && 'nav-item-active')}>
+              <Link href="/notices" className={cn('nav-item', pathname.startsWith('/notices') && 'nav-item-active')}>
                 Notice
-                {hasRecentNotice && (
-                  <span className="absolute top-2 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-sm" />
-                )}
               </Link>
               <Link href="/developers" className={cn('nav-item', pathname === '/developers' && 'nav-item-active')}>
                 Developers
@@ -191,7 +171,7 @@ export default function Navbar() {
       <div className="h-16" />
 
       {/* Mobile Menu Overlay */}
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} session={session} hasRecentNotice={hasRecentNotice} />
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} session={session} />
     </>
   );
 }

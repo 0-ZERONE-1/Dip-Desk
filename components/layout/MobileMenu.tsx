@@ -22,7 +22,7 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/browse', label: 'Browse Resources', icon: BookOpen },
-    { href: '/notices', label: 'Notice Board', icon: Bell, hasBadge: hasRecentNotice },
+    { href: '/notices', label: 'Notice Board', icon: Bell },
     { href: '/developers', label: 'Developers', icon: Code2 },
     ...(session && !isAdmin ? [{ href: '/dashboard', label: 'Student Panel', icon: Bookmark }] : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin Panel', icon: Settings }] : []),
@@ -84,7 +84,7 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
 
             {/* Nav Links */}
             <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-              {navLinks.map(({ href, label, icon: Icon, hasBadge }) => (
+              {navLinks.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}
@@ -100,9 +100,6 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
                     <Icon className="w-4 h-4" />
                     {label}
                   </div>
-                  {hasBadge && (
-                    <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-sm" />
-                  )}
                 </Link>
               ))}
             </nav>
