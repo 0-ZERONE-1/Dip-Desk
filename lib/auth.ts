@@ -90,11 +90,14 @@ export const authOptions: NextAuthOptions = {
 
         const inputEmail = credentials.email.toLowerCase().trim();
 
-        // Strict Admin Credentials
-        if (inputEmail === 'admin@dipdesk.com' && credentials.password === 'Admin.dipdesk') {
+        // Strict Admin Credentials (reads exclusively from ADMIN_EMAIL & ADMIN_PASSWORD env vars)
+        const targetAdminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.toLowerCase().trim() : '';
+        const targetAdminPassword = process.env.ADMIN_PASSWORD || '';
+
+        if (targetAdminEmail && targetAdminPassword && inputEmail === targetAdminEmail && credentials.password === targetAdminPassword) {
           return {
             id: 'admin_default_id',
-            email: 'admin@dipdesk.com',
+            email: targetAdminEmail,
             name: 'Administrator',
             role: 'admin',
           };
