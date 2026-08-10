@@ -14,7 +14,9 @@ import {
   defaultNotices,
 } from './defaultData';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.VERCEL || process.env.NODE_ENV === 'production'
+  ? '/tmp'
+  : path.join(process.cwd(), 'data');
 const STORE_FILE = path.join(DATA_DIR, 'store.json');
 
 interface StoreData {
@@ -23,6 +25,7 @@ interface StoreData {
   subjects: any[];
   resources: any[];
   notices?: any[];
+  deletedIds?: string[];
   users?: any[];
 }
 
@@ -33,6 +36,7 @@ function getInitialStore(): StoreData {
     subjects: [...defaultSubjects],
     resources: [...defaultResources],
     notices: [...defaultNotices],
+    deletedIds: [],
     users: [],
   };
 }
@@ -59,12 +63,13 @@ function readLocalStore(): StoreData {
     const content = fs.readFileSync(STORE_FILE, 'utf-8');
     const data = JSON.parse(content);
     const store = {
-      developers: data.developers || defaultDevelopers,
-      departments: data.departments || defaultDepartments,
-      subjects: data.subjects || defaultSubjects,
-      resources: data.resources || defaultResources,
-      notices: data.notices || defaultNotices,
-      users: data.users || [],
+      developers: Array.isArray(data.developers) ? data.developers : defaultDevelopers,
+      departments: Array.isArray(data.departments) ? data.departments : defaultDepartments,
+      subjects: Array.isArray(data.subjects) ? data.subjects : defaultSubjects,
+      resources: Array.isArray(data.resources) ? data.resources : defaultResources,
+      notices: Array.isArray(data.notices) ? data.notices : defaultNotices,
+      deletedIds: Array.isArray(data.deletedIds) ? data.deletedIds : [],
+      users: Array.isArray(data.users) ? data.users : [],
     };
     global._inMemoryStore = store;
     return store;
@@ -114,7 +119,10 @@ export async function getDevelopersStore() {
     } catch {}
   }
   const store = readLocalStore();
-  return store.developers;
+  const deleted = store.deletedIds || [];
+  return (store.developers || [])
+    .filter((dev) => !deleted.includes(dev._id))
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 }
 
 export async function createDeveloperStore(data: any) {
@@ -178,6 +186,8 @@ export async function deleteDeveloperStore(id: string) {
   }
 
   const store = readLocalStore();
+  if (!store.deletedIds) store.deletedIds = [];
+  if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
   store.developers = store.developers.filter((d) => d._id !== id);
   saveLocalStore(store);
   return true;
@@ -192,7 +202,8 @@ export async function getDepartmentsStore() {
     } catch {}
   }
   const store = readLocalStore();
-  return store.departments;
+  const deleted = store.deletedIds || [];
+  return (store.departments || []).filter((d) => !deleted.includes(d._id) && !deleted.includes(d.slug));
 }
 
 export async function createDepartmentStore(data: any) {
@@ -252,6 +263,8 @@ export async function deleteDepartmentStore(id: string) {
   }
 
   const store = readLocalStore();
+  if (!store.deletedIds) store.deletedIds = [];
+  if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
   store.departments = store.departments.filter((d) => d._id !== id && d.slug !== id);
   saveLocalStore(store);
   return true;
@@ -273,7 +286,8 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
   }
 
   const store = readLocalStore();
-  let list = store.subjects;
+  const deleted = store.deletedIds || [];
+  let list = (store.subjects || []).filter((s) => !deleted.includes(s._id) && !deleted.includes(s.slug));
   if (departmentSlug) {
     list = list.filter((s) => s.departmentId?.slug === departmentSlug || s.departmentSlug === departmentSlug);
   }
@@ -336,6 +350,8 @@ export async function deleteSubjectStore(id: string) {
   }
 
   const store = readLocalStore();
+  if (!store.deletedIds) store.deletedIds = [];
+  if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
   store.subjects = store.subjects.filter((s) => s._id !== id && s.slug !== id);
   saveLocalStore(store);
   return true;
@@ -360,7 +376,8 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
   }
 
   const store = readLocalStore();
-  let list = store.resources;
+  const deleted = store.deletedIds || [];
+  let list = (store.resources || []).filter((r) => !deleted.includes(r._id));
   if (category) list = list.filter((r) => r.category === category);
   if (subjectId) list = list.filter((r) => r.subjectId?._id === subjectId || r.subjectId === subjectId);
   return list;
@@ -420,6 +437,8 @@ export async function deleteResourceStore(id: string) {
   }
 
   const store = readLocalStore();
+  if (!store.deletedIds) store.deletedIds = [];
+  if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
   store.resources = store.resources.filter((r) => r._id !== id);
   saveLocalStore(store);
   return true;
@@ -496,7 +515,8 @@ export async function getNoticesStore() {
     } catch {}
   }
   const store = readLocalStore();
-  return store.notices || defaultNotices;
+  const deleted = store.deletedIds || [];
+  return (store.notices || defaultNotices).filter((n) => !deleted.includes(n._id));
 }
 
 export async function createNoticeStore(data: any) {
@@ -556,6 +576,8 @@ export async function deleteNoticeStore(id: string) {
 
   const store = readLocalStore();
   if (!store.notices) store.notices = [...defaultNotices];
+  if (!store.deletedIds) store.deletedIds = [];
+  if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
   store.notices = store.notices.filter((n) => n._id !== id);
   saveLocalStore(store);
   return true;

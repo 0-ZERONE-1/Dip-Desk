@@ -58,15 +58,6 @@
       "icon": "📡",
       "color": "#10b981",
       "isActive": true
-    },
-    {
-      "_id": "dept_1786233140390",
-      "slug": "mecha",
-      "isActive": true,
-      "name": "Mecha",
-      "description": "srgsrg",
-      "icon": "",
-      "color": "#6366f1"
     }
   ],
   "subjects": [
@@ -549,17 +540,7 @@
       }
     }
   ],
-  "notices": [
-    {
-      "_id": "notice_2",
-      "title": "New Lab Manuals & Solution Codes Uploaded",
-      "content": "Updated C Programming & Data Structures practical lab manuals with verified output screenshots are now available under 2nd and 3rd semester subjects.",
-      "badge": "Update",
-      "isPinned": false,
-      "isActive": true,
-      "createdAt": "2026-08-08T23:21:46.972Z"
-    }
-  ],
+  "notices": [],
   "users": [
     {
       "_id": "demo_student_id",
@@ -570,5 +551,9 @@
       "regNumber": "D242535681",
       "isProfileComplete": true
     }
+  ],
+  "deletedIds": [
+    "notice_2",
+    "dept_1786233140390"
   ]
 }
