@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
 import { BookOpen, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -98,7 +97,6 @@ export default function BrowsePage() {
           </div>
         )}
       </main>
-      <Footer />
     </>
   );
 }

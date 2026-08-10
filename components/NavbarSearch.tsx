@@ -167,7 +167,7 @@ export default function NavbarSearch() {
           className="w-full text-xs sm:text-sm text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none"
         />
 
-        {query ? (
+        {query && (
           <button
             onClick={() => {
               setQuery('');
@@ -179,10 +179,6 @@ export default function NavbarSearch() {
           >
             <X className="w-4 h-4" />
           </button>
-        ) : (
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-surface-200 rounded text-[11px] text-gray-400 font-mono flex-shrink-0">
-            <span>⌘</span>K
-          </kbd>
         )}
       </div>
 
@@ -249,21 +245,6 @@ export default function NavbarSearch() {
                   </p>
                 </div>
               )}
-            </div>
-
-            {/* Footer with Keyboard Hints */}
-            <div className="px-4 py-2 border-t border-surface-100 bg-surface-50 flex items-center justify-between text-xs text-gray-400">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <kbd className="border border-surface-200 rounded px-1 bg-white shadow-2xs font-mono text-[10px]">↑↓</kbd> navigate
-                </span>
-                <span className="flex items-center gap-1">
-                  <kbd className="border border-surface-200 rounded px-1 bg-white shadow-2xs font-mono text-[10px]">↵</kbd> select
-                </span>
-              </div>
-              <span className="flex items-center gap-1">
-                <kbd className="border border-surface-200 rounded px-1 bg-white shadow-2xs font-mono text-[10px]">ESC</kbd> close
-              </span>
             </div>
           </motion.div>
         )}

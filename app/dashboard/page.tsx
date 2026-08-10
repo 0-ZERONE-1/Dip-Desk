@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import ResourceCard from '@/components/ResourceCard';
 import {
   Bookmark, BookOpen, ThumbsUp, ThumbsDown, MessageSquarePlus, User, Edit3, Save, Loader2, CheckCircle, Clock, ShieldCheck
@@ -563,8 +562,6 @@ export default function StudentPanelPage() {
 
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Bell, Pin, ExternalLink, Calendar, Search, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -191,7 +190,6 @@ export default function PublicNoticesPage() {
           )}
         </div>
       </main>
-      <Footer />
     </>
   );
 }

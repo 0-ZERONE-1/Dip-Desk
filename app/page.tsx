@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
-import Footer from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'Dip-Desk — Free Study Materials for Diploma Students',
@@ -25,7 +24,6 @@ export default function HomePage() {
         <HeroSection />
         <FeaturesSection />
       </main>
-      <Footer />
     </div>
   );
 }

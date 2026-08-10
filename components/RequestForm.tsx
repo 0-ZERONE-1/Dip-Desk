@@ -47,21 +47,24 @@ export default function RequestForm({ subjectId, subjectName, defaultCategory, o
 
   return (
     <AnimatePresence>
-      <>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-0"
           onClick={onClose}
         />
+
+        {/* Modal Container */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-[61] px-4"
+          className="relative w-full max-w-md z-10 my-auto"
         >
-          <div className="bg-white rounded-2xl shadow-modal p-6">
+          <div className="bg-white rounded-2xl shadow-2xl border border-surface-200 p-5 sm:p-6">
             {/* Header */}
             <div className="flex items-start justify-between mb-5">
               <div>
@@ -130,7 +133,7 @@ export default function RequestForm({ subjectId, subjectName, defaultCategory, o
             )}
           </div>
         </motion.div>
-      </>
+      </div>
     </AnimatePresence>
   );
 }

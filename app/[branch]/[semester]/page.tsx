@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import SemesterPage from '@/components/pages/SemesterPage';
 
 interface Props {
@@ -26,7 +25,6 @@ export default async function SemesterRoute({ params }: Props) {
       <main className="container-max px-4 py-8 flex-1">
         <SemesterPage branchSlug={branch} semesterNumber={semesterNumber} />
       </main>
-      <Footer />
     </>
   );
 }

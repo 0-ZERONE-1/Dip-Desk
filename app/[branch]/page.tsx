@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import BranchPage from '@/components/pages/BranchPage';
 
 interface Props {
@@ -24,7 +23,6 @@ export default async function BranchRoute({ params }: Props) {
       <main className="container-max px-4 py-8 flex-1">
         <BranchPage branchSlug={branch} />
       </main>
-      <Footer />
     </>
   );
 }

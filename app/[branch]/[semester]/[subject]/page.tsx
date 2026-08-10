@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import SubjectPage from '@/components/pages/SubjectPage';
 
 interface Props {
@@ -30,7 +29,6 @@ export default async function SubjectRoute({ params }: Props) {
           subjectSlug={subject}
         />
       </main>
-      <Footer />
     </>
   );
 }

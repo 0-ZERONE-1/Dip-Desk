@@ -1,8 +1,14 @@
 'use client';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import {
+  motion,
+  useMotionValue,
+  useMotionTemplate,
+  animate,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
 import { Github, Linkedin, Instagram, Mail, Globe, Code2, Loader2 } from 'lucide-react';
 
 interface DeveloperItem {
@@ -29,7 +35,53 @@ const shardOrigins = [
   { x: -200, y: 65,   rotate: 40,  scale: 0.28 },
 ];
 
-/* ─── 3D Tilt Card ─────────────────────────────────────────────────── */
+/* ─── Animated RGB Gradient Border Wrapper ────────────────────────── */
+function AIGradientBorder({
+  children,
+  className = '',
+  duration = 4,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  duration?: number;
+}) {
+  const turn = useMotionValue(0);
+
+  useEffect(() => {
+    const controls = animate(turn, 1, {
+      ease: 'linear',
+      duration,
+      repeat: Infinity,
+    });
+    return () => controls.stop();
+  }, [duration, turn]);
+
+  /* Conic gradient that continuously rotates around the card border */
+  const gradient = useMotionTemplate`conic-gradient(from ${turn}turn, transparent 0%, #ec489900 5%, #ec4899 12%, #a855f7 20%, #6366f1 28%, #3b82f6 36%, #14b8a6 44%, #f59e0b 48%, #f59e0b00 54%, transparent 58%)`;
+
+  return (
+    <div className={`relative p-[2px] rounded-[1.25rem] h-full flex flex-col ${className}`}>
+      {/* Animated Conic Gradient Border */}
+      <motion.div
+        style={{ backgroundImage: gradient }}
+        className="absolute inset-0 rounded-[inherit]"
+      />
+
+      {/* Card Content + Glow Spill */}
+      <div className="relative rounded-[calc(1.25rem-2px)] overflow-hidden h-full flex flex-col flex-1 bg-white">
+        <div className="relative h-full flex flex-col flex-1 z-0">{children}</div>
+
+        {/* Ambient Outer Glow Spill */}
+        <motion.div
+          style={{ backgroundImage: gradient }}
+          className="ai-glow-spill-mask opacity-60 blur-xl pointer-events-none absolute inset-[-30%] z-10 overflow-hidden"
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ─── 3D Tilt Card Component ───────────────────────────────────────── */
 function TiltCard({
   dev,
   index,
@@ -53,11 +105,11 @@ function TiltCard({
   const glowX   = useSpring(rawGlowX, { stiffness: 150, damping: 20 });
   const glowY   = useSpring(rawGlowY, { stiffness: 150, damping: 20 });
 
-  /* Gradient spotlight follows cursor */
+  /* Mouse spotlight gradient inside card */
   const glowBackground = useTransform(
     [glowX, glowY],
     ([gx, gy]: number[]) =>
-      `radial-gradient(circle at ${gx}% ${gy}%, rgba(99,102,241,0.18) 0%, rgba(139,92,246,0.08) 35%, transparent 70%)`
+      `radial-gradient(circle at ${gx}% ${gy}%, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.08) 35%, transparent 70%)`
   );
 
   const handleMouseMove = useCallback(
@@ -86,7 +138,7 @@ function TiltCard({
   }, [rawX, rawY, rawGlowX, rawGlowY]);
 
   return (
-    /* Outer wrapper: handles entry animation only */
+    /* Entry Shatter Animation Wrapper */
     <motion.div
       initial={{
         opacity: 0,
@@ -114,130 +166,133 @@ function TiltCard({
         filter: { duration: 0.55, delay: index * 0.18, ease: 'easeOut' },
       }}
       style={{ perspective: 900 }}
-      className="max-w-sm mx-auto w-full"
+      className="max-w-sm mx-auto w-full h-full flex flex-col"
     >
-      {/* Inner wrapper: handles 3D tilt */}
+      {/* 3D Tilt Wrapper */}
       <motion.div
         ref={ref}
         style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative bg-white rounded-2xl shadow-card border border-surface-200 overflow-hidden flex flex-col h-full cursor-default"
+        className="h-full flex flex-col flex-1 cursor-default"
       >
-        {/* Entry shimmer sweep */}
-        <motion.div
-          initial={{ x: '-110%', opacity: 0.8 }}
-          animate={{ x: '210%', opacity: 0 }}
-          transition={{
-            delay: index * 0.18 + 0.75,
-            duration: 0.55,
-            ease: 'easeOut',
-          }}
-          className="absolute inset-0 z-20 pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.65) 50%, transparent 75%)',
-          }}
-        />
+        {/* Animated RGB Gradient Border Card */}
+        <AIGradientBorder className="shadow-card hover:shadow-card-hover transition-shadow duration-300">
+          {/* Shimmer sweep after assembly */}
+          <motion.div
+            initial={{ x: '-110%', opacity: 0.8 }}
+            animate={{ x: '210%', opacity: 0 }}
+            transition={{
+              delay: index * 0.18 + 0.75,
+              duration: 0.55,
+              ease: 'easeOut',
+            }}
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.65) 50%, transparent 75%)',
+            }}
+          />
 
-        {/* Cursor spotlight overlay */}
-        <motion.div
-          className="absolute inset-0 z-10 pointer-events-none rounded-2xl"
-          style={{ background: glowBackground }}
-        />
+          {/* Mouse Spotlight Overlay */}
+          <motion.div
+            className="absolute inset-0 z-10 pointer-events-none"
+            style={{ background: glowBackground }}
+          />
 
-        {/* Photo — no zoom, just a subtle scale on the card 3D tilt */}
-        <div className="w-full aspect-square relative overflow-hidden bg-surface-100">
-          {dev.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={dev.imageUrl}
-              alt={dev.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-white text-5xl font-black">
-              {dev.name?.[0]?.toUpperCase() || 'D'}
-            </div>
-          )}
-        </div>
-
-        {/* Info Panel */}
-        <div className="px-5 pt-5 pb-2.5 flex flex-col text-center items-center flex-1 relative z-10">
-          <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight">{dev.name}</h3>
-          <span className="badge-primary mb-3 text-xs px-2.5 py-0.5">{dev.role}</span>
-
-          {dev.bio && (
-            <p className="text-sm text-gray-600 leading-relaxed mb-3">{dev.bio}</p>
-          )}
-
-          {/* Social Links */}
-          <div className="flex items-center gap-3.5 pt-2 border-t border-surface-100 w-full justify-center mt-auto flex-wrap">
-            {dev.githubUrl && (
-              <a
-                href={dev.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-surface-100 transition-all"
-                title="GitHub Profile"
-              >
-                <Github className="w-7 h-7" />
-              </a>
-            )}
-            {dev.linkedinUrl && (
-              <a
-                href={dev.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                title="LinkedIn Profile"
-              >
-                <Linkedin className="w-7 h-7" />
-              </a>
-            )}
-            {dev.instagramUrl && (
-              <a
-                href={dev.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1 rounded-xl text-gray-400 hover:text-pink-600 hover:bg-pink-50 transition-all"
-                title="Instagram Profile"
-              >
-                <Instagram className="w-7 h-7" />
-              </a>
-            )}
-            {dev.emailUrl && (
-              <a
-                href={
-                  dev.emailUrl.startsWith('mailto:')
-                    ? dev.emailUrl
-                    : `mailto:${dev.emailUrl}`
-                }
-                className="p-1 rounded-xl text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
-                title="Send Email"
-              >
-                <Mail className="w-7 h-7" />
-              </a>
-            )}
-            {dev.portfolioUrl && (
-              <a
-                href={dev.portfolioUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1 rounded-xl text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-all"
-                title="Portfolio Website"
-              >
-                <Globe className="w-7 h-7" />
-              </a>
+          {/* Photo Header */}
+          <div className="w-full aspect-square relative overflow-hidden bg-surface-100 flex-shrink-0">
+            {dev.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={dev.imageUrl}
+                alt={dev.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-white text-5xl font-black">
+                {dev.name?.[0]?.toUpperCase() || 'D'}
+              </div>
             )}
           </div>
-        </div>
+
+          {/* Info Panel - flex-1 with mt-auto on social icons so bottom edge aligns perfectly across all cards */}
+          <div className="px-5 pt-5 pb-3 flex flex-col text-center items-center flex-1 relative z-10 bg-white">
+            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight">{dev.name}</h3>
+            <span className="badge-primary mb-3 text-xs px-2.5 py-0.5">{dev.role}</span>
+
+            {dev.bio && (
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">{dev.bio}</p>
+            )}
+
+            {/* Social Links Pinned to Bottom */}
+            <div className="flex items-center gap-3.5 pt-3 border-t border-surface-100 w-full justify-center mt-auto flex-wrap">
+              {dev.githubUrl && (
+                <a
+                  href={dev.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-surface-100 transition-all"
+                  title="GitHub Profile"
+                >
+                  <Github className="w-7 h-7" />
+                </a>
+              )}
+              {dev.linkedinUrl && (
+                <a
+                  href={dev.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                  title="LinkedIn Profile"
+                >
+                  <Linkedin className="w-7 h-7" />
+                </a>
+              )}
+              {dev.instagramUrl && (
+                <a
+                  href={dev.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 rounded-xl text-gray-400 hover:text-pink-600 hover:bg-pink-50 transition-all"
+                  title="Instagram Profile"
+                >
+                  <Instagram className="w-7 h-7" />
+                </a>
+              )}
+              {dev.emailUrl && (
+                <a
+                  href={
+                    dev.emailUrl.startsWith('mailto:')
+                      ? dev.emailUrl
+                      : `mailto:${dev.emailUrl}`
+                  }
+                  className="p-1 rounded-xl text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                  title="Send Email"
+                >
+                  <Mail className="w-7 h-7" />
+                </a>
+              )}
+              {dev.portfolioUrl && (
+                <a
+                  href={dev.portfolioUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 rounded-xl text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-all"
+                  title="Portfolio Website"
+                >
+                  <Globe className="w-7 h-7" />
+                </a>
+              )}
+            </div>
+          </div>
+        </AIGradientBorder>
       </motion.div>
     </motion.div>
   );
 }
 
-/* ─── Page ─────────────────────────────────────────────────────────── */
+/* ─── Main Developers Page ─────────────────────────────────────────── */
 export default function DevelopersPage() {
   const [developers, setDevelopers] = useState<DeveloperItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -287,14 +342,13 @@ export default function DevelopersPage() {
             <p className="text-sm text-gray-400">Admin can add developer profiles from the admin panel.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
             {developers.map((dev, i) => (
               <TiltCard key={dev._id} dev={dev} index={i} />
             ))}
           </div>
         )}
       </main>
-      <Footer />
     </>
   );
 }
