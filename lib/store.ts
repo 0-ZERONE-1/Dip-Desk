@@ -178,10 +178,13 @@ export async function updateDeveloperStore(id: string, data: any) {
 
 export async function deleteDeveloperStore(id: string) {
   const isDb = await isDbConnected();
-
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      await Developer.findByIdAndDelete(id);
+      if (id.length === 24) {
+        await Developer.findByIdAndDelete(id);
+      } else {
+        await Developer.deleteOne({ _id: id });
+      }
     } catch {}
   }
 
@@ -195,14 +198,16 @@ export async function deleteDeveloperStore(id: string) {
 
 // --- DEPARTMENTS ---
 export async function getDepartmentsStore() {
+  const store = readLocalStore();
+  const deleted = store.deletedIds || [];
   if (await isDbConnected()) {
     try {
       const depts = await Department.find({ isActive: true }).sort({ name: 1 });
-      if (depts.length > 0) return depts;
+      if (depts.length > 0) {
+        return depts.filter((d: any) => !deleted.includes(d._id.toString()) && !deleted.includes(d.slug));
+      }
     } catch {}
   }
-  const store = readLocalStore();
-  const deleted = store.deletedIds || [];
   return (store.departments || []).filter((d) => !deleted.includes(d._id) && !deleted.includes(d.slug));
 }
 
@@ -256,9 +261,13 @@ export async function updateDepartmentStore(id: string, data: any) {
 
 export async function deleteDepartmentStore(id: string) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      await Department.findByIdAndDelete(id);
+      if (id.length === 24) {
+        await Department.findByIdAndDelete(id);
+      } else {
+        await Department.deleteOne({ _id: id });
+      }
     } catch {}
   }
 
@@ -272,6 +281,8 @@ export async function deleteDepartmentStore(id: string) {
 
 // --- SUBJECTS ---
 export async function getSubjectsStore(departmentSlug?: string, semesterNumber?: number) {
+  const store = readLocalStore();
+  const deleted = store.deletedIds || [];
   if (await isDbConnected()) {
     try {
       const filter: any = { isActive: true };
@@ -281,12 +292,12 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         if (dept) filter.departmentId = dept._id;
       }
       const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
-      if (subjects.length > 0) return subjects;
+      if (subjects.length > 0) {
+        return subjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
+      }
     } catch {}
   }
 
-  const store = readLocalStore();
-  const deleted = store.deletedIds || [];
   let list = (store.subjects || []).filter((s) => !deleted.includes(s._id) && !deleted.includes(s.slug));
   if (departmentSlug) {
     list = list.filter((s) => s.departmentId?.slug === departmentSlug || s.departmentSlug === departmentSlug);
@@ -343,9 +354,13 @@ export async function updateSubjectStore(id: string, data: any) {
 
 export async function deleteSubjectStore(id: string) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      await Subject.findByIdAndDelete(id);
+      if (id.length === 24) {
+        await Subject.findByIdAndDelete(id);
+      } else {
+        await Subject.deleteOne({ _id: id });
+      }
     } catch {}
   }
 
@@ -359,6 +374,8 @@ export async function deleteSubjectStore(id: string) {
 
 // --- RESOURCES ---
 export async function getResourcesStore(category?: string, subjectId?: string) {
+  const store = readLocalStore();
+  const deleted = store.deletedIds || [];
   if (await isDbConnected()) {
     try {
       const filter: any = {};
@@ -371,12 +388,12 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
           populate: { path: 'departmentId', select: 'name slug' },
         })
         .sort({ createdAt: -1 });
-      if (resList.length > 0) return resList;
+      if (resList.length > 0) {
+        return resList.filter((r: any) => !deleted.includes(r._id.toString()));
+      }
     } catch {}
   }
 
-  const store = readLocalStore();
-  const deleted = store.deletedIds || [];
   let list = (store.resources || []).filter((r) => !deleted.includes(r._id));
   if (category) list = list.filter((r) => r.category === category);
   if (subjectId) list = list.filter((r) => r.subjectId?._id === subjectId || r.subjectId === subjectId);
@@ -430,9 +447,13 @@ export async function updateResourceStore(id: string, data: any) {
 
 export async function deleteResourceStore(id: string) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      await Resource.findByIdAndDelete(id);
+      if (id.length === 24) {
+        await Resource.findByIdAndDelete(id);
+      } else {
+        await Resource.deleteOne({ _id: id });
+      }
     } catch {}
   }
 

@@ -41,7 +41,6 @@ export default function AdminDepartmentsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this department? All associated subjects and resources will be affected.')) return;
     setDepartments((prev) => prev.filter((d) => d._id !== id));
     await fetch(`/api/departments/${id}`, { method: 'DELETE' });
     toast.success('Deleted');

@@ -94,7 +94,6 @@ export default function AdminNoticesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this notice?')) return;
     try {
       setNotices((prev) => prev.filter((n) => n._id !== id));
       const res = await fetch(`/api/notices/${id}`, { method: 'DELETE' });

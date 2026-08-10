@@ -99,7 +99,6 @@ export default function AdminResourcesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this resource?')) return;
     setResources((prev) => prev.filter((r) => r._id !== id));
     await fetch(`/api/resources/${id}`, { method: 'DELETE' });
     toast.success('Deleted');

@@ -50,7 +50,6 @@ export default function AdminSubjectsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this subject?')) return;
     setSubjects((prev) => prev.filter((s) => s._id !== id));
     await fetch(`/api/subjects/${id}`, { method: 'DELETE' });
     toast.success('Deleted');

@@ -121,7 +121,6 @@ export default function AdminDevelopersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this developer profile?')) return;
     try {
       setDevelopers((prev) => prev.filter((d) => d._id !== id));
       const res = await fetch(`/api/developers/${id}`, { method: 'DELETE' });
