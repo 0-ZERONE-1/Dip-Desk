@@ -15,6 +15,9 @@
     <a href="https://github.com/0-ZERONE-1/Dip-Desk">
       <img src="https://img.shields.io/badge/GitHub-0--ZERONE--1%2FDip--Desk-2DBA4E?style=for-the-badge&logo=github&logoColor=white&labelColor=181717" alt="GitHub Repository" />
     </a>
+  </p>
+
+  <p align="center">
     <img src="https://img.shields.io/badge/Next.js-v16.3-9333EA?style=for-the-badge&logo=next.js&logoColor=white&labelColor=0F172A" alt="Next.js v16.3" />
     <img src="https://img.shields.io/badge/TypeScript-v5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1E293B" alt="TypeScript v5.0" />
     <img src="https://img.shields.io/badge/Tailwind_CSS-v3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0F172A" alt="TailwindCSS v3.4" />
@@ -44,7 +47,7 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
   * **Editable Profile**: Customize Full Name, Title/Designation, Institute Name, and Registration/Roll Number anytime.
   * **Saved Resources**: Quick access to bookmarked notes and question papers.
   * **Upvoted & Downvoted Records**: Track materials you find helpful.
-  * **Resource Requests**: Submit requests for missing notes or books and track their fulfillment status (`Pending` / `Fulfilled`).
+  * **Resource Requests**: Submit requests for missing notes or books and track their fulfillment status (`Pending ⏳` / `Fulfilled ✓`).
 
 ### 👑 **Admin Management Panel**
 * **Strict Credential Authentication**: Secure administrative dashboard powered by NextAuth.js.
@@ -67,6 +70,20 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 | 🎭 **Framer Motion** | **v11.0.0** | Fluid layout animations & smooth theme switching |
 | 🍃 **MongoDB / Mongoose** | **v8.0.0** | NoSQL database with JSON in-memory fallback store |
 | 🎨 **Lucide React** | **v0.300.0** | Modern SVG icons set |
+
+---
+
+## 🔑 Demo Access Credentials
+
+To test administrative capabilities, use the default administrator credentials below:
+
+| Role | Access URL | Email | Password |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `/login` ➔ **Admin Sign In** | `admin@dipdesk.com` | `Admin.dipdesk` |
+| **Student** | `/login` ➔ **Register / Sign In** | *Create any email & password* | *Any password* |
+
+> [!NOTE]
+> Students can register manually in seconds with just an email and password!
 
 ---
 
@@ -142,7 +159,7 @@ Dip-Desk/
 
 ## 👨‍💻 Author & Acknowledgements
 
-Created with ❤️ by **ZERONE** for diploma students.
+Created with ❤️ by **ZERONE** for diploma students worldwide.
 
 * **GitHub**: [@0-ZERONE-1](https://github.com/0-ZERONE-1)
 * **Project Repository**: [Dip-Desk](https://github.com/0-ZERONE-1/Dip-Desk)
