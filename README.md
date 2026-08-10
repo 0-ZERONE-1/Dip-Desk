@@ -2,7 +2,7 @@
 
   <br />
   
-  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=40&duration=3000&pause=1000&color=4F46E5&center=true&vCenter=true&width=600&height=70&lines=Dip-Desk+%F0%9F%8E%93;Study+Library+for+Diploma+Students;Notes+%E2%80%A2+Books+%E2%80%A2+Papers+%E2%80%A2+Manuals;Built+for+Excellence+%E2%9A%A1" alt="Dip-Desk Typing Header" />
+  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=32&duration=3000&pause=1000&color=6366F1&center=true&vCenter=true&width=800&height=65&lines=Dip-Desk+%F0%9F%8E%93;Diploma+Student+Resource+Platform;Notes+%E2%80%A2+Books+%E2%80%A2+Papers+%E2%80%A2+Lab+Manuals;Built+with+Next.js+16+%26+TypeScript" alt="Dip-Desk Typing Header" />
 
   <p align="center">
     <b>The Ultimate All-in-One Resource Platform Designed for Polytechnic & Diploma Students</b>
@@ -10,14 +10,14 @@
 
   <p align="center">
     <a href="https://dip-desk.vercel.app" target="_blank">
-      <img src="https://img.shields.io/badge/🚀_Live_Demo-dip--desk.vercel.app-6366F1?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+      <img src="https://img.shields.io/badge/Live_App-dip--desk.vercel.app-0070F3?style=for-the-badge&logo=vercel&logoColor=white&labelColor=000000" alt="Live App" />
     </a>
     <a href="https://github.com/0-ZERONE-1/Dip-Desk">
-      <img src="https://img.shields.io/badge/GitHub-0--ZERONE--1%2FDip--Desk-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository" />
+      <img src="https://img.shields.io/badge/GitHub-0--ZERONE--1%2FDip--Desk-2DBA4E?style=for-the-badge&logo=github&logoColor=white&labelColor=181717" alt="GitHub Repository" />
     </a>
-    <img src="https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 16" />
-    <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38BDF8?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
+    <img src="https://img.shields.io/badge/TypeScript-95.6%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1E293B" alt="TypeScript 95.6%" />
+    <img src="https://img.shields.io/badge/Next.js-16.3-9333EA?style=for-the-badge&logo=next.js&logoColor=white&labelColor=0F172A" alt="Next.js 16" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0F172A" alt="TailwindCSS" />
   </p>
 
   <br />
@@ -56,9 +56,20 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 
 ---
 
+## 📊 Language & Tech Breakdown
+
+| Technology / Language | Ratio / Version | Role |
+| :--- | :--- | :--- |
+| 🔷 **TypeScript** | **95.6%** | Core Application Logic, Models & API Endpoints |
+| 🟡 **JavaScript** | **3.0%** | Config scripts & build helpers |
+| 🎨 **CSS (TailwindCSS)** | **1.4%** | Custom styling, glassmorphism & gradients |
+| ⚡ **Next.js** | **v16.3** | Full-stack React Framework (Turbopack) |
+
+---
+
 ## 🔑 Demo Access Credentials
 
-To test the application administrative capabilities, use the default administrator credentials below:
+To test administrative capabilities, use the default administrator credentials below:
 
 | Role | Access URL | Email | Password |
 | :--- | :--- | :--- | :--- |
