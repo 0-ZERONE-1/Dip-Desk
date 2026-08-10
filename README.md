@@ -26,7 +26,7 @@
 
 ---
 
-##  Overview
+## 📋 Overview
 
 **Dip-Desk** is a state-of-the-art, high-performance web application engineered specifically for **Polytechnic & Diploma Engineering students**. It provides structured, instant access to syllabus-aligned **Lecture Notes**, **Reference Textbooks**, **Model Question Papers**, and **Practical Lab Manuals** grouped by branch, semester, and subject.
 
@@ -34,7 +34,7 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 
 ---
 
-##  Key Features
+## ✔️ Key Features
 
 ### 🎓 **Student Experience**
 * **Instant Global Search**: Blazing-fast inline search with dynamic suggestions dropdown across all departments, semesters, and subjects.
@@ -44,7 +44,7 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
   * **Editable Profile**: Customize Full Name, Title/Designation, Institute Name, and Registration/Roll Number anytime.
   * **Saved Resources**: Quick access to bookmarked notes and question papers.
   * **Upvoted & Downvoted Records**: Track materials you find helpful.
-  * **Resource Requests**: Submit requests for missing notes or books and track their fulfillment status (`Pending ⏳` / `Fulfilled ✓`).
+  * **Resource Requests**: Submit requests for missing notes or books and track their fulfillment status (`Pending` / `Fulfilled`).
 
 ### 👑 **Admin Management Panel**
 * **Strict Credential Authentication**: Secure administrative dashboard powered by NextAuth.js.
