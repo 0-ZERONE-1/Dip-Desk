@@ -31,7 +31,7 @@
 
 ## 📋 Overview
 
-**Dip-Desk** is a state-of-the-art, high-performance web application engineered specifically for **Polytechnic & Diploma Engineering students**. It provides structured, instant access to syllabus-aligned **Lecture Notes**, **Reference Textbooks**, **Model Question Papers**, and **Practical Lab Manuals** grouped by branch, semester, and subject.
+**Dip-Desk** is a high-performance web application engineered specifically for **Polytechnic & Diploma Engineering students**. It provides structured, instant access to syllabus-aligned **Lecture Notes**, **Reference Textbooks**, **Model Question Papers**, and **Practical Lab Manuals** grouped by branch, semester, and subject.
 
 Designed with a focus on modern aesthetic excellence, dynamic theme transitions, and seamless resource management, Dip-Desk bridges the gap between students looking for study materials and administrators curating academic content.
 
@@ -47,7 +47,7 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
   * **Editable Profile**: Customize Full Name, Title/Designation, Institute Name, and Registration/Roll Number anytime.
   * **Saved Resources**: Quick access to bookmarked notes and question papers.
   * **Upvoted & Downvoted Records**: Track materials you find helpful.
-  * **Resource Requests**: Submit requests for missing notes or books and track their fulfillment status (`Pending ⏳` / `Fulfilled ✓`).
+  * **Resource Requests**: Submit requests for missing notes or books and track their fulfillment status (`Pending` / `Fulfilled`).
 
 ### 👑 **Admin Management Panel**
 * **Strict Credential Authentication**: Secure administrative dashboard powered by NextAuth.js.
@@ -55,7 +55,6 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 * **Resource Management**: Upload, edit, verify, or toggle resource availability with one click.
 * **Notice Board Manager**: Broadcast pinned diploma announcements and notifications with live badge alerts.
 * **Request Approval Pipeline**: Review student resource requests and mark them as fulfilled.
-* **Smooth Color Shifts**: Seamless transition between Student (Vibrant Blue) and Admin (Sleek Dark Purple) themes.
 
 ---
 
@@ -73,17 +72,11 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 
 ---
 
-## 🔑 Demo Access Credentials
-
-To test administrative capabilities, use the default administrator credentials below:
+## 🔑 Access Credentials
 
 | Role | Access URL | Email | Password |
 | :--- | :--- | :--- | :--- |
-| **Administrator** | `/login` ➔ **Admin Sign In** | `admin@dipdesk.com` | `Admin.dipdesk` |
 | **Student** | `/login` ➔ **Register / Sign In** | *Create any email & password* | *Any password* |
-
-> [!NOTE]
-> Students can register manually in seconds with just an email and password!
 
 ---
 
