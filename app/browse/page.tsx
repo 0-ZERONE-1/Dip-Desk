@@ -52,10 +52,12 @@ export default function BrowsePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="skeleton h-44 rounded-2xl" />
-            ))}
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 rounded-full border-4 border-primary-100" />
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary-500 animate-spin" />
+            </div>
+            <p className="text-sm text-gray-400 font-medium animate-pulse">Loading departments...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">

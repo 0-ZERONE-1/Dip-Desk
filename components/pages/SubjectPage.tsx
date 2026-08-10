@@ -148,10 +148,12 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
 
       {/* Resources Main Panel */}
       {resourcesLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="skeleton h-44 rounded-3xl" />
-          ))}
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-primary-100" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary-500 animate-spin" />
+          </div>
+          <p className="text-sm text-gray-400 font-medium animate-pulse">Loading {activeCategory}...</p>
         </div>
       ) : resources.length === 0 ? (
         <motion.div
