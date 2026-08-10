@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getResourcesStore, createResourceStore } from '@/lib/store';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const subjectId = searchParams.get('subjectId');
@@ -10,7 +13,11 @@ export async function GET(req: NextRequest) {
 
   try {
     const resources = await getResourcesStore(category || undefined, subjectId || undefined);
-    return NextResponse.json({ resources });
+    return NextResponse.json({ resources }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch resources' }, { status: 500 });
   }

@@ -42,7 +42,7 @@ export default function AdminDevelopersPage() {
 
   const fetchDevelopers = async () => {
     try {
-      const r = await fetch('/api/developers');
+      const r = await fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' });
       const d = await r.json();
       setDevelopers(d.developers || []);
     } catch {
@@ -110,11 +110,11 @@ export default function AdminDevelopersPage() {
 
       if (!res.ok) throw new Error();
 
-      toast.success(editingDev ? 'Developer updated!' : 'Developer added!');
+      toast.success(editingDev ? 'Developer updated' : 'Developer created');
       setShowModal(false);
       fetchDevelopers();
     } catch {
-      toast.error('Operation failed');
+      toast.error('Failed to save developer profile');
     } finally {
       setSubmitting(false);
     }
@@ -123,12 +123,14 @@ export default function AdminDevelopersPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to remove this developer profile?')) return;
     try {
+      setDevelopers((prev) => prev.filter((d) => d._id !== id));
       const res = await fetch(`/api/developers/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       toast.success('Developer removed');
       fetchDevelopers();
     } catch {
       toast.error('Failed to delete developer');
+      fetchDevelopers();
     }
   };
 

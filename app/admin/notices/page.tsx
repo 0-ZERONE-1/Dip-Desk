@@ -42,7 +42,7 @@ export default function AdminNoticesPage() {
 
   const load = async () => {
     setLoading(true);
-    const data = await fetch('/api/notices').then((r) => r.json());
+    const data = await fetch(`/api/notices?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
     setNotices(data.notices || []);
     setLoading(false);
   };
@@ -96,12 +96,14 @@ export default function AdminNoticesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this notice?')) return;
     try {
+      setNotices((prev) => prev.filter((n) => n._id !== id));
       const res = await fetch(`/api/notices/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
       toast.success('Notice deleted');
       load();
     } catch {
       toast.error('Could not delete notice');
+      load();
     }
   };
 

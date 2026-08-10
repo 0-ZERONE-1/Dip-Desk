@@ -32,7 +32,7 @@ export default function PublicNoticesPage() {
   const [selectedBadge, setSelectedBadge] = useState('All');
 
   useEffect(() => {
-    fetch('/api/notices')
+    fetch(`/api/notices?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         setNotices(data.notices || []);

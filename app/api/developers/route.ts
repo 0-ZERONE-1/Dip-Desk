@@ -3,10 +3,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getDevelopersStore, createDeveloperStore } from '@/lib/store';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const developers = await getDevelopersStore();
-    return NextResponse.json({ developers });
+    return NextResponse.json({ developers }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch developers' }, { status: 500 });
   }

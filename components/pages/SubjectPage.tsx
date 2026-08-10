@@ -49,7 +49,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
 
   // Load subject info
   useEffect(() => {
-    fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}`)
+    fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         const found = data.subjects?.find((s: Subject) => s.slug === subjectSlug);
@@ -63,7 +63,8 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
     if (!subject) return;
     setResourcesLoading(true);
     fetch(
-      `/api/resources?subjectId=${subject._id}&category=${encodeURIComponent(activeCategory)}`
+      `/api/resources?subjectId=${subject._id}&category=${encodeURIComponent(activeCategory)}&t=${Date.now()}`,
+      { cache: 'no-store' }
     )
       .then((r) => r.json())
       .then((data) => {

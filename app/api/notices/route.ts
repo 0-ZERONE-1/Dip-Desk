@@ -3,10 +3,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getNoticesStore, createNoticeStore } from '@/lib/store';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const notices = await getNoticesStore();
-    return NextResponse.json({ notices });
+    return NextResponse.json({ notices }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+    });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch notices' }, { status: 500 });
   }

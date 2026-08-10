@@ -48,10 +48,11 @@ export default function AdminResourcesPage() {
 
   const loadAll = async () => {
     setLoading(true);
+    const t = Date.now();
     const [resData, deptData, subData] = await Promise.all([
-      fetch('/api/resources').then((r) => r.json()),
-      fetch('/api/departments').then((r) => r.json()),
-      fetch('/api/subjects').then((r) => r.json()),
+      fetch(`/api/resources?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/subjects?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
     setResources(resData.resources || []);
     setDepartments(deptData.departments || []);
@@ -99,9 +100,10 @@ export default function AdminResourcesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this resource?')) return;
+    setResources((prev) => prev.filter((r) => r._id !== id));
     await fetch(`/api/resources/${id}`, { method: 'DELETE' });
     toast.success('Deleted');
-    setResources((prev) => prev.filter((r) => r._id !== id));
+    loadAll();
   };
 
   const filtered = resources.filter((r) =>

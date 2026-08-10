@@ -23,9 +23,10 @@ export default function AdminSubjectsPage() {
 
   const load = async () => {
     setLoading(true);
+    const t = Date.now();
     const [subData, deptData] = await Promise.all([
-      fetch('/api/subjects').then((r) => r.json()),
-      fetch('/api/departments').then((r) => r.json()),
+      fetch(`/api/subjects?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
     setSubjects(subData.subjects || []);
     setDepartments(deptData.departments || []);
@@ -50,9 +51,10 @@ export default function AdminSubjectsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this subject?')) return;
+    setSubjects((prev) => prev.filter((s) => s._id !== id));
     await fetch(`/api/subjects/${id}`, { method: 'DELETE' });
     toast.success('Deleted');
-    setSubjects((prev) => prev.filter((s) => s._id !== id));
+    load();
   };
 
   const filtered = subjects.filter((s) => {

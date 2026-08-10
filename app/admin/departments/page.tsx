@@ -19,7 +19,7 @@ export default function AdminDepartmentsPage() {
 
   const load = async () => {
     setLoading(true);
-    const data = await fetch('/api/departments').then((r) => r.json());
+    const data = await fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
     setDepartments(data.departments || []);
     setLoading(false);
   };
@@ -42,6 +42,7 @@ export default function AdminDepartmentsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this department? All associated subjects and resources will be affected.')) return;
+    setDepartments((prev) => prev.filter((d) => d._id !== id));
     await fetch(`/api/departments/${id}`, { method: 'DELETE' });
     toast.success('Deleted');
     load();

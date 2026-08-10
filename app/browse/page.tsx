@@ -19,7 +19,7 @@ export default function BrowsePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/departments')
+    fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         setDepartments(data.departments || []);

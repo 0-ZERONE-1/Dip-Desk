@@ -298,7 +298,7 @@ export default function DevelopersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/developers')
+    fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         setDevelopers(data.developers || []);
