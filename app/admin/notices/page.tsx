@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Edit2, Save, X, Loader2, Pin, Bell, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
+import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
 interface Notice {
   _id: string;
@@ -45,7 +45,7 @@ export default function AdminNoticesPage() {
     setLoading(true);
     const data = await fetch(`/api/notices?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
     const rawList = data.notices || [];
-    setNotices(filterClientDeleted(rawList));
+    setNotices(syncAndFilterItems<Notice>('notices', rawList));
     setLoading(false);
   };
 
@@ -81,6 +81,14 @@ export default function AdminNoticesPage() {
       if (!res.ok) {
         const d = await res.json();
         throw new Error(d.error || 'Failed to save');
+      }
+
+      const resData = await res.json().catch(() => null);
+      if (resData && (resData._id || resData.notice?._id)) {
+        const saved = resData.notice || resData;
+        saveClientCustomItem('notices', saved);
+      } else {
+        saveClientCustomItem('notices', { _id: editId || `notice_${Date.now()}`, ...form, createdAt: new Date().toISOString() });
       }
 
       toast.success(editId ? 'Notice updated!' : 'Notice created!');

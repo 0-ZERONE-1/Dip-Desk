@@ -4,7 +4,7 @@ import AdminNav from '@/components/admin/AdminNav';
 import { Plus, Edit2, Trash2, X, Save, Loader2, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
-import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
+import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
 interface Department { _id: string; name: string; slug: string; description: string; icon: string; color: string; isActive: boolean; }
 const emptyForm = { name: '', description: '', icon: '📚', color: '#6366f1' };
@@ -22,7 +22,7 @@ export default function AdminDepartmentsPage() {
   const load = async () => {
     setLoading(true);
     const data = await fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
-    setDepartments(filterClientDeleted(data.departments || []));
+    setDepartments(syncAndFilterItems<Department>('departments', data.departments || []));
     setLoading(false);
   };
 
@@ -34,6 +34,12 @@ export default function AdminDepartmentsPage() {
       const method = editId ? 'PUT' : 'POST';
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      const resData = await res.json().catch(() => null);
+      if (resData && (resData._id || resData.department?._id)) {
+        saveClientCustomItem('departments', resData.department || resData);
+      } else {
+        saveClientCustomItem('departments', { _id: editId || `dept_${Date.now()}`, ...form });
+      }
       toast.success(editId ? 'Updated!' : 'Department created!');
       setShowForm(false); setEditId(null); setForm(emptyForm);
       load();

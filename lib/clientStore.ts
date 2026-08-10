@@ -1,6 +1,7 @@
 // Client-side persistent store helper for demo/mock mode on Vercel serverless environments
 
 const DELETED_KEY = 'dipdesk_deleted_ids';
+const CUSTOM_PREFIX = 'dipdesk_custom_';
 
 export function getClientDeletedIds(): string[] {
   if (typeof window === 'undefined') return [];
@@ -30,4 +31,48 @@ export function filterClientDeleted<T = any>(items: T[]): T[] {
   return items.filter(
     (item: any) => item && item._id && !deleted.includes(String(item._id)) && (!item.slug || !deleted.includes(String(item.slug)))
   );
+}
+
+export function saveClientCustomItem(category: string, item: any) {
+  if (typeof window === 'undefined' || !category || !item || !item._id) return;
+  try {
+    const key = CUSTOM_PREFIX + category;
+    const existing: any[] = getClientCustomItems(category);
+    const index = existing.findIndex((i) => i._id === item._id);
+    if (index !== -1) {
+      existing[index] = { ...existing[index], ...item };
+    } else {
+      existing.unshift(item);
+    }
+    localStorage.setItem(key, JSON.stringify(existing));
+  } catch {}
+}
+
+export function getClientCustomItems<T = any>(category: string): T[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const key = CUSTOM_PREFIX + category;
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function syncAndFilterItems<T = any>(category: string, serverItems: T[]): T[] {
+  if (typeof window === 'undefined') return serverItems || [];
+  const rawList = Array.isArray(serverItems) ? [...serverItems] : [];
+  const customList = getClientCustomItems<any>(category);
+
+  // Merge custom created/edited items into rawList
+  customList.forEach((customItem) => {
+    const index = rawList.findIndex((item: any) => item._id === customItem._id);
+    if (index !== -1) {
+      rawList[index] = { ...rawList[index], ...customItem };
+    } else {
+      rawList.unshift(customItem);
+    }
+  });
+
+  return filterClientDeleted(rawList);
 }

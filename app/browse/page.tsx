@@ -4,7 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import Link from 'next/link';
 import { BookOpen, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { filterClientDeleted } from '@/lib/clientStore';
+import { syncAndFilterItems } from '@/lib/clientStore';
 
 interface Department {
   _id: string;
@@ -23,7 +23,7 @@ export default function BrowsePage() {
     fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        setDepartments(filterClientDeleted(data.departments || []));
+        setDepartments(syncAndFilterItems<Department>('departments', data.departments || []));
         setLoading(false);
       })
       .catch(() => setLoading(false));

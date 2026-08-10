@@ -3,47 +3,53 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, Save, Loader2, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { CATEGORIES } from '@/lib/utils';
-import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
+import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
 interface Department { _id: string; name: string; slug: string; }
 interface Subject { _id: string; name: string; slug: string; semesterNumber: number; departmentId: Department; }
 interface Resource {
   _id: string;
   title: string;
-  description: string;
+  description?: string;
   url: string;
   category: string;
-  isActive: boolean;
-  upvotes: number;
-  downvotes: number;
+  subjectId: Subject;
+  tags?: string[];
   createdAt: string;
-  subjectId: { _id: string; name: string; semesterNumber: number; departmentId: Department };
+  upvotes?: number;
+  downvotes?: number;
+  isActive?: boolean;
 }
 
-const emptyForm = { title: '', description: '', url: '', category: 'Notes', subjectId: '', tags: '' };
+const emptyForm = {
+  title: '',
+  description: '',
+  url: '',
+  category: 'Notes',
+  subjectId: '',
+  tags: '',
+};
 
 export default function AdminResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
+  const [selectedDept, setSelectedDept] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
-  const [selectedDept, setSelectedDept] = useState('');
-  const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
+
+  useEffect(() => { loadAll(); }, []);
 
   useEffect(() => {
-    loadAll();
-  }, []);
-
-  useEffect(() => {
-    if (selectedDept) {
-      setFilteredSubjects(subjects.filter((s) => s.departmentId?._id === selectedDept));
-    } else {
+    if (!selectedDept) {
       setFilteredSubjects(subjects);
+    } else {
+      setFilteredSubjects(subjects.filter((s) => s.departmentId?._id === selectedDept || (s.departmentId as any) === selectedDept));
     }
   }, [selectedDept, subjects]);
 
@@ -55,9 +61,9 @@ export default function AdminResourcesPage() {
       fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/subjects?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
-    setResources(filterClientDeleted<Resource>(resData.resources || []));
-    setDepartments(filterClientDeleted<Department>(deptData.departments || []));
-    const subList = filterClientDeleted<Subject>(subData.subjects || []);
+    setResources(syncAndFilterItems<Resource>('resources', resData.resources || []));
+    setDepartments(syncAndFilterItems<Department>('departments', deptData.departments || []));
+    const subList = syncAndFilterItems<Subject>('subjects', subData.subjects || []);
     setSubjects(subList);
     setFilteredSubjects(subList);
     setLoading(false);
@@ -75,6 +81,12 @@ export default function AdminResourcesPage() {
       const method = editId ? 'PUT' : 'POST';
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error();
+      const resData = await res.json().catch(() => null);
+      if (resData && (resData._id || resData.resource?._id)) {
+        saveClientCustomItem('resources', resData.resource || resData);
+      } else {
+        saveClientCustomItem('resources', { _id: editId || `res_${Date.now()}`, ...form, createdAt: new Date().toISOString() });
+      }
       toast.success(editId ? 'Resource updated!' : 'Resource created!');
       setShowForm(false);
       setEditId(null);
@@ -91,7 +103,7 @@ export default function AdminResourcesPage() {
     setEditId(r._id);
     setForm({
       title: r.title,
-      description: r.description,
+      description: r.description || '',
       url: r.url,
       category: r.category,
       subjectId: r.subjectId?._id || '',

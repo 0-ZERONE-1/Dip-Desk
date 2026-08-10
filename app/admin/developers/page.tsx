@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import AdminNav from '@/components/admin/AdminNav';
 import { Plus, Edit2, Trash2, Github, Linkedin, Instagram, Mail, Globe, Loader2, Code2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
+import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
 interface Developer {
   _id: string;
@@ -45,7 +45,7 @@ export default function AdminDevelopersPage() {
     try {
       const r = await fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' });
       const d = await r.json();
-      setDevelopers(filterClientDeleted(d.developers || []));
+      setDevelopers(syncAndFilterItems<Developer>('developers', d.developers || []));
     } catch {
       toast.error('Failed to load developers');
     } finally {
@@ -110,6 +110,13 @@ export default function AdminDevelopersPage() {
       });
 
       if (!res.ok) throw new Error();
+
+      const resData = await res.json().catch(() => null);
+      if (resData && (resData._id || resData.developer?._id)) {
+        saveClientCustomItem('developers', resData.developer || resData);
+      } else {
+        saveClientCustomItem('developers', { _id: editingDev?._id || `dev_${Date.now()}`, ...form });
+      }
 
       toast.success(editingDev ? 'Developer updated' : 'Developer created');
       setShowModal(false);

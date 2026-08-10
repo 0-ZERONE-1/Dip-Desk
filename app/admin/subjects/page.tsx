@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Trash2, Edit2, Save, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SEMESTERS } from '@/lib/utils';
-import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
+import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
 interface Department { _id: string; name: string; }
 interface Subject { _id: string; name: string; slug: string; semesterNumber: number; description: string; departmentId: Department; }
@@ -29,8 +29,8 @@ export default function AdminSubjectsPage() {
       fetch(`/api/subjects?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
-    setSubjects(filterClientDeleted(subData.subjects || []));
-    setDepartments(filterClientDeleted(deptData.departments || []));
+    setSubjects(syncAndFilterItems<Subject>('subjects', subData.subjects || []));
+    setDepartments(syncAndFilterItems<Department>('departments', deptData.departments || []));
     setLoading(false);
   };
 
@@ -42,6 +42,12 @@ export default function AdminSubjectsPage() {
       const method = editId ? 'PUT' : 'POST';
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      const resData = await res.json().catch(() => null);
+      if (resData && (resData._id || resData.subject?._id)) {
+        saveClientCustomItem('subjects', resData.subject || resData);
+      } else {
+        saveClientCustomItem('subjects', { _id: editId || `sub_${Date.now()}`, ...form });
+      }
       toast.success(editId ? 'Updated!' : 'Subject created!');
       setShowForm(false); setEditId(null); setForm(emptyForm);
       load();
