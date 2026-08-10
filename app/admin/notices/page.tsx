@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Edit2, Save, X, Loader2, Pin, Bell, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
 
 interface Notice {
   _id: string;
@@ -43,7 +44,8 @@ export default function AdminNoticesPage() {
   const load = async () => {
     setLoading(true);
     const data = await fetch(`/api/notices?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
-    setNotices(data.notices || []);
+    const rawList = data.notices || [];
+    setNotices(filterClientDeleted(rawList));
     setLoading(false);
   };
 
@@ -94,8 +96,9 @@ export default function AdminNoticesPage() {
   };
 
   const handleDelete = async (id: string) => {
+    addClientDeletedId(id);
+    setNotices((prev) => prev.filter((n) => n._id !== id));
     try {
-      setNotices((prev) => prev.filter((n) => n._id !== id));
       const res = await fetch(`/api/notices/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
       toast.success('Notice deleted');

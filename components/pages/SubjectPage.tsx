@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import ResourceCard from '@/components/ResourceCard';
 import RequestForm from '@/components/RequestForm';
+import { filterClientDeleted } from '@/lib/clientStore';
 import { BookOpen, Loader2, PlusCircle, FileText, Sparkles } from 'lucide-react';
 import { cn, CATEGORIES, categoryIcon } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -52,7 +53,9 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
     fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        const found = data.subjects?.find((s: Subject) => s.slug === subjectSlug);
+        const rawList = data.subjects || [];
+        const filteredList = filterClientDeleted<Subject>(rawList);
+        const found = filteredList.find((s: Subject) => s.slug === subjectSlug);
         setSubject(found || null);
         setLoading(false);
       });
@@ -68,7 +71,8 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
     )
       .then((r) => r.json())
       .then((data) => {
-        setResources(data.resources || []);
+        const rawList = data.resources || [];
+        setResources(filterClientDeleted(rawList));
         setResourcesLoading(false);
       })
       .catch(() => setResourcesLoading(false));

@@ -10,6 +10,7 @@ import {
   useTransform,
 } from 'framer-motion';
 import { Github, Linkedin, Instagram, Mail, Globe, Code2, Loader2 } from 'lucide-react';
+import { filterClientDeleted } from '@/lib/clientStore';
 
 interface DeveloperItem {
   _id: string;
@@ -301,7 +302,7 @@ export default function DevelopersPage() {
     fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        setDevelopers(data.developers || []);
+        setDevelopers(filterClientDeleted(data.developers || []));
         setLoading(false);
       })
       .catch(() => setLoading(false));

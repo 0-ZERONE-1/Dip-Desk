@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import AdminNav from '@/components/admin/AdminNav';
 import { Plus, Edit2, Trash2, Github, Linkedin, Instagram, Mail, Globe, Loader2, Code2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
 
 interface Developer {
   _id: string;
@@ -44,7 +45,7 @@ export default function AdminDevelopersPage() {
     try {
       const r = await fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' });
       const d = await r.json();
-      setDevelopers(d.developers || []);
+      setDevelopers(filterClientDeleted(d.developers || []));
     } catch {
       toast.error('Failed to load developers');
     } finally {
@@ -121,8 +122,9 @@ export default function AdminDevelopersPage() {
   };
 
   const handleDelete = async (id: string) => {
+    addClientDeletedId(id);
+    setDevelopers((prev) => prev.filter((d) => d._id !== id));
     try {
-      setDevelopers((prev) => prev.filter((d) => d._id !== id));
       const res = await fetch(`/api/developers/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       toast.success('Developer removed');

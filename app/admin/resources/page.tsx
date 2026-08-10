@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, Save, Loader2, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { CATEGORIES } from '@/lib/utils';
+import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
 
 interface Department { _id: string; name: string; slug: string; }
 interface Subject { _id: string; name: string; slug: string; semesterNumber: number; departmentId: Department; }
@@ -54,10 +55,11 @@ export default function AdminResourcesPage() {
       fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/subjects?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
-    setResources(resData.resources || []);
-    setDepartments(deptData.departments || []);
-    setSubjects(subData.subjects || []);
-    setFilteredSubjects(subData.subjects || []);
+    setResources(filterClientDeleted<Resource>(resData.resources || []));
+    setDepartments(filterClientDeleted<Department>(deptData.departments || []));
+    const subList = filterClientDeleted<Subject>(subData.subjects || []);
+    setSubjects(subList);
+    setFilteredSubjects(subList);
     setLoading(false);
   };
 
@@ -99,6 +101,7 @@ export default function AdminResourcesPage() {
   };
 
   const handleDelete = async (id: string) => {
+    addClientDeletedId(id);
     setResources((prev) => prev.filter((r) => r._id !== id));
     await fetch(`/api/resources/${id}`, { method: 'DELETE' });
     toast.success('Deleted');

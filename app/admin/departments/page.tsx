@@ -1,11 +1,13 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { Plus, Trash2, Edit2, Save, X, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import AdminNav from '@/components/admin/AdminNav';
+import { Plus, Edit2, Trash2, X, Save, Loader2, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
+import { addClientDeletedId, filterClientDeleted } from '@/lib/clientStore';
 
 interface Department { _id: string; name: string; slug: string; description: string; icon: string; color: string; isActive: boolean; }
-const emptyForm = { name: '', description: '', icon: '', color: '#6366f1' };
+const emptyForm = { name: '', description: '', icon: '📚', color: '#6366f1' };
 
 export default function AdminDepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -20,7 +22,7 @@ export default function AdminDepartmentsPage() {
   const load = async () => {
     setLoading(true);
     const data = await fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
-    setDepartments(data.departments || []);
+    setDepartments(filterClientDeleted(data.departments || []));
     setLoading(false);
   };
 
@@ -41,6 +43,7 @@ export default function AdminDepartmentsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    addClientDeletedId(id);
     setDepartments((prev) => prev.filter((d) => d._id !== id));
     await fetch(`/api/departments/${id}`, { method: 'DELETE' });
     toast.success('Deleted');

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Bell, Pin, ExternalLink, Calendar, Search, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { filterClientDeleted } from '@/lib/clientStore';
 
 interface Notice {
   _id: string;
@@ -35,7 +36,8 @@ export default function PublicNoticesPage() {
     fetch(`/api/notices?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        setNotices(data.notices || []);
+        const rawList = data.notices || [];
+        setNotices(filterClientDeleted(rawList));
         setLoading(false);
       })
       .catch(() => setLoading(false));
