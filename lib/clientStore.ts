@@ -59,13 +59,35 @@ export function getClientCustomItems<T = any>(category: string): T[] {
   }
 }
 
-export function syncAndFilterItems<T = any>(category: string, serverItems: T[]): T[] {
+export function syncAndFilterItems<T = any>(
+  category: string,
+  serverItems: T[],
+  filters?: { category?: string; subjectId?: string; departmentSlug?: string; semesterNumber?: number }
+): T[] {
   if (typeof window === 'undefined') return serverItems || [];
   const rawList = Array.isArray(serverItems) ? [...serverItems] : [];
   const customList = getClientCustomItems<any>(category);
 
-  // Merge custom created/edited items into rawList
+  // Merge custom created/edited items into rawList if they match active filters
   customList.forEach((customItem) => {
+    if (filters) {
+      if (filters.category && customItem.category && customItem.category !== filters.category) return;
+      if (filters.subjectId) {
+        const itemSubId = typeof customItem.subjectId === 'object'
+          ? (customItem.subjectId?._id || customItem.subjectId?.slug)
+          : customItem.subjectId;
+        if (itemSubId && itemSubId !== filters.subjectId) return;
+      }
+      if (filters.departmentSlug) {
+        const itemDeptSlug = customItem.departmentSlug || customItem.departmentId?.slug || customItem.subjectId?.departmentId?.slug;
+        if (itemDeptSlug && itemDeptSlug !== filters.departmentSlug) return;
+      }
+      if (filters.semesterNumber) {
+        const itemSem = customItem.semesterNumber || customItem.subjectId?.semesterNumber;
+        if (itemSem && Number(itemSem) !== Number(filters.semesterNumber)) return;
+      }
+    }
+
     const index = rawList.findIndex((item: any) => item._id === customItem._id);
     if (index !== -1) {
       rawList[index] = { ...rawList[index], ...customItem };

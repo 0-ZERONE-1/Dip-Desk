@@ -72,7 +72,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       .then((r) => r.json())
       .then((data) => {
         const rawList = data.resources || [];
-        setResources(syncAndFilterItems<Resource>('resources', rawList));
+        setResources(syncAndFilterItems<Resource>('resources', rawList, { subjectId: subject._id, category: activeCategory }));
         setResourcesLoading(false);
       })
       .catch(() => setResourcesLoading(false));

@@ -406,7 +406,7 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
 
   let list = (store.resources || []).filter((r) => !deleted.includes(r._id));
   if (category) list = list.filter((r) => r.category === category);
-  if (subjectId) list = list.filter((r) => r.subjectId?._id === subjectId || r.subjectId === subjectId);
+  if (subjectId) list = list.filter((r) => r.subjectId?._id === subjectId || r.subjectId === subjectId || r.subjectId?.slug === subjectId);
   return list;
 }
 
