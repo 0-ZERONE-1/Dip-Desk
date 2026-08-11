@@ -19,6 +19,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 2. GitHub Blob / Permalink handling
+    if (decodedUrl.includes('github.com/') && decodedUrl.includes('/blob/')) {
+      const rawUrl = decodedUrl.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+      return NextResponse.redirect(rawUrl, 302);
+    }
+
     // 2. Fetch page/image content
     const res = await fetch(decodedUrl, {
       headers: {

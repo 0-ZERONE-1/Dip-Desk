@@ -90,6 +90,11 @@ export function formatImageUrl(url: string): string {
     return `/api/image-proxy?url=${encodeURIComponent(trimmed)}`;
   }
 
+  // 6. GitHub Blob / Permalink handling (e.g. github.com/0-ZERONE-1/Image-Asset/blob/sha/path.jpg)
+  if (trimmed.includes('github.com/') && trimmed.includes('/blob/')) {
+    return trimmed.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+  }
+
   return trimmed;
 }
 
