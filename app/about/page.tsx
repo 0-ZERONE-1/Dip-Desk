@@ -23,8 +23,11 @@ import {
   Workflow,
   UserCheck,
   FilePlus,
-  Server,
-  Layers3,
+  HelpCircle,
+  KeyRound,
+  Compass,
+  FolderTree,
+  BookmarkCheck,
 } from 'lucide-react';
 
 const softwareTableData = [
@@ -159,11 +162,61 @@ const platformCapabilities = [
   },
 ];
 
+const howToGuideSteps = [
+  {
+    step: '01',
+    title: 'Student Account & Login Requirements',
+    icon: KeyRound,
+    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+    summary: 'How to sign in and what information is needed to get started.',
+    details: [
+      { label: 'Login Requirements', text: 'Valid Email Address and Password.' },
+      { label: 'Profile Options', text: 'Full Name, Polytechnic Institute Name, Roll / Registration Number, and Designation.' },
+      { label: 'How to Sign In', text: 'Click the "Sign In" or "Register" button in the top right corner of the Navbar. Once authenticated, click your avatar to access the "Student Panel".' },
+    ],
+  },
+  {
+    step: '02',
+    title: 'How to Find Specific Study Resources',
+    icon: Compass,
+    badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
+    summary: 'Locate notes, books, and model papers in seconds.',
+    details: [
+      { label: 'Global Search Bar', text: 'Click the top Search Bar or press "Ctrl + K" (on desktop). Type any subject name, topic title, or resource keyword to see live suggestions.' },
+      { label: 'Inline Previewing', text: 'Click "Open" or the Eye icon on any card to read PDFs directly in your browser without forcing downloads.' },
+      { label: 'Category Filtering', text: 'Inside any subject page, switch between "Notes", "Books", "Model Question Papers", and "Lab Manuals" tabs.' },
+    ],
+  },
+  {
+    step: '03',
+    title: 'Navigating Departments & Semesters',
+    icon: FolderTree,
+    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    summary: 'Browse subject curriculums step-by-step.',
+    details: [
+      { label: 'Step 1: Department', text: 'Click "Browse" in the top Navbar and choose your Engineering Branch (e.g., Computer Science, Mechanical, Electrical, ETCE).' },
+      { label: 'Step 2: Semester', text: 'Select your current academic semester (Semester 1 through Semester 6).' },
+      { label: 'Step 3: Subject', text: 'Click on any subject card to view all verified study materials associated with that subject.' },
+    ],
+  },
+  {
+    step: '04',
+    title: 'Bookmarking & Requesting Missing Materials',
+    icon: BookmarkCheck,
+    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    summary: 'Save resources for revision or request new notes.',
+    details: [
+      { label: 'Saving Bookmarks', text: 'Click the Bookmark icon on any resource card to save it. View all your saved notes anytime under your "Student Panel".' },
+      { label: 'Requesting Materials', text: 'Can\'t find notes for a specific topic? Submit a resource request from your Student Panel, and site admins will upload it for you!' },
+    ],
+  },
+];
+
 export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main className="container-max px-4 py-8 sm:py-12 flex-1">
+      <main className="container-max px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full max-w-full overflow-x-hidden">
         {/* Header Hero Section */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
           <motion.div
@@ -171,9 +224,9 @@ export default function AboutPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary-500/10 via-accent-500/10 to-primary-500/10 border border-primary-200 text-xs sm:text-sm font-semibold text-primary-700 mb-4 shadow-sm"
           >
-            <Sparkles className="w-4 h-4 text-primary-600 animate-spin-slow" />
+            <Sparkles className="w-4 h-4 text-primary-600 animate-spin-slow flex-shrink-0" />
             <span>Dip-Desk is running on Beta 0.7.3</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping flex-shrink-0" />
           </motion.div>
 
           <motion.h1
@@ -188,32 +241,56 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-base sm:text-lg text-gray-600 leading-relaxed"
+            className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto"
           >
-            Dip-Desk is built on modern web software and technologies. Check out the software versions, frameworks, and architecture powering the site below.
+            Dip-Desk is built on modern web software and technologies. Check out the software versions, frameworks, features, and platform user guide below.
           </motion.p>
         </div>
 
-        {/* Software & Technologies Used Table Section */}
+        {/* Software & Technologies Used Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card overflow-hidden border border-surface-200 mb-16 shadow-sm"
+          className="card overflow-hidden border border-surface-200 mb-12 sm:mb-16 shadow-sm w-full"
         >
-          <div className="bg-gradient-to-r from-surface-50 via-white to-primary-50/40 px-6 py-4 border-b border-surface-200 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-surface-50 via-white to-primary-50/40 px-4 sm:px-6 py-4 border-b border-surface-200 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold text-xs">
+              <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                 ⚙️
               </div>
               <div>
-                <h2 className="font-extrabold text-gray-900 text-base sm:text-lg">Software & Technologies Used</h2>
-                <p className="text-xs text-gray-500">Core software dependencies and framework version manifest</p>
+                <h2 className="font-extrabold text-gray-900 text-sm sm:text-lg">Software & Technologies Used</h2>
+                <p className="text-xs text-gray-500 hidden sm:block">Core software dependencies and framework version manifest</p>
               </div>
             </div>
-            <span className="badge-primary text-xs hidden sm:inline-flex">Package Manifest</span>
+            <span className="badge-primary text-xs flex-shrink-0">Package Manifest</span>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Card List Layout (Visible on Small Screens) */}
+          <div className="sm:hidden divide-y divide-surface-100">
+            {softwareTableData.map((item) => (
+              <div key={item.name} className="p-4 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 font-bold text-sm text-gray-900 truncate">
+                    <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${item.color}`} />
+                    <span className="truncate">{item.name}</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-primary-50 border border-primary-200/70 font-mono text-xs font-bold text-primary-600 flex-shrink-0">
+                    {item.version}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs gap-2">
+                  <span className={`px-2 py-0.5 rounded-full font-semibold border text-[11px] ${item.badgeClass}`}>
+                    {item.category}
+                  </span>
+                  <span className="text-gray-500 text-right truncate max-w-[200px]">{item.purpose}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View (Visible on Medium+ Screens) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="border-b border-surface-200 bg-surface-50/80 text-gray-600 font-semibold text-xs uppercase tracking-wider">
@@ -230,12 +307,12 @@ export default function AboutPage() {
                       <span className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
                       {item.name}
                     </td>
-                    <td className="px-6 py-4 font-mono font-bold text-primary-600 text-xs sm:text-sm">
+                    <td className="px-6 py-4 font-mono font-bold text-primary-600 text-xs sm:text-sm whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded-md bg-primary-50 border border-primary-200/70">
                         {item.version}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${item.badgeClass}`}>
                         {item.category}
                       </span>
@@ -254,56 +331,114 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/40 p-6 sm:p-10 text-center shadow-sm mb-16 border border-surface-200/90"
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/40 p-6 sm:p-10 text-center shadow-sm mb-12 sm:mb-16 border border-surface-200/90 w-full"
         >
           <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary-50 border border-primary-200/80 text-xs font-semibold text-primary-700 mb-4 shadow-2xs">
-              <Globe2 className="w-3.5 h-3.5 text-primary-600" /> Purpose & Vision
+              <Globe2 className="w-3.5 h-3.5 text-primary-600 flex-shrink-0" /> Purpose & Vision
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 leading-snug text-gray-900">
-              Bridging the gap in organized polytechnic diploma education.
+
+            <h2 className="text-2xl sm:text-4xl font-extrabold mb-4 text-gray-900 leading-snug sm:leading-tight max-w-2xl">
+              Empowering Diploma Engineering Students with Free, Organized Study Resources
             </h2>
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6 max-w-2xl">
-              Polytechnic diploma students often struggle to find syllabus-aligned notes, model question papers, and lab manuals organized by branch and semester. Dip-Desk solves this by providing a unified, high-performance digital library where study materials are structured, searchable, and instantly accessible without paywalls or intrusive ads.
+
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 max-w-2xl">
+              Polytechnic diploma engineering students frequently struggle to find syllabus-aligned handwritten notes, official model question papers, and lab solution manuals organized by branch and semester.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-semibold text-gray-700">
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Free Open Access</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> No Registration Required to Browse</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Mobile & Tablet Optimized</span>
+
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6 max-w-2xl">
+              Dip-Desk bridges this gap by providing a free, high-performance digital library where all study materials are structured, searchable, and instantly accessible without paywalls, subscriptions, or intrusive ads.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-semibold text-gray-700">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Free Open Access</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> No Registration Required to Browse</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Mobile & Tablet Optimized</span>
             </div>
           </div>
         </motion.div>
 
         {/* Platform Capabilities Grid */}
-        <div className="mb-16">
-          <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="mb-12 sm:mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">Key Platform Features</h2>
             <p className="text-sm sm:text-base text-gray-500">
               Designed around student and admin workflows to make finding, saving, and managing notes effortless.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {platformCapabilities.map((cap, i) => (
               <motion.div
                 key={cap.title}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.05 * i }}
-                className="card p-5 border border-surface-200/80 hover:shadow-md transition-all duration-200 group"
+                className="card p-5 border border-surface-200/80 hover:shadow-md transition-all duration-200 group flex flex-col justify-between"
               >
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${cap.color} text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-110 transition-transform duration-200`}>
-                  <cap.icon className="w-5 h-5" />
+                <div>
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${cap.color} text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-110 transition-transform duration-200 flex-shrink-0`}>
+                    <cap.icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-base text-gray-900 mb-1.5">{cap.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{cap.desc}</p>
                 </div>
-                <h3 className="font-bold text-base text-gray-900 mb-1.5">{cap.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{cap.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* User Guide & How-To Section */}
+        <div className="mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent-50 border border-accent-200 text-xs font-semibold text-accent-700 mb-3">
+              <HelpCircle className="w-3.5 h-3.5 text-accent-600 flex-shrink-0" /> Site User Guide
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">How to Use Dip-Desk</h2>
+            <p className="text-sm sm:text-base text-gray-500">
+              Step-by-step instructions on signing in, finding resources, browsing branches, and bookmarking materials.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {howToGuideSteps.map((item, idx) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * idx }}
+                className="card p-6 sm:p-7 border border-surface-200/90 hover:border-primary-300 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm flex-shrink-0">
+                        {item.step}
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900">{item.title}</h3>
+                    </div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-5 leading-relaxed font-medium">{item.summary}</p>
+
+                  <div className="space-y-3">
+                    {item.details.map((detail) => (
+                      <div key={detail.label} className="p-3 rounded-xl bg-surface-50 border border-surface-100">
+                        <div className="font-semibold text-xs sm:text-sm text-gray-900 mb-1 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary-500 flex-shrink-0" />
+                          {detail.label}
+                        </div>
+                        <p className="text-xs text-gray-600 pl-3.5 leading-relaxed">{detail.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
 
         {/* Bottom CTA Card */}
-        <div className="card p-8 text-center bg-gradient-to-r from-primary-500/5 via-accent-500/5 to-primary-500/5 border border-primary-200/80 max-w-3xl mx-auto">
+        <div className="card p-6 sm:p-8 text-center bg-gradient-to-r from-primary-500/5 via-accent-500/5 to-primary-500/5 border border-primary-200/80 max-w-3xl mx-auto">
           <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-2">Explore Diploma Study Materials Now</h3>
           <p className="text-sm text-gray-600 mb-6">Start browsing subject materials for your semester or check out the developer team.</p>
           <div className="flex items-center justify-center gap-3 flex-wrap">
