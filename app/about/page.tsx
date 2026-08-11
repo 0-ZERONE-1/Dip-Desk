@@ -392,17 +392,6 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
-
-          {/* Bottom Summary Bar */}
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-primary-600 to-indigo-600 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-center sm:text-left">
-              <h4 className="font-bold text-base sm:text-lg">Ready to start your exam preparation?</h4>
-              <p className="text-xs sm:text-sm text-primary-100">Explore handwritten notes, lab manuals, and previous year question papers for your semester.</p>
-            </div>
-            <Link href="/browse" className="btn-secondary bg-white text-primary-700 hover:bg-surface-100 text-xs sm:text-sm px-6 py-2.5 flex-shrink-0 font-bold">
-              Browse All Branches →
-            </Link>
-          </div>
         </motion.div>
 
         {/* Platform Capabilities Grid */}
