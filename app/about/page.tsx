@@ -327,34 +327,81 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* Purpose & Vision Section */}
+        {/* Purpose & Vision Section — Full Width & Rich Details */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/40 p-6 sm:p-10 text-center shadow-sm mb-12 sm:mb-16 border border-surface-200/90 w-full"
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/50 p-6 sm:p-10 shadow-sm mb-12 sm:mb-16 border border-surface-200/90 w-full"
         >
-          <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary-50 border border-primary-200/80 text-xs font-semibold text-primary-700 mb-4 shadow-2xs">
-              <Globe2 className="w-3.5 h-3.5 text-primary-600 flex-shrink-0" /> Purpose & Vision
+          {/* Header Banner */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-8 border-b border-surface-200">
+            <div className="space-y-2 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-100/80 border border-primary-200 text-xs font-extrabold text-primary-800">
+                <Globe2 className="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <span>Purpose & Core Vision</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-black text-gray-900 leading-tight">
+                Empowering Polytechnic Diploma Engineering Students Nationwide
+              </h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Free Open Access
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
+                <CheckCircle2 className="w-4 h-4 text-blue-600" /> Zero Subscription Fees
+              </span>
+            </div>
+          </div>
+
+          {/* 3 Pillar Grid of Deep Content */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="p-6 rounded-2xl bg-white border border-surface-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center font-bold text-lg mb-4">
+                  ⚠️
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">The Problem We Solved</h3>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  Polytechnic diploma students across various institutes frequently struggle to locate reliable, syllabus-aligned study materials. Notes are often scattered across random messaging groups, broken Google Drive links, or paywalled platforms filled with aggressive popup advertisements.
+                </p>
+              </div>
             </div>
 
-            <h2 className="text-2xl sm:text-4xl font-extrabold mb-4 text-gray-900 leading-snug sm:leading-tight max-w-2xl">
-              Empowering Diploma Engineering Students with Free, Organized Study Resources
-            </h2>
-
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 max-w-2xl">
-              Polytechnic diploma engineering students frequently struggle to find syllabus-aligned handwritten notes, official model question papers, and lab solution manuals organized by branch and semester.
-            </p>
-
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6 max-w-2xl">
-              Dip-Desk bridges this gap by providing a free, high-performance digital library where all study materials are structured, searchable, and instantly accessible without paywalls, subscriptions, or intrusive ads.
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-semibold text-gray-700">
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Free Open Access</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> No Registration Required to Browse</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Mobile & Tablet Optimized</span>
+            <div className="p-6 rounded-2xl bg-white border border-surface-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-200 text-primary-600 flex items-center justify-center font-bold text-lg mb-4">
+                  🎯
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Our Mission & Goal</h3>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  Dip-Desk was built to centralize polytechnic education into a fast, unified digital hub. We organize all diploma curriculum resources — handwritten lecture notes, official council model question papers, standard textbooks, and lab solution manuals — categorized cleanly by engineering branch and semester.
+                </p>
+              </div>
             </div>
+
+            <div className="p-6 rounded-2xl bg-white border border-surface-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
+                  🚀
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Student-Centric Vision</h3>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  We believe high-quality study resources must be open and accessible to every student, regardless of financial background. Dip-Desk offers sub-second instant search, in-browser PDF previewers, personal bookmarks, and zero mandatory downloads or registration barriers for browsing.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Summary Bar */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-primary-600 to-indigo-600 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h4 className="font-bold text-base sm:text-lg">Ready to start your exam preparation?</h4>
+              <p className="text-xs sm:text-sm text-primary-100">Explore handwritten notes, lab manuals, and previous year question papers for your semester.</p>
+            </div>
+            <Link href="/browse" className="btn-secondary bg-white text-primary-700 hover:bg-surface-100 text-xs sm:text-sm px-6 py-2.5 flex-shrink-0 font-bold">
+              Browse All Branches →
+            </Link>
           </div>
         </motion.div>
 
