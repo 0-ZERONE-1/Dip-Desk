@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
+import LatestNoticeSection from '@/components/home/LatestNoticeSection';
 
 export const metadata: Metadata = {
   title: 'Dip-Desk — Free Study Materials for Diploma Students',
@@ -23,6 +24,7 @@ export default function HomePage() {
       <main className="flex-1 relative z-10">
         <HeroSection />
         <FeaturesSection />
+        <LatestNoticeSection />
       </main>
     </div>
   );
