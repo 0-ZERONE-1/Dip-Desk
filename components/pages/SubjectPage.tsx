@@ -54,7 +54,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       .then((r) => r.json())
       .then((data) => {
         const rawList = data.subjects || [];
-        const filteredList = syncAndFilterItems<Subject>('subjects', rawList);
+        const filteredList = syncAndFilterItems<Subject>('subjects', rawList, { departmentSlug: branchSlug, semesterNumber: semesterNumber });
         const found = filteredList.find((s: Subject) => s.slug === subjectSlug);
         setSubject(found || null);
         setLoading(false);

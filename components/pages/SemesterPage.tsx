@@ -33,7 +33,7 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
       fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ])
       .then(([subData, deptData]) => {
-        const subList = syncAndFilterItems<Subject>('subjects', subData.subjects || []);
+        const subList = syncAndFilterItems<Subject>('subjects', subData.subjects || [], { departmentSlug: branchSlug, semesterNumber: semesterNumber });
         const deptList = syncAndFilterItems<any>('departments', deptData.departments || []);
         const deptFound = deptList.find((d: any) => d.slug === branchSlug);
         if (deptFound) setDeptName(deptFound.name);

@@ -59,6 +59,63 @@ export function getClientCustomItems<T = any>(category: string): T[] {
   }
 }
 
+function itemMatchesDept(customItem: any, targetDeptSlug: string): boolean {
+  if (!targetDeptSlug) return true;
+
+  // Direct slug checks
+  if (customItem.departmentSlug === targetDeptSlug) return true;
+  if (typeof customItem.departmentId === 'object' && customItem.departmentId?.slug === targetDeptSlug) return true;
+  if (typeof customItem.subjectId === 'object' && customItem.subjectId?.departmentId?.slug === targetDeptSlug) return true;
+
+  if (typeof customItem.departmentId === 'string') {
+    const dStr = customItem.departmentId;
+    if (dStr === targetDeptSlug) return true;
+    if (dStr.replace(/^dept_/, '') === targetDeptSlug) return true;
+
+    // Check custom departments in localStorage
+    const depts = getClientCustomItems<any>('departments');
+    const matchedDept = depts.find((d) => d._id === dStr || d.slug === dStr);
+    if (matchedDept && matchedDept.slug === targetDeptSlug) return true;
+  }
+
+  // If customItem has subjectId as a string or object, check matched subject's department
+  if (customItem.subjectId) {
+    const subIdStr = typeof customItem.subjectId === 'object' ? customItem.subjectId._id : customItem.subjectId;
+    const subjects = getClientCustomItems<any>('subjects');
+    const matchedSub = subjects.find((s) => s._id === subIdStr || s.slug === subIdStr);
+    if (matchedSub) {
+      return itemMatchesDept(matchedSub, targetDeptSlug);
+    }
+  }
+
+  // If item explicitly has a department specified, and none matched targetDeptSlug, reject it!
+  if (customItem.departmentSlug || customItem.departmentId) {
+    return false;
+  }
+
+  return true;
+}
+
+function itemMatchesSemester(customItem: any, targetSem: number): boolean {
+  if (!targetSem) return true;
+
+  const sem = customItem.semesterNumber || customItem.subjectId?.semesterNumber;
+  if (sem) {
+    return Number(sem) === Number(targetSem);
+  }
+
+  if (customItem.subjectId) {
+    const subIdStr = typeof customItem.subjectId === 'object' ? customItem.subjectId._id : customItem.subjectId;
+    const subjects = getClientCustomItems<any>('subjects');
+    const matchedSub = subjects.find((s) => s._id === subIdStr || s.slug === subIdStr);
+    if (matchedSub && matchedSub.semesterNumber) {
+      return Number(matchedSub.semesterNumber) === Number(targetSem);
+    }
+  }
+
+  return true;
+}
+
 export function syncAndFilterItems<T = any>(
   category: string,
   serverItems: T[],
@@ -72,28 +129,20 @@ export function syncAndFilterItems<T = any>(
   customList.forEach((customItem) => {
     if (filters) {
       if (filters.category && customItem.category && customItem.category !== filters.category) return;
+
       if (filters.subjectId) {
         const itemSubId = typeof customItem.subjectId === 'object'
           ? (customItem.subjectId?._id || customItem.subjectId?.slug)
           : customItem.subjectId;
         if (itemSubId && itemSubId !== filters.subjectId) return;
       }
+
       if (filters.departmentSlug) {
-        let itemDeptSlug = customItem.departmentSlug;
-        if (!itemDeptSlug && typeof customItem.departmentId === 'object') {
-          itemDeptSlug = customItem.departmentId?.slug;
-        }
-        if (!itemDeptSlug && typeof customItem.subjectId === 'object') {
-          itemDeptSlug = customItem.subjectId?.departmentId?.slug;
-        }
-        if (!itemDeptSlug && typeof customItem.departmentId === 'string') {
-          itemDeptSlug = customItem.departmentId.replace(/^dept_/, '');
-        }
-        if (itemDeptSlug && itemDeptSlug !== filters.departmentSlug) return;
+        if (!itemMatchesDept(customItem, filters.departmentSlug)) return;
       }
+
       if (filters.semesterNumber) {
-        const itemSem = customItem.semesterNumber || customItem.subjectId?.semesterNumber;
-        if (itemSem && Number(itemSem) !== Number(filters.semesterNumber)) return;
+        if (!itemMatchesSemester(customItem, filters.semesterNumber)) return;
       }
     }
 
