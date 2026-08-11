@@ -235,9 +235,14 @@ export async function createDepartmentStore(data: any) {
 
 export async function updateDepartmentStore(id: string, data: any) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      const updated = await Department.findByIdAndUpdate(id, data, { new: true });
+      let updated;
+      if (id.length === 24) {
+        updated = await Department.findByIdAndUpdate(id, data, { new: true });
+      } else {
+        updated = await Department.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
+      }
       if (updated) return updated;
     } catch {}
   }
@@ -332,9 +337,14 @@ export async function createSubjectStore(data: any) {
 
 export async function updateSubjectStore(id: string, data: any) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      const updated = await Subject.findByIdAndUpdate(id, data, { new: true });
+      let updated;
+      if (id.length === 24) {
+        updated = await Subject.findByIdAndUpdate(id, data, { new: true });
+      } else {
+        updated = await Subject.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
+      }
       if (updated) return updated;
     } catch {}
   }
@@ -425,9 +435,18 @@ export async function createResourceStore(data: any) {
 
 export async function updateResourceStore(id: string, data: any) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      const updated = await Resource.findByIdAndUpdate(id, data, { new: true });
+      let updated;
+      if (id.length === 24) {
+        updated = await Resource.findByIdAndUpdate(id, data, { new: true }).populate({
+          path: 'subjectId',
+          select: 'name slug semesterNumber',
+          populate: { path: 'departmentId', select: 'name slug' },
+        });
+      } else {
+        updated = await Resource.findOneAndUpdate({ _id: id }, data, { new: true });
+      }
       if (updated) return updated;
     } catch {}
   }

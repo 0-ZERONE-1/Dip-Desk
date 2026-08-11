@@ -30,6 +30,20 @@ const emptyForm = {
   tags: '',
 };
 
+const getSubjectIdStr = (subjectId: any) => {
+  if (!subjectId) return '';
+  if (typeof subjectId === 'string') return subjectId;
+  return subjectId._id || subjectId.id || '';
+};
+
+const getSubjectName = (subjectId: any, subjectsList: any[]) => {
+  if (!subjectId) return '';
+  if (typeof subjectId === 'object' && subjectId.name) return subjectId.name;
+  const idStr = typeof subjectId === 'string' ? subjectId : subjectId._id;
+  const found = subjectsList.find((s) => s._id === idStr || s.slug === idStr);
+  return found ? found.name : '';
+};
+
 export default function AdminResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -82,11 +96,19 @@ export default function AdminResourcesPage() {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error();
       const resData = await res.json().catch(() => null);
-      if (resData && (resData._id || resData.resource?._id)) {
-        saveClientCustomItem('resources', resData.resource || resData);
-      } else {
-        saveClientCustomItem('resources', { _id: editId || `res_${Date.now()}`, ...form, createdAt: new Date().toISOString() });
+      const foundSub = subjects.find((s) => s._id === form.subjectId || s.slug === form.subjectId);
+      const savedObj = resData?.resource || resData || {
+        _id: editId || `res_${Date.now()}`,
+        ...form,
+        createdAt: new Date().toISOString(),
+      };
+      if (foundSub) {
+        savedObj.subjectId = foundSub;
+      } else if (typeof savedObj.subjectId === 'string') {
+        const match = subjects.find((s) => s._id === savedObj.subjectId);
+        if (match) savedObj.subjectId = match;
       }
+      saveClientCustomItem('resources', savedObj);
       toast.success(editId ? 'Resource updated!' : 'Resource created!');
       setShowForm(false);
       setEditId(null);
@@ -101,12 +123,13 @@ export default function AdminResourcesPage() {
 
   const handleEdit = (r: Resource) => {
     setEditId(r._id);
+    const subIdStr = getSubjectIdStr(r.subjectId);
     setForm({
       title: r.title,
       description: r.description || '',
       url: r.url,
       category: r.category,
-      subjectId: r.subjectId?._id || '',
+      subjectId: subIdStr,
       tags: '',
     });
     setShowForm(true);
@@ -122,7 +145,7 @@ export default function AdminResourcesPage() {
 
   const filtered = resources.filter((r) =>
     r.title.toLowerCase().includes(search.toLowerCase()) ||
-    r.subjectId?.name?.toLowerCase().includes(search.toLowerCase())
+    getSubjectName(r.subjectId, subjects).toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -229,7 +252,7 @@ export default function AdminResourcesPage() {
                   <tr key={r._id} className="border-b border-surface-100 hover:bg-surface-50">
                     <td className="px-4 py-3 font-medium text-gray-900 max-w-[200px] truncate">{r.title}</td>
                     <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{r.category}</td>
-                    <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{r.subjectId?.name}</td>
+                    <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{getSubjectName(r.subjectId, subjects)}</td>
                     <td className="px-4 py-3 text-gray-500 hidden md:table-cell">▲{r.upvotes} ▼{r.downvotes}</td>
                     <td className="px-4 py-3">
                       <span className={r.isActive ? 'badge-success' : 'badge-danger'}>
