@@ -199,20 +199,16 @@ export default function AdminDevelopersPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface-50">
-      <AdminNav />
-
-      <main className="flex-1 md:ml-64 p-6 lg:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-              <Code2 className="w-7 h-7 text-primary-600" />
-              Manage Developers
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Add, edit, reorder, or remove developer profile cards displayed on the public /developers page.
-            </p>
-          </div>
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-extrabold text-gray-900">
+            Manage Developers
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Add, edit, reorder, or remove developer profile cards displayed on the public /developers page.
+          </p>
+        </div>
 
           <button onClick={openAddModal} className="btn-primary flex-shrink-0">
             <Plus className="w-4 h-4" />
@@ -473,7 +469,6 @@ export default function AdminDevelopersPage() {
             </div>
           </div>
         )}
-      </main>
     </div>
   );
 }
