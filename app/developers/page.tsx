@@ -219,12 +219,14 @@ function TiltCard({
           </div>
 
           {/* Info Panel - flex-1 with mt-auto on social icons so bottom edge aligns perfectly across all cards */}
-          <div className="px-5 pt-5 pb-3 flex flex-col text-center items-center flex-1 relative z-10 bg-white">
-            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight">{dev.name}</h3>
+          <div className="px-6 pt-5 pb-4 flex flex-col text-center items-center flex-1 relative z-10 bg-white w-full min-w-0 box-border">
+            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight max-w-full truncate">{dev.name}</h3>
             <span className="badge-primary mb-3 text-xs px-2.5 py-0.5">{dev.role}</span>
 
             {dev.bio && (
-              <p className="text-sm text-gray-600 leading-relaxed mb-4">{dev.bio}</p>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-5 break-words [overflow-wrap:anywhere] max-w-full w-full">
+                {dev.bio}
+              </p>
             )}
 
             {/* Social Links Pinned to Bottom */}

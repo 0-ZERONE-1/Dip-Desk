@@ -201,7 +201,7 @@ export default function AdminDevelopersPage() {
                 </div>
 
                 {dev.bio && (
-                  <p className="text-xs text-gray-500 line-clamp-3 mb-4 leading-relaxed">{dev.bio}</p>
+                  <p className="text-xs text-gray-500 line-clamp-5 break-words [overflow-wrap:anywhere] mb-4 leading-relaxed max-w-full">{dev.bio}</p>
                 )}
 
                 <div className="flex items-center justify-between pt-3 border-t border-surface-100 mt-auto">
