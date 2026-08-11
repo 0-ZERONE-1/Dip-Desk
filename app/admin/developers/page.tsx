@@ -4,6 +4,7 @@ import AdminNav from '@/components/admin/AdminNav';
 import { Plus, Edit2, Trash2, Github, Linkedin, Instagram, Mail, Globe, Loader2, Code2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
+import { formatImageUrl } from '@/lib/utils';
 
 interface Developer {
   _id: string;
@@ -186,7 +187,7 @@ export default function AdminDevelopersPage() {
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-surface-200 flex-shrink-0 bg-surface-100">
                     {dev.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={dev.imageUrl} alt={dev.name} className="w-full h-full object-cover" />
+                      <img src={formatImageUrl(dev.imageUrl)} alt={dev.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-xl">
                         {dev.name?.[0]?.toUpperCase() || 'D'}

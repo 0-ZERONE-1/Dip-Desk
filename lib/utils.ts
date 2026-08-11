@@ -45,23 +45,35 @@ export function formatImageUrl(url: string): string {
   if (!url) return url;
   const trimmed = url.trim();
 
-  // If already a direct i.imgur.com link
+  // 1. ImgBB webpage link (e.g. https://ibb.co/LwJPHkw)
+  if (trimmed.includes('ibb.co/') && !trimmed.includes('i.ibb.co/')) {
+    return `/api/image-proxy?url=${encodeURIComponent(trimmed)}`;
+  }
+
+  // 2. Google Drive links (e.g. drive.google.com/file/d/1A2B3C.../view or drive.google.com/open?id=1A2B3C...)
+  if (trimmed.includes('drive.google.com')) {
+    const fileIdMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+    if (fileIdMatch && fileIdMatch[1]) {
+      return `https://lh3.googleusercontent.com/d/${fileIdMatch[1]}=w1000`;
+    }
+  }
+
+  // 3. Dropbox links (e.g. www.dropbox.com/s/.../file.png?dl=0)
+  if (trimmed.includes('dropbox.com')) {
+    return trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '');
+  }
+
+  // 4. Imgur links (e.g. i.imgur.com/xyz.png or imgur.com/xyz)
   if (trimmed.includes('i.imgur.com/')) {
     return trimmed;
   }
-
-  // Handle imgur.com webpage / gallery / album links
   if (trimmed.includes('imgur.com/')) {
-    // 1. Check for fragment hash ID (e.g. #nIZZ2aB)
     const hashMatch = trimmed.match(/#([a-zA-Z0-9]{5,})/);
     if (hashMatch && hashMatch[1]) {
       return `https://i.imgur.com/${hashMatch[1]}.png`;
     }
-
-    // 2. Extract ID from path slug (e.g. /gallery/title-slug-SfebhGT or /gallery/SfebhGT)
     const cleanUrl = trimmed.split('#')[0].split('?')[0];
     const parts = cleanUrl.split(/[/_-]/).filter(Boolean);
-
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];
       if (
@@ -71,6 +83,11 @@ export function formatImageUrl(url: string): string {
         return `https://i.imgur.com/${p}.png`;
       }
     }
+  }
+
+  // 5. PostImages webpage links (e.g. postimg.cc/xxx)
+  if (trimmed.includes('postimg.cc/') && !trimmed.includes('i.postimg.cc/')) {
+    return `/api/image-proxy?url=${encodeURIComponent(trimmed)}`;
   }
 
   return trimmed;

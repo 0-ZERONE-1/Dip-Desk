@@ -11,6 +11,7 @@ import {
 } from 'framer-motion';
 import { Github, Linkedin, Instagram, Mail, Globe, Code2, Loader2 } from 'lucide-react';
 import { syncAndFilterItems } from '@/lib/clientStore';
+import { formatImageUrl } from '@/lib/utils';
 
 interface DeveloperItem {
   _id: string;
@@ -206,7 +207,7 @@ function TiltCard({
             {dev.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={dev.imageUrl}
+                src={formatImageUrl(dev.imageUrl)}
                 alt={dev.name}
                 className="w-full h-full object-cover"
               />
