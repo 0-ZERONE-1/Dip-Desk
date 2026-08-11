@@ -305,7 +305,10 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
 
   let list = (store.subjects || []).filter((s) => !deleted.includes(s._id) && !deleted.includes(s.slug));
   if (departmentSlug) {
-    list = list.filter((s) => s.departmentId?.slug === departmentSlug || s.departmentSlug === departmentSlug);
+    list = list.filter((s) => {
+      const deptSlug = s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId.replace(/^dept_/, '') : '');
+      return deptSlug === departmentSlug || s.departmentId === departmentSlug;
+    });
   }
   if (semesterNumber) {
     list = list.filter((s) => s.semesterNumber === semesterNumber);

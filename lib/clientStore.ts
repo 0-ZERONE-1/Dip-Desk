@@ -79,7 +79,16 @@ export function syncAndFilterItems<T = any>(
         if (itemSubId && itemSubId !== filters.subjectId) return;
       }
       if (filters.departmentSlug) {
-        const itemDeptSlug = customItem.departmentSlug || customItem.departmentId?.slug || customItem.subjectId?.departmentId?.slug;
+        let itemDeptSlug = customItem.departmentSlug;
+        if (!itemDeptSlug && typeof customItem.departmentId === 'object') {
+          itemDeptSlug = customItem.departmentId?.slug;
+        }
+        if (!itemDeptSlug && typeof customItem.subjectId === 'object') {
+          itemDeptSlug = customItem.subjectId?.departmentId?.slug;
+        }
+        if (!itemDeptSlug && typeof customItem.departmentId === 'string') {
+          itemDeptSlug = customItem.departmentId.replace(/^dept_/, '');
+        }
         if (itemDeptSlug && itemDeptSlug !== filters.departmentSlug) return;
       }
       if (filters.semesterNumber) {

@@ -5,9 +5,23 @@ import toast from 'react-hot-toast';
 import { SEMESTERS } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
-interface Department { _id: string; name: string; }
+interface Department { _id: string; name: string; slug?: string; }
 interface Subject { _id: string; name: string; slug: string; semesterNumber: number; description: string; departmentId: Department; }
 const emptyForm = { name: '', semesterNumber: 1, departmentId: '', description: '' };
+
+const getDeptIdStr = (dept: any) => {
+  if (!dept) return '';
+  if (typeof dept === 'string') return dept;
+  return dept._id || dept.slug || '';
+};
+
+const getDeptName = (dept: any, departmentsList: Department[]) => {
+  if (!dept) return '';
+  if (typeof dept === 'object' && dept.name) return dept.name;
+  const idStr = typeof dept === 'string' ? dept : dept._id;
+  const found = departmentsList.find((d) => d._id === idStr || d.slug === idStr);
+  return found ? found.name : '';
+};
 
 export default function AdminSubjectsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -43,17 +57,40 @@ export default function AdminSubjectsPage() {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       const resData = await res.json().catch(() => null);
-      if (resData && (resData._id || resData.subject?._id)) {
-        saveClientCustomItem('subjects', resData.subject || resData);
-      } else {
-        saveClientCustomItem('subjects', { _id: editId || `sub_${Date.now()}`, ...form });
+      const foundDept = departments.find((d) => d._id === form.departmentId || d.slug === form.departmentId);
+      const savedObj = resData?.subject || resData || {
+        _id: editId || `sub_${Date.now()}`,
+        ...form,
+        createdAt: new Date().toISOString(),
+      };
+      if (foundDept) {
+        savedObj.departmentId = foundDept;
+        savedObj.departmentSlug = foundDept.slug;
+      } else if (typeof savedObj.departmentId === 'string') {
+        const match = departments.find((d) => d._id === savedObj.departmentId || d.slug === savedObj.departmentId);
+        if (match) {
+          savedObj.departmentId = match;
+          savedObj.departmentSlug = match.slug;
+        }
       }
+      saveClientCustomItem('subjects', savedObj);
       toast.success(editId ? 'Updated!' : 'Subject created!');
       setShowForm(false); setEditId(null); setForm(emptyForm);
       load();
     } catch (e: any) {
       toast.error(e.message || 'Failed to save');
     } finally { setSaving(false); }
+  };
+
+  const handleEdit = (s: Subject) => {
+    setEditId(s._id);
+    setForm({
+      name: s.name,
+      semesterNumber: s.semesterNumber,
+      departmentId: getDeptIdStr(s.departmentId),
+      description: s.description || '',
+    });
+    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -65,7 +102,7 @@ export default function AdminSubjectsPage() {
   };
 
   const filtered = subjects.filter((s) => {
-    if (filterDept && s.departmentId?._id !== filterDept) return false;
+    if (filterDept && getDeptIdStr(s.departmentId) !== filterDept) return false;
     if (filterSem && s.semesterNumber !== parseInt(filterSem)) return false;
     return true;
   });
@@ -152,11 +189,11 @@ export default function AdminSubjectsPage() {
               {filtered.map((s) => (
                 <tr key={s._id} className="border-b border-surface-100 hover:bg-surface-50">
                   <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
-                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{s.departmentId?.name}</td>
+                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{getDeptName(s.departmentId, departments)}</td>
                   <td className="px-4 py-3 text-gray-500">Sem {s.semesterNumber}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <button id={`edit-subject-${s._id}`} onClick={() => { setEditId(s._id); setForm({ name: s.name, semesterNumber: s.semesterNumber, departmentId: s.departmentId?._id || '', description: s.description }); setShowForm(true); }} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button id={`edit-subject-${s._id}`} onClick={() => handleEdit(s)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"><Edit2 className="w-3.5 h-3.5" /></button>
                       <button id={`delete-subject-${s._id}`} onClick={() => handleDelete(s._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
