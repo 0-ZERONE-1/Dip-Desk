@@ -62,6 +62,9 @@ export default function Navbar() {
               <Link href="/developers" className={cn('nav-item', pathname === '/developers' && 'nav-item-active')}>
                 Developers
               </Link>
+              <Link href="/about" className={cn('nav-item', pathname === '/about' && 'nav-item-active')}>
+                About
+              </Link>
               {status === 'authenticated' && !isAdmin && (
                 <Link href="/dashboard" className={cn('nav-item', pathname === '/dashboard' && 'nav-item-active')}>
                   Student Panel

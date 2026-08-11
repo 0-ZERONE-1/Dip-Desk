@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signIn, signOut } from 'next-auth/react';
-import { X, Home, BookOpen, Bookmark, Settings, LogIn, LogOut, Code2, Bell } from 'lucide-react';
+import { X, Home, BookOpen, Bookmark, Settings, LogIn, LogOut, Code2, Bell, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Session } from 'next-auth';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +24,7 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
     { href: '/browse', label: 'Browse Resources', icon: BookOpen },
     { href: '/notices', label: 'Notice Board', icon: Bell },
     { href: '/developers', label: 'Developers', icon: Code2 },
+    { href: '/about', label: 'About App', icon: Info },
     ...(session && !isAdmin ? [{ href: '/dashboard', label: 'Student Panel', icon: Bookmark }] : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin Panel', icon: Settings }] : []),
   ];
