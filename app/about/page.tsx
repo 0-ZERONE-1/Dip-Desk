@@ -25,57 +25,89 @@ import {
   ThumbsUp,
   FileText,
   Workflow,
-  Heart,
+  Sparkle,
+  BadgeAlert,
 } from 'lucide-react';
 
-const techStack = [
+const topSoftwareVersionStats = [
+  { label: 'Full-stack Framework', val: 'Next.js v16.3.0', icon: Cpu, color: 'text-blue-600 bg-blue-50 border-blue-200' },
+  { label: 'Type Safety Engine', val: 'TypeScript v5.0.0', icon: Code2, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+  { label: 'Authentication Engine', val: 'NextAuth v4.24.7', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50 border-amber-200' },
+  { label: 'UI Animation Engine', val: 'Framer v11.3.8', icon: Zap, color: 'text-purple-600 bg-purple-50 border-purple-200' },
+];
+
+const softwareTableData = [
   {
-    category: 'Frontend Core',
-    icon: Code2,
-    badgeColor: 'bg-blue-500/10 text-blue-600 border-blue-200',
-    headerGradient: 'from-blue-600 to-cyan-500',
-    description: 'Built on the latest cutting-edge React ecosystem for lightning-fast rendering.',
-    items: [
-      { name: 'Next.js 16 (Turbopack)', desc: 'App Router architecture with React Server Components & hybrid SSR.' },
-      { name: 'React 19', desc: 'Concurrent UI hydration, hooks, and seamless state synchronization.' },
-      { name: 'TypeScript 5', desc: 'End-to-end strict static type safety across API routes & components.' },
-    ],
+    name: 'Next.js',
+    version: 'v16.3.0',
+    purpose: 'Full-stack React Framework (App Router & Turbopack)',
+    category: 'Framework',
+    color: 'bg-black text-white',
+    badgeClass: 'badge-primary',
   },
   {
-    category: 'Styling & UI Aesthetics',
-    icon: Layout,
-    badgeColor: 'bg-purple-500/10 text-purple-600 border-purple-200',
-    headerGradient: 'from-purple-600 to-pink-500',
-    description: 'Curated modern glassmorphic design system with vibrant accent palettes.',
-    items: [
-      { name: 'Vanilla CSS Design System', desc: 'Custom HSL CSS tokens, glassmorphism backdrop blurs & clean utility classes.' },
-      { name: 'Lucide Vector Icons', desc: 'Crisp, lightweight SVG icons tailored for accessible UI elements.' },
-      { name: 'Framer Motion', desc: 'Fluid spring animations, layout transitions, and interactive entry effects.' },
-    ],
+    name: 'TypeScript',
+    version: 'v5.0.0',
+    purpose: 'Strongly typed programming language for robust codebase',
+    category: 'Language',
+    color: 'bg-blue-600 text-white',
+    badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
   },
   {
-    category: 'Data & Persistence Architecture',
-    icon: Database,
-    badgeColor: 'bg-emerald-500/10 text-emerald-600 border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
-    description: 'Hybrid storage engine ensuring zero-downtime access to study materials.',
-    items: [
-      { name: 'MongoDB & Mongoose Schema', desc: 'Cloud database with relational schemas for branches, subjects, and resources.' },
-      { name: 'LocalStorage Client Store Sync', desc: 'Zero-latency offline fallback store with real-time sync for demo sessions.' },
-      { name: 'Zero-Cache Edge Headers', desc: 'Explicit cache invalidation headers guaranteeing real-time content updates.' },
-    ],
+    name: 'Tailwind CSS / Vanilla CSS',
+    version: 'v3.4.1',
+    purpose: 'Utility-first & custom HSL CSS engine for modern responsive UI',
+    category: 'Styling',
+    color: 'bg-cyan-500 text-white',
+    badgeClass: 'bg-cyan-100 text-cyan-800 border-cyan-200',
   },
   {
-    category: 'Security & Authentication',
-    icon: ShieldCheck,
-    badgeColor: 'bg-amber-500/10 text-amber-600 border-amber-200',
-    headerGradient: 'from-amber-600 to-orange-500',
-    description: 'Enterprise-grade session management and role-based access controls.',
-    items: [
-      { name: 'NextAuth.js v4', desc: 'Secure OAuth & credentials authentication with encrypted JWT cookies.' },
-      { name: 'Role-Based Access (RBAC)', desc: 'Granular permissions differentiating Student vs Administrator capabilities.' },
-      { name: 'Bcrypt Password Hashing', desc: 'Salted cryptographic hashing protecting stored user credentials.' },
-    ],
+    name: 'NextAuth.js',
+    version: 'v4.24.7',
+    purpose: 'Authentication engine for Student & Admin session login',
+    category: 'Auth & Security',
+    color: 'bg-purple-600 text-white',
+    badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
+  },
+  {
+    name: 'Framer Motion',
+    version: 'v11.3.8',
+    purpose: 'Fluid layout animations & interactive micro-transitions',
+    category: 'Animation',
+    color: 'bg-pink-600 text-white',
+    badgeClass: 'bg-pink-100 text-pink-800 border-pink-200',
+  },
+  {
+    name: 'MongoDB / Mongoose',
+    version: 'v8.5.1',
+    purpose: 'NoSQL database with fallback client-side store sync',
+    category: 'Database',
+    color: 'bg-emerald-600 text-white',
+    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  },
+  {
+    name: 'Lucide React',
+    version: 'v0.417.0',
+    purpose: 'Modern crisp SVG icons set for accessible UI elements',
+    category: 'Iconography',
+    color: 'bg-orange-500 text-white',
+    badgeClass: 'bg-orange-100 text-orange-800 border-orange-200',
+  },
+  {
+    name: 'React Hot Toast',
+    version: 'v2.4.1',
+    purpose: 'Dynamic alert toast notifications across admin & student panels',
+    category: 'Notifications',
+    color: 'bg-rose-500 text-white',
+    badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
+  },
+  {
+    name: 'Fuse.js',
+    version: 'v7.0.0',
+    purpose: 'Lightweight client-side fuzzy search indexing',
+    category: 'Search Engine',
+    color: 'bg-yellow-600 text-white',
+    badgeClass: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   },
 ];
 
@@ -118,31 +150,20 @@ const platformCapabilities = [
   },
 ];
 
-const systemSpecs = [
-  { label: 'Platform Name', value: 'Dip-Desk (Diploma Resource Hub)' },
-  { label: 'Platform Version', value: 'v1.0.0 (Production Build)' },
-  { label: 'Target Audience', value: 'Polytechnic Diploma Students (WBSCT&VE)' },
-  { label: 'Supported Branches', value: 'Mechanical, CST, EE, ETCE, Civil & more' },
-  { label: 'Supported Semesters', value: 'Semester 1 through Semester 6' },
-  { label: 'Resource Categories', value: 'Notes, Books, Question Papers, Lab Manuals' },
-  { label: 'Hosting & Deployment', value: 'Vercel Global Edge Serverless Network' },
-  { label: 'Open Source License', value: 'MIT License' },
-];
-
 export default function AboutPage() {
   return (
     <>
       <Navbar />
       <main className="container-max px-4 py-8 sm:py-12 flex-1">
         {/* Header Hero Section */}
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary-500/10 via-accent-500/10 to-primary-500/10 border border-primary-200 text-xs sm:text-sm font-semibold text-primary-700 mb-4 shadow-sm"
           >
             <Sparkles className="w-4 h-4 text-primary-600 animate-spin-slow" />
-            <span>Platform Overview & Specifications</span>
+            <span>Software & Technologies Specifications</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
           </motion.div>
 
@@ -160,19 +181,13 @@ export default function AboutPage() {
             transition={{ delay: 0.1 }}
             className="text-base sm:text-lg text-gray-600 leading-relaxed"
           >
-            Dip-Desk is a modern, open-access study platform built specifically for Diploma Engineering students.
-            Explore the technology stack, system architecture, and core features powering this web app.
+            Dip-Desk is built on modern web software and technologies. Check out the software versions, frameworks, and architecture powering the site below.
           </motion.p>
         </div>
 
-        {/* Top Quick Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 sm:mb-16">
-          {[
-            { label: 'Target Audience', val: '100% Diploma', icon: BookOpen, color: 'text-primary-600 bg-primary-50' },
-            { label: 'Semesters Covered', val: 'Sem 1 to Sem 6', icon: Layers, color: 'text-accent-600 bg-accent-50' },
-            { label: 'Core Framework', val: 'Next.js 16', icon: Cpu, color: 'text-emerald-600 bg-emerald-50' },
-            { label: 'Search Latency', val: '< 50ms Live', icon: Zap, color: 'text-amber-600 bg-amber-50' },
-          ].map((stat, i) => (
+        {/* Top Software Version Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 sm:mb-14">
+          {topSoftwareVersionStats.map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
@@ -180,16 +195,72 @@ export default function AboutPage() {
               transition={{ delay: 0.05 * i }}
               className="card p-4 sm:p-5 flex flex-col items-center text-center hover:shadow-md transition-all duration-200 border border-surface-200/80"
             >
-              <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 shadow-inner`}>
+              <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 shadow-sm border`}>
                 <stat.icon className="w-5 h-5" />
               </div>
-              <span className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-0.5">{stat.val}</span>
+              <span className="text-lg sm:text-xl font-extrabold text-gray-900 mb-0.5">{stat.val}</span>
               <span className="text-xs sm:text-sm text-gray-500 font-medium">{stat.label}</span>
             </motion.div>
           ))}
         </div>
 
-        {/* Mission Statement Colored Text Banner */}
+        {/* Software & Technologies Used Table Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card overflow-hidden border border-surface-200 mb-16 shadow-sm"
+        >
+          <div className="bg-gradient-to-r from-surface-50 via-white to-primary-50/40 px-6 py-4 border-b border-surface-200 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold text-xs">
+                ⚙️
+              </div>
+              <div>
+                <h2 className="font-extrabold text-gray-900 text-base sm:text-lg">Software & Technologies Used</h2>
+                <p className="text-xs text-gray-500">Core software dependencies and framework version manifest</p>
+              </div>
+            </div>
+            <span className="badge-primary text-xs hidden sm:inline-flex">Package Manifest</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="border-b border-surface-200 bg-surface-50/80 text-gray-600 font-semibold text-xs uppercase tracking-wider">
+                  <th className="px-6 py-3.5">Technology / Software</th>
+                  <th className="px-6 py-3.5">Version</th>
+                  <th className="px-6 py-3.5">Category</th>
+                  <th className="px-6 py-3.5">Purpose & Function</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-100 font-medium">
+                {softwareTableData.map((item) => (
+                  <tr key={item.name} className="hover:bg-surface-50/70 transition-colors">
+                    <td className="px-6 py-4 font-bold text-gray-900 flex items-center gap-2.5">
+                      <span className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+                      {item.name}
+                    </td>
+                    <td className="px-6 py-4 font-mono font-bold text-primary-600 text-xs sm:text-sm">
+                      <span className="px-2 py-0.5 rounded-md bg-primary-50 border border-primary-200/70">
+                        {item.version}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${item.badgeClass}`}>
+                        {item.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 text-xs sm:text-sm">
+                      {item.purpose}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+
+        {/* Mission Statement Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -206,7 +277,7 @@ export default function AboutPage() {
               Bridging the gap in organized polytechnic diploma education.
             </h2>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed mb-6">
-              Polytechnic diploma students often struggle to find syllabus-aligned notes, model question papers, and lab manuals organized by branch and semester. Dip-Desk solves this by providing a unified, lightning-fast digital library where study materials are structured, searchable, and instantly accessible without paywalls or intrusive ads.
+              Polytechnic diploma students often struggle to find syllabus-aligned notes, model question papers, and lab manuals organized by branch and semester. Dip-Desk solves this by providing a unified, high-performance digital library where study materials are structured, searchable, and instantly accessible without paywalls or intrusive ads.
             </p>
             <div className="flex flex-wrap gap-4 text-xs sm:text-sm font-semibold text-gray-300">
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Free Open Access</span>
@@ -215,55 +286,6 @@ export default function AboutPage() {
             </div>
           </div>
         </motion.div>
-
-        {/* Technology Stack Grid Section */}
-        <div className="mb-16">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">Technologies & Architecture</h2>
-            <p className="text-sm sm:text-base text-gray-500">
-              Dip-Desk is engineered with modern web standards for maximum speed, security, and developer ergonomics.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {techStack.map((tech, idx) => (
-              <motion.div
-                key={tech.category}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * idx }}
-                className="card p-6 sm:p-7 border border-surface-200/90 hover:border-primary-300 transition-all duration-300 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl bg-gradient-to-r ${tech.headerGradient} text-white shadow-sm`}>
-                        <tech.icon className="w-5 h-5" />
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-900">{tech.category}</h3>
-                    </div>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${tech.badgeColor}`}>
-                      Verified
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-gray-500 mb-5 leading-relaxed">{tech.description}</p>
-
-                  <div className="space-y-3">
-                    {tech.items.map((item) => (
-                      <div key={item.name} className="p-3 rounded-xl bg-surface-50 border border-surface-100">
-                        <div className="font-semibold text-xs sm:text-sm text-gray-900 mb-0.5 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-                          {item.name}
-                        </div>
-                        <p className="text-xs text-gray-500 pl-3.5">{item.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
 
         {/* Platform Capabilities Grid */}
         <div className="mb-16">
@@ -292,31 +314,6 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-
-        {/* System Specifications Table Panel */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card overflow-hidden border border-surface-200 mb-16"
-        >
-          <div className="bg-gradient-to-r from-surface-50 to-primary-50/30 px-6 py-4 border-b border-surface-200 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <Terminal className="w-5 h-5 text-primary-600" />
-              <h3 className="font-bold text-gray-900 text-base">Web Application Specifications</h3>
-            </div>
-            <span className="badge-primary text-xs">System Info</span>
-          </div>
-          <div className="divide-y divide-surface-100">
-            {systemSpecs.map((spec) => (
-              <div key={spec.label} className="px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 hover:bg-surface-50/60 transition-colors">
-                <span className="text-xs sm:text-sm font-semibold text-gray-600">{spec.label}</span>
-                <span className="text-xs sm:text-sm font-medium text-gray-900 font-mono bg-surface-100/80 px-2.5 py-1 rounded-lg">
-                  {spec.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
 
         {/* Bottom CTA Card */}
         <div className="card p-8 text-center bg-gradient-to-r from-primary-500/5 via-accent-500/5 to-primary-500/5 border border-primary-200/80 max-w-3xl mx-auto">
