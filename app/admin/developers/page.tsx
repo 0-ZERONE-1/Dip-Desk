@@ -245,10 +245,14 @@ export default function AdminDevelopersPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-gray-700">Full Name *</label>
+                    <span className="text-[11px] text-gray-400">max 25 chars</span>
+                  </div>
                   <input
                     type="text"
                     required
+                    maxLength={25}
                     placeholder="e.g. Alex Johnson"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -257,10 +261,14 @@ export default function AdminDevelopersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Role / Title *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-gray-700">Role / Title *</label>
+                    <span className="text-[11px] text-gray-400">max 25 chars</span>
+                  </div>
                   <input
                     type="text"
                     required
+                    maxLength={25}
                     placeholder="e.g. Lead Full-Stack Developer"
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
@@ -269,7 +277,7 @@ export default function AdminDevelopersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Image URL</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Image URL (No Limit)</label>
                   <input
                     type="url"
                     placeholder="https://example.com/avatar.jpg"
@@ -280,9 +288,15 @@ export default function AdminDevelopersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Short Bio</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-gray-700">Short Bio</label>
+                    <span className={`text-[11px] font-semibold ${150 - (form.bio?.length || 0) <= 15 ? 'text-amber-600' : 'text-gray-400'}`}>
+                      {150 - (form.bio?.length || 0)} characters left
+                    </span>
+                  </div>
                   <textarea
                     rows={3}
+                    maxLength={150}
                     placeholder="Brief description about background and contributions..."
                     value={form.bio}
                     onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -292,9 +306,10 @@ export default function AdminDevelopersPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">GitHub URL</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">GitHub URL (max 100)</label>
                     <input
                       type="url"
+                      maxLength={100}
                       placeholder="https://github.com/username"
                       value={form.githubUrl}
                       onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
@@ -302,9 +317,10 @@ export default function AdminDevelopersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">LinkedIn URL</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">LinkedIn URL (max 100)</label>
                     <input
                       type="url"
+                      maxLength={100}
                       placeholder="https://linkedin.com/in/username"
                       value={form.linkedinUrl}
                       onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
@@ -315,9 +331,10 @@ export default function AdminDevelopersPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Instagram URL</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Instagram URL (max 100)</label>
                     <input
                       type="url"
+                      maxLength={100}
                       placeholder="https://instagram.com/username"
                       value={form.instagramUrl}
                       onChange={(e) => setForm({ ...form, instagramUrl: e.target.value })}
@@ -325,9 +342,10 @@ export default function AdminDevelopersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Link / Address</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Link / Address (max 100)</label>
                     <input
                       type="text"
+                      maxLength={100}
                       placeholder="mailto:developer@example.com"
                       value={form.emailUrl}
                       onChange={(e) => setForm({ ...form, emailUrl: e.target.value })}
@@ -337,9 +355,10 @@ export default function AdminDevelopersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Portfolio URL</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Portfolio URL (max 100)</label>
                   <input
                     type="url"
+                    maxLength={100}
                     placeholder="https://myportfolio.dev"
                     value={form.portfolioUrl}
                     onChange={(e) => setForm({ ...form, portfolioUrl: e.target.value })}
