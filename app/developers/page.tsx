@@ -25,6 +25,7 @@ interface DeveloperItem {
   emailUrl?: string;
   portfolioUrl?: string;
   twitterUrl?: string;
+  order?: number;
 }
 
 /* Shard origins for the entry animation */
@@ -305,7 +306,9 @@ export default function DevelopersPage() {
     fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        setDevelopers(syncAndFilterItems<DeveloperItem>('developers', data.developers || []));
+        const rawDevs = syncAndFilterItems<DeveloperItem>('developers', data.developers || []);
+        const sortedDevs = [...rawDevs].sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+        setDevelopers(sortedDevs);
         setLoading(false);
       })
       .catch(() => setLoading(false));

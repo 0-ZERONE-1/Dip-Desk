@@ -1,7 +1,20 @@
 'use client';
 import { useEffect, useState } from 'react';
 import AdminNav from '@/components/admin/AdminNav';
-import { Plus, Edit2, Trash2, Github, Linkedin, Instagram, Mail, Globe, Loader2, Code2 } from 'lucide-react';
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Github,
+  Linkedin,
+  Instagram,
+  Mail,
+  Globe,
+  Loader2,
+  Code2,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import { formatImageUrl } from '@/lib/utils';
@@ -39,14 +52,16 @@ export default function AdminDevelopersPage() {
     instagramUrl: '',
     emailUrl: '',
     portfolioUrl: '',
-    order: 0,
+    order: 1,
   });
 
   const fetchDevelopers = async () => {
     try {
       const r = await fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' });
       const d = await r.json();
-      setDevelopers(syncAndFilterItems<Developer>('developers', d.developers || []));
+      const rawDevs = syncAndFilterItems<Developer>('developers', d.developers || []);
+      const sortedDevs = [...rawDevs].sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      setDevelopers(sortedDevs);
     } catch {
       toast.error('Failed to load developers');
     } finally {
@@ -70,7 +85,7 @@ export default function AdminDevelopersPage() {
       instagramUrl: '',
       emailUrl: '',
       portfolioUrl: '',
-      order: 0,
+      order: developers.length + 1,
     });
     setShowModal(true);
   };
@@ -87,7 +102,7 @@ export default function AdminDevelopersPage() {
       instagramUrl: dev.instagramUrl || '',
       emailUrl: dev.emailUrl || '',
       portfolioUrl: dev.portfolioUrl || '',
-      order: dev.order || 0,
+      order: dev.order || 1,
     });
     setShowModal(true);
   };
@@ -143,6 +158,46 @@ export default function AdminDevelopersPage() {
     }
   };
 
+  const handleReorder = async (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= developers.length) return;
+
+    const currentDev = developers[index];
+    const targetDev = developers[targetIndex];
+
+    const currentOrder = currentDev.order ?? index + 1;
+    const targetOrder = targetDev.order ?? targetIndex + 1;
+
+    // Swap order numbers
+    const updatedDevs = [...developers];
+    updatedDevs[index] = { ...currentDev, order: targetOrder };
+    updatedDevs[targetIndex] = { ...targetDev, order: currentOrder };
+    updatedDevs.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+
+    setDevelopers(updatedDevs);
+
+    saveClientCustomItem('developers', { ...currentDev, order: targetOrder });
+    saveClientCustomItem('developers', { ...targetDev, order: currentOrder });
+
+    try {
+      await Promise.all([
+        fetch(`/api/developers/${currentDev._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...currentDev, order: targetOrder }),
+        }),
+        fetch(`/api/developers/${targetDev._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...targetDev, order: currentOrder }),
+        }),
+      ]);
+      toast.success('Developer order updated');
+    } catch {
+      // Optimistic update retained
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-surface-50">
       <AdminNav />
@@ -155,7 +210,7 @@ export default function AdminDevelopersPage() {
               Manage Developers
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Add, edit, or remove developer profile cards displayed on the public /developers page.
+              Add, edit, reorder, or remove developer profile cards displayed on the public /developers page.
             </p>
           </div>
 
@@ -181,22 +236,47 @@ export default function AdminDevelopersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {developers.map((dev) => (
-              <div key={dev._id} className="card p-6 flex flex-col justify-between relative group">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-surface-200 flex-shrink-0 bg-surface-100">
-                    {dev.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={formatImageUrl(dev.imageUrl)} alt={dev.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-xl">
-                        {dev.name?.[0]?.toUpperCase() || 'D'}
-                      </div>
-                    )}
+            {developers.map((dev, idx) => (
+              <div key={dev._id} className="card p-6 flex flex-col justify-between relative group shadow-sm border border-surface-200">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-surface-200 flex-shrink-0 bg-surface-100">
+                      {dev.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={formatImageUrl(dev.imageUrl)} alt={dev.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-lg">
+                          {dev.name?.[0]?.toUpperCase() || 'D'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-gray-900 truncate">{dev.name}</h3>
+                      <span className="badge-primary text-xs mt-1 inline-block">{dev.role}</span>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-gray-900 truncate">{dev.name}</h3>
-                    <span className="badge-primary text-xs mt-1 inline-block">{dev.role}</span>
+
+                  {/* Reorder Buttons */}
+                  <div className="flex items-center gap-1 bg-surface-100 p-1 rounded-lg border border-surface-200">
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={() => handleReorder(idx, 'up')}
+                      className="p-1 rounded text-gray-600 hover:bg-white hover:text-primary-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                      title="Move First / Up"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-[11px] font-bold px-1 text-primary-700">#{idx + 1}</span>
+                    <button
+                      type="button"
+                      disabled={idx === developers.length - 1}
+                      onClick={() => handleReorder(idx, 'down')}
+                      className="p-1 rounded text-gray-600 hover:bg-white hover:text-primary-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                      title="Move Down"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 
@@ -244,27 +324,34 @@ export default function AdminDevelopersPage() {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-gray-700">Full Name *</label>
-                    <span className="text-[11px] text-gray-400">max 25 chars</span>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={25}
+                      placeholder="e.g. Alex Johnson"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className="input"
+                    />
                   </div>
-                  <input
-                    type="text"
-                    required
-                    maxLength={25}
-                    placeholder="e.g. Alex Johnson"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="input"
-                  />
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Display Order</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={form.order}
+                      onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
+                      className="input"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-gray-700">Role / Title *</label>
-                    <span className="text-[11px] text-gray-400">max 25 chars</span>
-                  </div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Role / Title *</label>
                   <input
                     type="text"
                     required
@@ -277,7 +364,7 @@ export default function AdminDevelopersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Image URL (No Limit)</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Image URL</label>
                   <input
                     type="url"
                     placeholder="https://example.com/avatar.jpg"
@@ -306,7 +393,7 @@ export default function AdminDevelopersPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">GitHub URL (max 100)</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">GitHub URL</label>
                     <input
                       type="url"
                       maxLength={100}
@@ -317,7 +404,7 @@ export default function AdminDevelopersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">LinkedIn URL (max 100)</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">LinkedIn URL</label>
                     <input
                       type="url"
                       maxLength={100}
@@ -331,7 +418,7 @@ export default function AdminDevelopersPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Instagram URL (max 100)</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Instagram URL</label>
                     <input
                       type="url"
                       maxLength={100}
@@ -342,7 +429,7 @@ export default function AdminDevelopersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Link / Address (max 100)</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Link / Address</label>
                     <input
                       type="text"
                       maxLength={100}
@@ -355,7 +442,7 @@ export default function AdminDevelopersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Portfolio URL (max 100)</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Portfolio URL</label>
                   <input
                     type="url"
                     maxLength={100}
