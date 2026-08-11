@@ -21,6 +21,10 @@ import {
   ThumbsUp,
   FileText,
   Workflow,
+  UserCheck,
+  FilePlus,
+  Server,
+  Layers3,
 } from 'lucide-react';
 
 const softwareTableData = [
@@ -103,37 +107,55 @@ const platformCapabilities = [
     title: 'Instant Global Search',
     icon: Search,
     color: 'from-blue-500 to-indigo-600',
-    desc: 'Sub-second real-time search auto-indexing titles, subjects, categories, and keywords.',
+    desc: 'Sub-second real-time search with dynamic dropdown auto-suggestions across departments, semesters, and subjects.',
   },
   {
     title: 'Inline Document Previewer',
     icon: FileText,
     color: 'from-violet-500 to-purple-600',
-    desc: 'Embedded high-speed PDF reader allowing students to view notes without downloading.',
+    desc: 'Embedded PDF previewer and direct external link access without mandatory downloads.',
   },
   {
     title: 'Personal Bookmarks & Library',
     icon: Bookmark,
     color: 'from-amber-500 to-orange-600',
-    desc: 'Save critical exam preparation materials to your personalized student dashboard.',
+    desc: 'Save critical exam notes and question papers to your personalized student dashboard for quick revision.',
   },
   {
     title: 'Community Quality Voting',
     icon: ThumbsUp,
     color: 'from-emerald-500 to-teal-600',
-    desc: 'Student upvotes and downvotes prioritize top-quality handwritten notes and papers.',
+    desc: 'Upvote or downvote study materials to help fellow diploma students find top-quality resources.',
   },
   {
-    title: 'Live Notice Board',
+    title: 'Personalized Student Profile',
+    icon: UserCheck,
+    color: 'from-indigo-500 to-blue-600',
+    desc: 'Customize full name, title/designation, institute name, and roll/registration number anytime.',
+  },
+  {
+    title: 'Resource Request Pipeline',
+    icon: FilePlus,
+    color: 'from-rose-500 to-pink-600',
+    desc: 'Submit requests for missing notes or books and track fulfillment status (Pending / Fulfilled).',
+  },
+  {
+    title: 'Live Notice Board & Alerts',
     icon: Sparkles,
     color: 'from-pink-500 to-rose-600',
-    desc: 'Real-time announcements regarding council exams, routine updates, and polytechnic news.',
+    desc: 'Broadcast pinned diploma announcements regarding council exams, routine updates, and polytechnic news.',
   },
   {
     title: 'Comprehensive Admin Panel',
     icon: Workflow,
     color: 'from-cyan-500 to-blue-600',
-    desc: 'Full CRUD management suite for departments, subjects, resources, and developer profiles.',
+    desc: 'Full CRUD management suite for departments, subjects, resources, notices, requests, and developer team profiles.',
+  },
+  {
+    title: 'Hybrid Serverless Store & Sync',
+    icon: Database,
+    color: 'from-teal-500 to-emerald-600',
+    desc: 'MongoDB cloud database integrated with client-side localStorage fallback ensuring 100% demo uptime.',
   },
 ];
 
@@ -150,7 +172,7 @@ export default function AboutPage() {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary-500/10 via-accent-500/10 to-primary-500/10 border border-primary-200 text-xs sm:text-sm font-semibold text-primary-700 mb-4 shadow-sm"
           >
             <Sparkles className="w-4 h-4 text-primary-600 animate-spin-slow" />
-            <span>Software & Technologies Specifications</span>
+            <span>Dip-Desk is running on Beta 0.7.3</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
           </motion.div>
 
@@ -260,7 +282,7 @@ export default function AboutPage() {
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">Key Platform Features</h2>
             <p className="text-sm sm:text-base text-gray-500">
-              Designed around student workflows to make finding and saving notes effortless.
+              Designed around student and admin workflows to make finding, saving, and managing notes effortless.
             </p>
           </div>
 
