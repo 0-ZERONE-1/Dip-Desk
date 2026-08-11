@@ -250,29 +250,26 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* Mission Statement Banner */}
+        {/* Purpose & Vision Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-surface-900 to-primary-950 p-6 sm:p-10 text-white shadow-xl mb-16 border border-white/10"
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/40 p-6 sm:p-10 text-center shadow-sm mb-16 border border-surface-200/90"
         >
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-64 h-64 bg-accent-500/20 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-primary-300 mb-4 border border-white/10">
-              <Globe2 className="w-3.5 h-3.5 text-accent-400" /> Purpose & Vision
+          <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary-50 border border-primary-200/80 text-xs font-semibold text-primary-700 mb-4 shadow-2xs">
+              <Globe2 className="w-3.5 h-3.5 text-primary-600" /> Purpose & Vision
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 leading-snug text-white">
+            <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 leading-snug text-gray-900">
               Bridging the gap in organized polytechnic diploma education.
             </h2>
-            <p className="text-sm sm:text-base text-gray-300 leading-relaxed mb-6">
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6 max-w-2xl">
               Polytechnic diploma students often struggle to find syllabus-aligned notes, model question papers, and lab manuals organized by branch and semester. Dip-Desk solves this by providing a unified, high-performance digital library where study materials are structured, searchable, and instantly accessible without paywalls or intrusive ads.
             </p>
-            <div className="flex flex-wrap gap-4 text-xs sm:text-sm font-semibold text-gray-300">
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Free Open Access</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> No Registration Required to Browse</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Mobile & Tablet Optimized</span>
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-semibold text-gray-700">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Free Open Access</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> No Registration Required to Browse</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Mobile & Tablet Optimized</span>
             </div>
           </div>
         </motion.div>
