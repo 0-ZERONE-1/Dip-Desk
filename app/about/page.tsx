@@ -16,25 +16,12 @@ import {
   BookOpen,
   ArrowRight,
   CheckCircle2,
-  Server,
-  FileCode2,
-  Boxes,
-  Lock,
   Search,
   Bookmark,
   ThumbsUp,
   FileText,
   Workflow,
-  Sparkle,
-  BadgeAlert,
 } from 'lucide-react';
-
-const topSoftwareVersionStats = [
-  { label: 'Full-stack Framework', val: 'Next.js v16.3.0', icon: Cpu, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-  { label: 'Type Safety Engine', val: 'TypeScript v5.0.0', icon: Code2, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
-  { label: 'Authentication Engine', val: 'NextAuth v4.24.7', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50 border-amber-200' },
-  { label: 'UI Animation Engine', val: 'Framer v11.3.8', icon: Zap, color: 'text-purple-600 bg-purple-50 border-purple-200' },
-];
 
 const softwareTableData = [
   {
@@ -183,25 +170,6 @@ export default function AboutPage() {
           >
             Dip-Desk is built on modern web software and technologies. Check out the software versions, frameworks, and architecture powering the site below.
           </motion.p>
-        </div>
-
-        {/* Top Software Version Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 sm:mb-14">
-          {topSoftwareVersionStats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 * i }}
-              className="card p-4 sm:p-5 flex flex-col items-center text-center hover:shadow-md transition-all duration-200 border border-surface-200/80"
-            >
-              <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 shadow-sm border`}>
-                <stat.icon className="w-5 h-5" />
-              </div>
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900 mb-0.5">{stat.val}</span>
-              <span className="text-xs sm:text-sm text-gray-500 font-medium">{stat.label}</span>
-            </motion.div>
-          ))}
         </div>
 
         {/* Software & Technologies Used Table Section */}
