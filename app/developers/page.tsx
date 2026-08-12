@@ -219,75 +219,89 @@ function TiltCard({
             )}
           </div>
 
-          {/* Info Panel - flex-1 with mt-auto on social icons so bottom edge aligns perfectly across all cards */}
-          <div className="px-6 pt-5 pb-4 flex flex-col text-center items-center flex-1 relative z-10 bg-white w-full min-w-0 box-border">
-            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight max-w-full truncate">{dev.name}</h3>
-            <span className="badge-primary mb-3 text-xs px-2.5 py-0.5">{dev.role}</span>
+          {/* Info Panel - min-h and flex layout so all cards maintain identical uniform height */}
+          <div className="px-6 pt-5 pb-4 flex flex-col text-center items-center flex-1 relative z-10 bg-white w-full min-w-0 box-border min-h-[195px] justify-between">
+            <div className="w-full flex flex-col items-center">
+              <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight max-w-full truncate">{dev.name}</h3>
+              <span className="badge-primary mb-3 text-xs px-2.5 py-0.5">{dev.role}</span>
 
-            {dev.bio && (
-              <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-5 break-words [overflow-wrap:anywhere] max-w-full w-full">
-                {dev.bio}
-              </p>
-            )}
+              {dev.bio ? (
+                <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-4 break-words [overflow-wrap:anywhere] max-w-full w-full">
+                  {dev.bio}
+                </p>
+              ) : (
+                <div className="w-full flex items-center justify-center my-auto min-h-[52px]">
+                  <p className="text-xs text-gray-400 italic">Platform Developer & Contributor</p>
+                </div>
+              )}
+            </div>
 
             {/* Social Links Pinned to Bottom */}
-            <div className="flex items-center gap-3.5 pt-3 border-t border-surface-100 w-full justify-center mt-auto flex-wrap">
-              {dev.githubUrl && (
-                <a
-                  href={dev.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-surface-100 transition-all"
-                  title="GitHub Profile"
-                >
-                  <Github className="w-7 h-7" />
-                </a>
-              )}
-              {dev.linkedinUrl && (
-                <a
-                  href={dev.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                  title="LinkedIn Profile"
-                >
-                  <Linkedin className="w-7 h-7" />
-                </a>
-              )}
-              {dev.instagramUrl && (
-                <a
-                  href={dev.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 rounded-xl text-gray-400 hover:text-pink-600 hover:bg-pink-50 transition-all"
-                  title="Instagram Profile"
-                >
-                  <Instagram className="w-7 h-7" />
-                </a>
-              )}
-              {dev.emailUrl && (
-                <a
-                  href={
-                    dev.emailUrl.startsWith('mailto:')
-                      ? dev.emailUrl
-                      : `mailto:${dev.emailUrl}`
-                  }
-                  className="p-1 rounded-xl text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
-                  title="Send Email"
-                >
-                  <Mail className="w-7 h-7" />
-                </a>
-              )}
-              {dev.portfolioUrl && (
-                <a
-                  href={dev.portfolioUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 rounded-xl text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-all"
-                  title="Portfolio Website"
-                >
-                  <Globe className="w-7 h-7" />
-                </a>
+            <div className="flex items-center gap-3.5 pt-3 border-t border-surface-100 w-full justify-center mt-auto min-h-[46px] flex-wrap">
+              {dev.githubUrl || dev.linkedinUrl || dev.instagramUrl || dev.emailUrl || dev.portfolioUrl ? (
+                <>
+                  {dev.githubUrl && (
+                    <a
+                      href={dev.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-surface-100 transition-all"
+                      title="GitHub Profile"
+                    >
+                      <Github className="w-6 h-6" />
+                    </a>
+                  )}
+                  {dev.linkedinUrl && (
+                    <a
+                      href={dev.linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                      title="LinkedIn Profile"
+                    >
+                      <Linkedin className="w-6 h-6" />
+                    </a>
+                  )}
+                  {dev.instagramUrl && (
+                    <a
+                      href={dev.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-xl text-gray-400 hover:text-pink-600 hover:bg-pink-50 transition-all"
+                      title="Instagram Profile"
+                    >
+                      <Instagram className="w-6 h-6" />
+                    </a>
+                  )}
+                  {dev.emailUrl && (
+                    <a
+                      href={
+                        dev.emailUrl.startsWith('mailto:')
+                          ? dev.emailUrl
+                          : `mailto:${dev.emailUrl}`
+                      }
+                      className="p-1 rounded-xl text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                      title="Send Email"
+                    >
+                      <Mail className="w-6 h-6" />
+                    </a>
+                  )}
+                  {dev.portfolioUrl && (
+                    <a
+                      href={dev.portfolioUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-xl text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-all"
+                      title="Portfolio Website"
+                    >
+                      <Globe className="w-6 h-6" />
+                    </a>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs font-semibold text-gray-300 tracking-wider uppercase py-1">
+                  Dip-Desk Core
+                </span>
               )}
             </div>
           </div>
