@@ -1,17 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
 import Resource from '@/lib/models/Resource';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET() {
+  try {
+    await dbConnect();
+    const isConnected = (mongoose.connection.readyState as number) === 1;
+    return NextResponse.json({
+      success: true,
+      connected: isConnected,
+      database: mongoose.connection.name || 'Connected',
+      readyState: mongoose.connection.readyState,
+    });
+  } catch (err: any) {
+    return NextResponse.json({
+      success: false,
+      connected: false,
+      error: err?.message || 'Database connection error',
+    }, { status: 500 });
+  }
+}
 
 // Admin: check link health for all resources
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any)?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     await dbConnect();
     const resources = await Resource.find({}).select('url _id');
     const results = [];

@@ -20,33 +20,25 @@ if (!cached) {
 }
 
 async function dbConnect(): Promise<typeof mongoose> {
-  if (cached.conn) {
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
+  }
+
+  if (!MONGODB_URI || MONGODB_URI.includes('YOUR_USERNAME')) {
+    throw new Error('MONGODB_URI is not configured in environment variables');
   }
 
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 1500,
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
     };
 
-    cached.promise = (async () => {
-      // 2 second timeout — only attempted once; store.ts caches the result
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('DB Connection Timeout')), 2000)
-      );
-
-      const connectPromise = (async () => {
-        if (MONGODB_URI && !MONGODB_URI.includes('YOUR_USERNAME')) {
-          const conn = await mongoose.connect(MONGODB_URI, opts);
-          await seedInitialData();
-          return conn;
-        }
-        throw new Error('No MONGODB_URI configured');
-      })();
-
-      return Promise.race([connectPromise, timeoutPromise]);
-    })();
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then(async (m) => {
+      await seedInitialData();
+      return m;
+    });
   }
 
   try {

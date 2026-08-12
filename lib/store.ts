@@ -93,22 +93,15 @@ function saveLocalStore(data: StoreData) {
   }
 }
 
-// Cache DB availability — once we know it's unavailable, don't waste time retrying every request
-let _dbAvailable: boolean | null = null;
-let _dbCheckPromise: Promise<boolean> | null = null;
-
-async function isDbConnected(): Promise<boolean> {
-  // Already confirmed available/unavailable — return immediately
-  if (_dbAvailable !== null) return _dbAvailable;
-
-  // If a check is already in-flight, reuse it instead of spawning a second one
-  if (!_dbCheckPromise) {
-    _dbCheckPromise = dbConnect()
-      .then(() => { _dbAvailable = true; return true; })
-      .catch(() => { _dbAvailable = false; return false; });
+export async function isDbConnected(): Promise<boolean> {
+  if ((mongoose.connection.readyState as number) === 1) return true;
+  try {
+    await dbConnect();
+    return (mongoose.connection.readyState as number) === 1;
+  } catch (e) {
+    console.error('MongoDB connection attempt error:', e);
+    return false;
   }
-
-  return _dbCheckPromise;
 }
 
 // --- DEVELOPERS ---
