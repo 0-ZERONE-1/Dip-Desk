@@ -22,7 +22,7 @@ export default async function SemesterRoute({ params }: Props) {
   return (
     <>
       <Navbar />
-      <main className="container-max px-4 py-8 flex-1">
+      <main className="container-max px-4 sm:px-8 lg:px-12 py-6 sm:py-8 flex-1 flex flex-col min-h-[calc(100vh-120px)]">
         <SemesterPage branchSlug={branch} semesterNumber={semesterNumber} />
       </main>
     </>

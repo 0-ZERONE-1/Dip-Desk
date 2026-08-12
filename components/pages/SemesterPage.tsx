@@ -54,7 +54,7 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
   const formattedDeptName = deptName || branchSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
   return (
-    <div className="w-full">
+    <div className="w-full flex-1 flex flex-col">
       <Breadcrumb
         crumbs={[
           { label: formattedDeptName, href: `/${branchSlug}` },
@@ -62,14 +62,14 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
         ]}
       />
 
-      {/* Top Banner (Full width & generous height matching top red box layout) */}
-      <div className="w-full mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-sm relative overflow-hidden">
-        <div className="flex items-center gap-5 relative z-10">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-extrabold flex-shrink-0 aspect-square">
+      {/* Top Banner (Expanded Semester Header matching Department page banner layout) */}
+      <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-sm relative overflow-hidden w-full">
+        <div className="flex items-center gap-5 sm:gap-7 relative z-10">
+          <div className="w-14 h-14 sm:w-18 sm:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-lg rounded-2xl flex items-center justify-center text-2xl sm:text-3xl lg:text-4xl font-extrabold flex-shrink-0 aspect-square">
             {semesterNumber}
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
               Semester {semesterNumber}
             </h1>
             <p className="text-sm sm:text-base text-gray-500 mt-1.5 max-w-2xl leading-relaxed">
@@ -79,17 +79,17 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
         </div>
       </div>
 
-      {/* Bottom Container Layout (Increased size filling full bottom red box area) */}
+      {/* Bottom Container Layout (Expanded to fill left, right, and bottom) */}
       {subjects.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full bg-white rounded-2xl sm:rounded-3xl border border-surface-200/90 shadow-sm p-12 sm:p-20 md:p-24 text-center flex flex-col items-center justify-center min-h-[480px] sm:min-h-[560px] my-4"
+          className="w-full flex-1 min-h-[450px] sm:min-h-[520px] lg:min-h-[580px] bg-white rounded-3xl border border-surface-200/90 shadow-sm p-8 sm:p-16 lg:p-20 text-center flex flex-col items-center justify-center my-2"
         >
           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-surface-50 border border-surface-200/80 rounded-3xl flex items-center justify-center mx-auto mb-6 text-gray-300 shadow-xs">
             <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 stroke-[1.5]" />
           </div>
-          <h3 className="text-xl sm:text-2xl font-extrabold text-gray-800 mb-2">
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-800 mb-2">
             No subjects yet
           </h3>
           <p className="text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
@@ -97,7 +97,7 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
           </p>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[400px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
           {subjects.map((subject, i) => (
             <motion.div
               key={subject._id}
