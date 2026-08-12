@@ -210,20 +210,22 @@ export async function getDepartmentsStore() {
 
 export async function createDepartmentStore(data: any) {
   const isDb = await isDbConnected();
+  const slug = data.slug || data.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
+  const cleanData = { ...data, slug, isActive: true };
+
   if (isDb) {
     try {
-      const created = await Department.create(data);
+      const created = await Department.create(cleanData);
       return created;
-    } catch {}
+    } catch (err) {
+      console.error('Failed to create department in MongoDB:', err);
+    }
   }
 
   const store = readLocalStore();
-  const slug = data.slug || data.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
   const newDept = {
     _id: `dept_${Date.now()}`,
-    slug,
-    isActive: true,
-    ...data,
+    ...cleanData,
   };
   store.departments.push(newDept);
   saveLocalStore(store);
@@ -234,14 +236,17 @@ export async function updateDepartmentStore(id: string, data: any) {
   const isDb = await isDbConnected();
   if (isDb) {
     try {
-      let updated;
+      let updated = null;
       if (mongoose.Types.ObjectId.isValid(id)) {
         updated = await Department.findByIdAndUpdate(id, data, { new: true });
-      } else {
+      }
+      if (!updated) {
         updated = await Department.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
       }
       if (updated) return updated;
-    } catch {}
+    } catch (err) {
+      console.error('Failed to update department in MongoDB:', err);
+    }
   }
 
   const store = readLocalStore();
@@ -289,7 +294,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
       const filter: any = { isActive: true };
       if (semesterNumber) filter.semesterNumber = semesterNumber;
       if (departmentSlug) {
-        const dept = await Department.findOne({ slug: departmentSlug });
+        const dept = await Department.findOne({ $or: [{ slug: departmentSlug }, { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined }] });
         if (dept) filter.departmentId = dept._id;
       }
       const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
@@ -312,20 +317,36 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
 
 export async function createSubjectStore(data: any) {
   const isDb = await isDbConnected();
+  const slug = data.slug || data.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
+  let deptId = data.departmentId;
+  if (typeof deptId === 'object' && deptId?._id) deptId = deptId._id;
+
   if (isDb) {
     try {
-      const created = await Subject.create(data);
+      if (typeof deptId === 'string' && !mongoose.Types.ObjectId.isValid(deptId)) {
+        const foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }] });
+        if (foundDept) deptId = foundDept._id;
+      }
+
+      const created = await Subject.create({
+        ...data,
+        slug,
+        departmentId: deptId,
+        isActive: true,
+      });
       return created;
-    } catch {}
+    } catch (err) {
+      console.error('Failed to create subject in MongoDB:', err);
+    }
   }
 
   const store = readLocalStore();
-  const slug = data.slug || data.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
   const newSub = {
     _id: `sub_${Date.now()}`,
     slug,
     isActive: true,
     ...data,
+    departmentId: deptId,
   };
   store.subjects.push(newSub);
   saveLocalStore(store);
@@ -334,16 +355,29 @@ export async function createSubjectStore(data: any) {
 
 export async function updateSubjectStore(id: string, data: any) {
   const isDb = await isDbConnected();
+  let deptId = data.departmentId;
+  if (typeof deptId === 'object' && deptId?._id) deptId = deptId._id;
+
   if (isDb) {
     try {
-      let updated;
+      if (deptId && typeof deptId === 'string' && !mongoose.Types.ObjectId.isValid(deptId)) {
+        const foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }] });
+        if (foundDept) deptId = foundDept._id;
+      }
+      const updateData = { ...data };
+      if (deptId) updateData.departmentId = deptId;
+
+      let updated = null;
       if (mongoose.Types.ObjectId.isValid(id)) {
-        updated = await Subject.findByIdAndUpdate(id, data, { new: true });
-      } else {
-        updated = await Subject.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
+        updated = await Subject.findByIdAndUpdate(id, updateData, { new: true });
+      }
+      if (!updated) {
+        updated = await Subject.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, updateData, { new: true });
       }
       if (updated) return updated;
-    } catch {}
+    } catch (err) {
+      console.error('Failed to update subject in MongoDB:', err);
+    }
   }
 
   const store = readLocalStore();
@@ -386,7 +420,15 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
     try {
       const filter: any = {};
       if (category) filter.category = category;
-      if (subjectId) filter.subjectId = subjectId;
+      if (subjectId) {
+        filter.$or = [
+          { subjectId: mongoose.Types.ObjectId.isValid(subjectId) ? subjectId : undefined },
+        ].filter((c) => c.subjectId !== undefined);
+        if (!filter.$or.length) {
+          const foundSub = await Subject.findOne({ slug: subjectId });
+          if (foundSub) filter.subjectId = foundSub._id;
+        }
+      }
       const resList = await Resource.find(filter)
         .populate({
           path: 'subjectId',
@@ -406,11 +448,27 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
 
 export async function createResourceStore(data: any) {
   const isDb = await isDbConnected();
+  let subId = data.subjectId;
+  if (typeof subId === 'object' && subId?._id) subId = subId._id;
+
   if (isDb) {
     try {
-      const created = await Resource.create(data);
+      if (typeof subId === 'string' && !mongoose.Types.ObjectId.isValid(subId)) {
+        const foundSub = await Subject.findOne({ $or: [{ slug: subId }, { name: subId }] });
+        if (foundSub) subId = foundSub._id;
+      }
+
+      const created = await Resource.create({
+        ...data,
+        subjectId: subId,
+        isActive: true,
+        upvotes: 0,
+        downvotes: 0,
+      });
       return created;
-    } catch {}
+    } catch (err) {
+      console.error('Failed to create resource in MongoDB:', err);
+    }
   }
 
   const store = readLocalStore();
@@ -421,6 +479,7 @@ export async function createResourceStore(data: any) {
     isActive: true,
     createdAt: new Date().toISOString(),
     ...data,
+    subjectId: subId,
   };
   store.resources.unshift(newRes);
   saveLocalStore(store);
@@ -429,20 +488,33 @@ export async function createResourceStore(data: any) {
 
 export async function updateResourceStore(id: string, data: any) {
   const isDb = await isDbConnected();
+  let subId = data.subjectId;
+  if (typeof subId === 'object' && subId?._id) subId = subId._id;
+
   if (isDb) {
     try {
-      let updated;
-      if (id.length === 24) {
-        updated = await Resource.findByIdAndUpdate(id, data, { new: true }).populate({
+      if (subId && typeof subId === 'string' && !mongoose.Types.ObjectId.isValid(subId)) {
+        const foundSub = await Subject.findOne({ $or: [{ slug: subId }, { name: subId }] });
+        if (foundSub) subId = foundSub._id;
+      }
+      const updateData = { ...data };
+      if (subId) updateData.subjectId = subId;
+
+      let updated = null;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        updated = await Resource.findByIdAndUpdate(id, updateData, { new: true }).populate({
           path: 'subjectId',
           select: 'name slug semesterNumber',
           populate: { path: 'departmentId', select: 'name slug' },
         });
-      } else {
-        updated = await Resource.findOneAndUpdate({ _id: id }, data, { new: true });
+      }
+      if (!updated) {
+        updated = await Resource.findOneAndUpdate({ _id: id }, updateData, { new: true });
       }
       if (updated) return updated;
-    } catch {}
+    } catch (err) {
+      console.error('Failed to update resource in MongoDB:', err);
+    }
   }
 
   const store = readLocalStore();
@@ -462,11 +534,10 @@ export async function deleteResourceStore(id: string) {
   const isDb = await isDbConnected();
   if (isDb) {
     try {
-      if (id.length === 24) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
         await Resource.findByIdAndDelete(id);
-      } else {
-        await Resource.deleteOne({ _id: id });
       }
+      await Resource.deleteOne({ _id: id });
     } catch {}
   }
 
