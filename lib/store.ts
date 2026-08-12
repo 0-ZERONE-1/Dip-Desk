@@ -106,11 +106,12 @@ export async function isDbConnected(): Promise<boolean> {
 
 // --- DEVELOPERS ---
 export async function getDevelopersStore() {
-  if (await isDbConnected()) {
-    try {
-      const devs = await Developer.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
-      return devs;
-    } catch {}
+  try {
+    await dbConnect();
+    const devs = await Developer.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
+    return devs;
+  } catch (err) {
+    console.error('Failed to fetch developers from DB:', err);
   }
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
@@ -120,12 +121,12 @@ export async function getDevelopersStore() {
 }
 
 export async function createDeveloperStore(data: any) {
-  const isDb = await isDbConnected();
-  if (isDb) {
-    try {
-      const created = await Developer.create({ ...data, isActive: true });
-      return created;
-    } catch {}
+  try {
+    await dbConnect();
+    const created = await Developer.create({ ...data, isActive: true });
+    return created;
+  } catch (err) {
+    console.error('Failed to create developer in DB:', err);
   }
 
   const store = readLocalStore();
@@ -143,19 +144,18 @@ export async function createDeveloperStore(data: any) {
 }
 
 export async function updateDeveloperStore(id: string, data: any) {
-  const isDb = await isDbConnected();
-
-  if (isDb) {
-    try {
-      let updated = null;
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        updated = await Developer.findByIdAndUpdate(id, data, { new: true });
-      }
-      if (!updated) {
-        updated = await Developer.findOneAndUpdate({ _id: id }, data, { new: true });
-      }
-      if (updated) return updated;
-    } catch {}
+  try {
+    await dbConnect();
+    let updated = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      updated = await Developer.findByIdAndUpdate(id, data, { new: true });
+    }
+    if (!updated) {
+      updated = await Developer.findOneAndUpdate({ _id: id }, data, { new: true });
+    }
+    if (updated) return updated;
+  } catch (err) {
+    console.error('Failed to update developer in DB:', err);
   }
 
   const store = readLocalStore();
@@ -177,14 +177,14 @@ export async function updateDeveloperStore(id: string, data: any) {
 }
 
 export async function deleteDeveloperStore(id: string) {
-  const isDb = await isDbConnected();
-  if (isDb) {
-    try {
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        await Developer.findByIdAndDelete(id);
-      }
-      await Developer.deleteOne({ _id: id });
-    } catch {}
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      await Developer.findByIdAndDelete(id);
+    }
+    await Developer.deleteOne({ _id: id });
+  } catch (err) {
+    console.error('Failed to delete developer from DB:', err);
   }
 
   const store = readLocalStore();
@@ -199,27 +199,26 @@ export async function deleteDeveloperStore(id: string) {
 export async function getDepartmentsStore() {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
-  if (await isDbConnected()) {
-    try {
-      const depts = await Department.find({ isActive: true }).sort({ name: 1 });
-      return depts.filter((d: any) => !deleted.includes(d._id.toString()) && !deleted.includes(d.slug));
-    } catch {}
+  try {
+    await dbConnect();
+    const depts = await Department.find({ isActive: true }).sort({ name: 1 });
+    return depts.filter((d: any) => !deleted.includes(d._id.toString()) && !deleted.includes(d.slug));
+  } catch (err) {
+    console.error('Failed to fetch departments from DB:', err);
   }
   return (store.departments || []).filter((d) => !deleted.includes(d._id) && !deleted.includes(d.slug));
 }
 
 export async function createDepartmentStore(data: any) {
-  const isDb = await isDbConnected();
   const slug = data.slug || data.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
   const cleanData = { ...data, slug, isActive: true };
 
-  if (isDb) {
-    try {
-      const created = await Department.create(cleanData);
-      return created;
-    } catch (err) {
-      console.error('Failed to create department in MongoDB:', err);
-    }
+  try {
+    await dbConnect();
+    const created = await Department.create(cleanData);
+    return created;
+  } catch (err) {
+    console.error('Failed to create department in MongoDB:', err);
   }
 
   const store = readLocalStore();
@@ -233,20 +232,18 @@ export async function createDepartmentStore(data: any) {
 }
 
 export async function updateDepartmentStore(id: string, data: any) {
-  const isDb = await isDbConnected();
-  if (isDb) {
-    try {
-      let updated = null;
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        updated = await Department.findByIdAndUpdate(id, data, { new: true });
-      }
-      if (!updated) {
-        updated = await Department.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
-      }
-      if (updated) return updated;
-    } catch (err) {
-      console.error('Failed to update department in MongoDB:', err);
+  try {
+    await dbConnect();
+    let updated = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      updated = await Department.findByIdAndUpdate(id, data, { new: true });
     }
+    if (!updated) {
+      updated = await Department.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
+    }
+    if (updated) return updated;
+  } catch (err) {
+    console.error('Failed to update department in MongoDB:', err);
   }
 
   const store = readLocalStore();
@@ -267,14 +264,14 @@ export async function updateDepartmentStore(id: string, data: any) {
 }
 
 export async function deleteDepartmentStore(id: string) {
-  const isDb = await isDbConnected();
-  if (isDb) {
-    try {
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        await Department.findByIdAndDelete(id);
-      }
-      await Department.deleteOne({ $or: [{ _id: id }, { slug: id }] });
-    } catch {}
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      await Department.findByIdAndDelete(id);
+    }
+    await Department.deleteOne({ $or: [{ _id: id }, { slug: id }] });
+  } catch (err) {
+    console.error('Failed to delete department from DB:', err);
   }
 
   const store = readLocalStore();
@@ -289,17 +286,18 @@ export async function deleteDepartmentStore(id: string) {
 export async function getSubjectsStore(departmentSlug?: string, semesterNumber?: number) {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
-  if (await isDbConnected()) {
-    try {
-      const filter: any = { isActive: true };
-      if (semesterNumber) filter.semesterNumber = semesterNumber;
-      if (departmentSlug) {
-        const dept = await Department.findOne({ $or: [{ slug: departmentSlug }, { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined }] });
-        if (dept) filter.departmentId = dept._id;
-      }
-      const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
-      return subjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
-    } catch {}
+  try {
+    await dbConnect();
+    const filter: any = { isActive: true };
+    if (semesterNumber) filter.semesterNumber = semesterNumber;
+    if (departmentSlug) {
+      const dept = await Department.findOne({ $or: [{ slug: departmentSlug }, { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined }] });
+      if (dept) filter.departmentId = dept._id;
+    }
+    const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
+    return subjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
+  } catch (err) {
+    console.error('Failed to fetch subjects from DB:', err);
   }
 
   let list = (store.subjects || []).filter((s) => !deleted.includes(s._id) && !deleted.includes(s.slug));
@@ -316,28 +314,26 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
 }
 
 export async function createSubjectStore(data: any) {
-  const isDb = await isDbConnected();
   const slug = data.slug || data.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
   let deptId = data.departmentId;
   if (typeof deptId === 'object' && deptId?._id) deptId = deptId._id;
 
-  if (isDb) {
-    try {
-      if (typeof deptId === 'string' && !mongoose.Types.ObjectId.isValid(deptId)) {
-        const foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }] });
-        if (foundDept) deptId = foundDept._id;
-      }
-
-      const created = await Subject.create({
-        ...data,
-        slug,
-        departmentId: deptId,
-        isActive: true,
-      });
-      return created;
-    } catch (err) {
-      console.error('Failed to create subject in MongoDB:', err);
+  try {
+    await dbConnect();
+    if (typeof deptId === 'string' && !mongoose.Types.ObjectId.isValid(deptId)) {
+      const foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }] });
+      if (foundDept) deptId = foundDept._id;
     }
+
+    const created = await Subject.create({
+      ...data,
+      slug,
+      departmentId: deptId,
+      isActive: true,
+    });
+    return created;
+  } catch (err) {
+    console.error('Failed to create subject in MongoDB:', err);
   }
 
   const store = readLocalStore();
@@ -354,30 +350,28 @@ export async function createSubjectStore(data: any) {
 }
 
 export async function updateSubjectStore(id: string, data: any) {
-  const isDb = await isDbConnected();
   let deptId = data.departmentId;
   if (typeof deptId === 'object' && deptId?._id) deptId = deptId._id;
 
-  if (isDb) {
-    try {
-      if (deptId && typeof deptId === 'string' && !mongoose.Types.ObjectId.isValid(deptId)) {
-        const foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }] });
-        if (foundDept) deptId = foundDept._id;
-      }
-      const updateData = { ...data };
-      if (deptId) updateData.departmentId = deptId;
-
-      let updated = null;
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        updated = await Subject.findByIdAndUpdate(id, updateData, { new: true });
-      }
-      if (!updated) {
-        updated = await Subject.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, updateData, { new: true });
-      }
-      if (updated) return updated;
-    } catch (err) {
-      console.error('Failed to update subject in MongoDB:', err);
+  try {
+    await dbConnect();
+    if (deptId && typeof deptId === 'string' && !mongoose.Types.ObjectId.isValid(deptId)) {
+      const foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }] });
+      if (foundDept) deptId = foundDept._id;
     }
+    const updateData = { ...data };
+    if (deptId) updateData.departmentId = deptId;
+
+    let updated = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      updated = await Subject.findByIdAndUpdate(id, updateData, { new: true });
+    }
+    if (!updated) {
+      updated = await Subject.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, updateData, { new: true });
+    }
+    if (updated) return updated;
+  } catch (err) {
+    console.error('Failed to update subject in MongoDB:', err);
   }
 
   const store = readLocalStore();
@@ -394,14 +388,14 @@ export async function updateSubjectStore(id: string, data: any) {
 }
 
 export async function deleteSubjectStore(id: string) {
-  const isDb = await isDbConnected();
-  if (isDb) {
-    try {
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        await Subject.findByIdAndDelete(id);
-      }
-      await Subject.deleteOne({ $or: [{ _id: id }, { slug: id }] });
-    } catch {}
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      await Subject.findByIdAndDelete(id);
+    }
+    await Subject.deleteOne({ $or: [{ _id: id }, { slug: id }] });
+  } catch (err) {
+    console.error('Failed to delete subject from DB:', err);
   }
 
   const store = readLocalStore();
@@ -416,28 +410,29 @@ export async function deleteSubjectStore(id: string) {
 export async function getResourcesStore(category?: string, subjectId?: string) {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
-  if (await isDbConnected()) {
-    try {
-      const filter: any = {};
-      if (category) filter.category = category;
-      if (subjectId) {
-        filter.$or = [
-          { subjectId: mongoose.Types.ObjectId.isValid(subjectId) ? subjectId : undefined },
-        ].filter((c) => c.subjectId !== undefined);
-        if (!filter.$or.length) {
-          const foundSub = await Subject.findOne({ slug: subjectId });
-          if (foundSub) filter.subjectId = foundSub._id;
-        }
+  try {
+    await dbConnect();
+    const filter: any = {};
+    if (category) filter.category = category;
+    if (subjectId) {
+      filter.$or = [
+        { subjectId: mongoose.Types.ObjectId.isValid(subjectId) ? subjectId : undefined },
+      ].filter((c) => c.subjectId !== undefined);
+      if (!filter.$or.length) {
+        const foundSub = await Subject.findOne({ slug: subjectId });
+        if (foundSub) filter.subjectId = foundSub._id;
       }
-      const resList = await Resource.find(filter)
-        .populate({
-          path: 'subjectId',
-          select: 'name slug semesterNumber',
-          populate: { path: 'departmentId', select: 'name slug' },
-        })
-        .sort({ createdAt: -1 });
-      return resList.filter((r: any) => !deleted.includes(r._id.toString()));
-    } catch {}
+    }
+    const resList = await Resource.find(filter)
+      .populate({
+        path: 'subjectId',
+        select: 'name slug semesterNumber',
+        populate: { path: 'departmentId', select: 'name slug' },
+      })
+      .sort({ createdAt: -1 });
+    return resList.filter((r: any) => !deleted.includes(r._id.toString()));
+  } catch (err) {
+    console.error('Failed to fetch resources from DB:', err);
   }
 
   let list = (store.resources || []).filter((r) => !deleted.includes(r._id));
@@ -613,24 +608,25 @@ export async function updateUserStore(id: string, data: any) {
 
 // --- NOTICES ---
 export async function getNoticesStore() {
-  if (await isDbConnected()) {
-    try {
-      const notices = await Notice.find({ isActive: true }).sort({ isPinned: -1, createdAt: -1 });
-      return notices;
-    } catch {}
+  try {
+    await dbConnect();
+    const notices = await Notice.find({ isActive: true }).sort({ isPinned: -1, createdAt: -1 });
+    return notices;
+  } catch (err) {
+    console.error('Failed to fetch notices from DB:', err);
   }
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
-  return (store.notices || defaultNotices).filter((n) => !deleted.includes(n._id));
+  return (store.notices || []).filter((n) => !deleted.includes(n._id));
 }
 
 export async function createNoticeStore(data: any) {
-  const isDb = await isDbConnected();
-  if (isDb) {
-    try {
-      const created = await Notice.create(data);
-      return created;
-    } catch {}
+  try {
+    await dbConnect();
+    const created = await Notice.create({ ...data, isActive: true });
+    return created;
+  } catch (err) {
+    console.error('Failed to create notice in DB:', err);
   }
 
   const store = readLocalStore();
