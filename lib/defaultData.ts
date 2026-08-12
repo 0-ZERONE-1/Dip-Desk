@@ -103,34 +103,6 @@ export const defaultResources = [
   },
 ];
 
-export const defaultDevelopers = [
-  {
-    _id: 'dev_nikhil',
-    name: 'Nikhil Mandal',
-    role: 'Project Manager',
-    bio: 'Lead Developer & Project Manager of Dip-Desk. Passionate about empowering engineering diploma students.',
-    imageUrl: 'https://github.com/0-ZERONE-1/Image-Asset/blob/9bc96a00c025d57b2829fcbdf74f07a4a2fe57fb/Snapchat-1960249767.jpg?raw=true',
-    githubUrl: 'https://github.com/0-ZERONE-1',
-    emailUrl: 'mailto:nikhilmandal.a1b2c3@gmail.com',
-    order: 1,
-    isActive: true,
-  },
-  {
-    _id: 'dev_jeet',
-    name: 'Jeet',
-    role: 'Tester',
-    bio: 'Someone Special',
-    order: 2,
-    isActive: true,
-  },
-  {
-    _id: 'dev_maruf',
-    name: 'Maruf Khan',
-    role: 'Back-End Developer',
-    bio: 'Back-End Engineer specializing in APIs and system architecture.',
-    order: 3,
-    isActive: true,
-  },
-];
+export const defaultDevelopers: any[] = [];
 
 export const defaultNotices: any[] = [];
