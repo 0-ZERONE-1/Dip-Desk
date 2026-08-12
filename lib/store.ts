@@ -209,9 +209,7 @@ export async function getDepartmentsStore() {
   if (await isDbConnected()) {
     try {
       const depts = await Department.find({ isActive: true }).sort({ name: 1 });
-      if (depts.length > 0) {
-        return depts.filter((d: any) => !deleted.includes(d._id.toString()) && !deleted.includes(d.slug));
-      }
+      return depts.filter((d: any) => !deleted.includes(d._id.toString()) && !deleted.includes(d.slug));
     } catch {}
   }
   return (store.departments || []).filter((d) => !deleted.includes(d._id) && !deleted.includes(d.slug));
@@ -244,7 +242,7 @@ export async function updateDepartmentStore(id: string, data: any) {
   if (isDb) {
     try {
       let updated;
-      if (id.length === 24) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
         updated = await Department.findByIdAndUpdate(id, data, { new: true });
       } else {
         updated = await Department.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
@@ -274,11 +272,10 @@ export async function deleteDepartmentStore(id: string) {
   const isDb = await isDbConnected();
   if (isDb) {
     try {
-      if (id.length === 24) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
         await Department.findByIdAndDelete(id);
-      } else {
-        await Department.deleteOne({ _id: id });
       }
+      await Department.deleteOne({ $or: [{ _id: id }, { slug: id }] });
     } catch {}
   }
 
@@ -303,9 +300,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         if (dept) filter.departmentId = dept._id;
       }
       const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
-      if (subjects.length > 0) {
-        return subjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
-      }
+      return subjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
     } catch {}
   }
 
@@ -349,7 +344,7 @@ export async function updateSubjectStore(id: string, data: any) {
   if (isDb) {
     try {
       let updated;
-      if (id.length === 24) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
         updated = await Subject.findByIdAndUpdate(id, data, { new: true });
       } else {
         updated = await Subject.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
@@ -375,11 +370,10 @@ export async function deleteSubjectStore(id: string) {
   const isDb = await isDbConnected();
   if (isDb) {
     try {
-      if (id.length === 24) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
         await Subject.findByIdAndDelete(id);
-      } else {
-        await Subject.deleteOne({ _id: id });
       }
+      await Subject.deleteOne({ $or: [{ _id: id }, { slug: id }] });
     } catch {}
   }
 
@@ -407,9 +401,7 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
           populate: { path: 'departmentId', select: 'name slug' },
         })
         .sort({ createdAt: -1 });
-      if (resList.length > 0) {
-        return resList.filter((r: any) => !deleted.includes(r._id.toString()));
-      }
+      return resList.filter((r: any) => !deleted.includes(r._id.toString()));
     } catch {}
   }
 
