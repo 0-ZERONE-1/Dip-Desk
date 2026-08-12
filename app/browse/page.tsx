@@ -59,6 +59,12 @@ export default function BrowsePage() {
             </div>
             <p className="text-sm text-gray-400 font-medium animate-pulse">Loading departments...</p>
           </div>
+        ) : departments.length === 0 ? (
+          <div className="card p-12 text-center max-w-md mx-auto">
+            <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-gray-700">No Departments Added Yet</h3>
+            <p className="text-sm text-gray-400 mt-1">Admin can add engineering departments from the admin panel.</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {departments.map((dept, i) => (
