@@ -66,21 +66,21 @@ export default function BrowsePage() {
             <p className="text-sm text-gray-400 mt-1">Admin can add engineering departments from the admin panel.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-6xl mx-auto">
             {departments.map((dept, i) => (
               <motion.div
                 key={dept._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="h-full flex flex-col"
+                className="w-full"
               >
                 <Link
                   href={`/${dept.slug}`}
-                  className="card p-7 sm:p-8 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group h-full flex flex-col justify-between min-h-[300px] sm:min-h-[320px] rounded-3xl relative overflow-hidden bg-white"
+                  className="card p-5 sm:p-6 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative overflow-hidden bg-white"
                 >
-                  <div className="flex flex-col flex-1">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-3xl mb-6 bg-surface-100/80 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                    <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl bg-surface-100/80 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
                       {dept.icon && (dept.icon.startsWith('http') || dept.icon.startsWith('/')) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={dept.icon} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
@@ -88,17 +88,17 @@ export default function BrowsePage() {
                         dept.icon || '📚'
                       )}
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-3 leading-snug">
-                      {dept.name}
-                    </h2>
-                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-4">
-                      {dept.description || 'Access curated semester-wise syllabus, handwritten notes, lab manuals, and previous question papers.'}
-                    </p>
-                  </div>
-                  <div className="pt-6 mt-6 border-t border-surface-100 flex items-center justify-between text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors">
-                    <span>Browse All Semesters</span>
-                    <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center text-primary-600 group-hover:translate-x-1 transition-all">
-                      <ArrowRight className="w-4 h-4" />
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1 leading-snug">
+                        {dept.name}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-gray-500 leading-relaxed line-clamp-2 mb-3">
+                        {dept.description || 'Access curated semester-wise syllabus, notes, lab manuals, and previous question papers.'}
+                      </p>
+                      <div className="flex items-center text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 gap-1.5 transition-all">
+                        <span>Browse Semesters</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 </Link>
