@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
-import { ArrowRight, BookOpen, Loader2, Plus } from 'lucide-react';
+import { ArrowRight, BookOpen, Loader2 } from 'lucide-react';
 
 import { syncAndFilterItems } from '@/lib/clientStore';
 
@@ -51,30 +51,51 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
     );
   }
 
+  const formattedDeptName = deptName || branchSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
   return (
     <div className="w-full">
       <Breadcrumb
         crumbs={[
-          { label: deptName || branchSlug.toUpperCase(), href: `/${branchSlug}` },
+          { label: formattedDeptName, href: `/${branchSlug}` },
           { label: `Semester ${semesterNumber}` },
         ]}
       />
 
-      <div className="mt-6 mb-10">
-        <h1 className="text-3xl font-extrabold text-gray-900">
-          Semester <span className="gradient-text">{semesterNumber}</span>
-        </h1>
-        <p className="text-gray-500 mt-2">
-          {subjects.length} subject{subjects.length !== 1 ? 's' : ''} · {deptName}
-        </p>
+      {/* Top Banner (Semester Header matching Department page banner layout) */}
+      <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md rounded-xl flex items-center justify-center text-xl sm:text-2xl font-extrabold flex-shrink-0 aspect-square">
+            {semesterNumber}
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+              Semester {semesterNumber}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
+              {subjects.length} subject{subjects.length !== 1 ? 's' : ''} · {formattedDeptName}
+            </p>
+          </div>
+        </div>
       </div>
 
+      {/* Bottom Container Layout */}
       {subjects.length === 0 ? (
-        <div className="card p-12 text-center">
-          <BookOpen className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-600 mb-2">No subjects yet</h3>
-          <p className="text-gray-400 text-sm">Admins haven't added subjects for this semester yet.</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full bg-white rounded-2xl border border-surface-200/90 shadow-sm p-12 sm:p-16 text-center flex flex-col items-center justify-center min-h-[300px]"
+        >
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-surface-50 border border-surface-200/80 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-300 shadow-xs">
+            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-gray-300 stroke-[1.5]" />
+          </div>
+          <h3 className="text-lg sm:text-xl font-extrabold text-gray-800 mb-1">
+            No subjects yet
+          </h3>
+          <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
+            Admins haven&apos;t added subjects for this semester yet.
+          </p>
+        </motion.div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {subjects.map((subject, i) => (
@@ -109,3 +130,4 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
     </div>
   );
 }
+
