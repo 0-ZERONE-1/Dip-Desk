@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import mongoose from 'mongoose';
 import dbConnect from './dbConnect';
 import Developer from './models/Developer';
 import Department from './models/Department';
@@ -115,7 +116,7 @@ export async function getDevelopersStore() {
   if (await isDbConnected()) {
     try {
       const devs = await Developer.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
-      if (devs.length > 0) return devs;
+      return devs;
     } catch {}
   }
   const store = readLocalStore();
@@ -151,9 +152,15 @@ export async function createDeveloperStore(data: any) {
 export async function updateDeveloperStore(id: string, data: any) {
   const isDb = await isDbConnected();
 
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      const updated = await Developer.findByIdAndUpdate(id, data, { new: true });
+      let updated = null;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        updated = await Developer.findByIdAndUpdate(id, data, { new: true });
+      }
+      if (!updated) {
+        updated = await Developer.findOneAndUpdate({ _id: id }, data, { new: true });
+      }
       if (updated) return updated;
     } catch {}
   }
@@ -180,11 +187,10 @@ export async function deleteDeveloperStore(id: string) {
   const isDb = await isDbConnected();
   if (isDb) {
     try {
-      if (id.length === 24) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
         await Developer.findByIdAndDelete(id);
-      } else {
-        await Developer.deleteOne({ _id: id });
       }
+      await Developer.deleteOne({ _id: id });
     } catch {}
   }
 
@@ -554,7 +560,7 @@ export async function getNoticesStore() {
   if (await isDbConnected()) {
     try {
       const notices = await Notice.find({ isActive: true }).sort({ isPinned: -1, createdAt: -1 });
-      if (notices.length > 0) return notices;
+      return notices;
     } catch {}
   }
   const store = readLocalStore();
@@ -588,9 +594,15 @@ export async function createNoticeStore(data: any) {
 
 export async function updateNoticeStore(id: string, data: any) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      const updated = await Notice.findByIdAndUpdate(id, data, { new: true });
+      let updated = null;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        updated = await Notice.findByIdAndUpdate(id, data, { new: true });
+      }
+      if (!updated) {
+        updated = await Notice.findOneAndUpdate({ _id: id }, data, { new: true });
+      }
       if (updated) return updated;
     } catch {}
   }
@@ -611,9 +623,12 @@ export async function updateNoticeStore(id: string, data: any) {
 
 export async function deleteNoticeStore(id: string) {
   const isDb = await isDbConnected();
-  if (isDb && id.length === 24) {
+  if (isDb) {
     try {
-      await Notice.findByIdAndDelete(id);
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        await Notice.findByIdAndDelete(id);
+      }
+      await Notice.deleteOne({ _id: id });
     } catch {}
   }
 

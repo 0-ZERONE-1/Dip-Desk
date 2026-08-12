@@ -123,6 +123,12 @@ export function syncAndFilterItems<T = any>(
 ): T[] {
   if (typeof window === 'undefined') return serverItems || [];
   const rawList = Array.isArray(serverItems) ? [...serverItems] : [];
+
+  // If server returned items, filter client-deleted items and return
+  if (rawList.length > 0) {
+    return filterClientDeleted(rawList);
+  }
+
   const customList = getClientCustomItems<any>(category);
 
   // Merge custom created/edited items into rawList if they match active filters
