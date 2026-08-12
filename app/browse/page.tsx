@@ -32,8 +32,8 @@ export default function BrowsePage() {
   return (
     <>
       <Navbar />
-      <main className="container-max px-4 py-10 flex-1">
-        <div className="text-center max-w-2xl mx-auto mb-10">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 overflow-x-hidden">
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -66,21 +66,21 @@ export default function BrowsePage() {
             <p className="text-sm text-gray-400 mt-1">Admin can add engineering departments from the admin panel.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full">
             {departments.map((dept, i) => (
               <motion.div
                 key={dept._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="w-full"
+                className="h-full flex flex-col"
               >
                 <Link
                   href={`/${dept.slug}`}
-                  className="card p-5 sm:p-6 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative overflow-hidden bg-white"
+                  className="card p-5 sm:p-6 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative overflow-hidden bg-white h-full flex flex-col justify-between"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                    <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl bg-surface-100/80 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/80 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
                       {dept.icon && (dept.icon.startsWith('http') || dept.icon.startsWith('/')) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={dept.icon} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
@@ -92,14 +92,15 @@ export default function BrowsePage() {
                       <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1 leading-snug">
                         {dept.name}
                       </h2>
-                      <p className="text-xs sm:text-sm text-gray-500 leading-relaxed line-clamp-2 mb-3">
+                      <p className="text-xs sm:text-sm text-gray-500 leading-relaxed line-clamp-2">
                         {dept.description || 'Access curated semester-wise syllabus, notes, lab manuals, and previous question papers.'}
                       </p>
-                      <div className="flex items-center text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 gap-1.5 transition-all">
-                        <span>Browse Semesters</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </div>
                     </div>
+                  </div>
+
+                  <div className="mt-4 pt-3.5 border-t border-surface-100 flex items-center justify-between text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors">
+                    <span>Browse Semesters</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </Link>
               </motion.div>
