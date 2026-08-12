@@ -72,7 +72,7 @@ export default function AdminDepartmentsPage() {
             <button onClick={() => { setShowForm(false); setEditId(null); }} className="btn-ghost p-1.5"><X className="w-4 h-4" /></button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-1">Department Name *</label>
               <input id="dept-name" type="text" placeholder="e.g. Computer Science & Technology" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input" />
             </div>
@@ -98,10 +98,6 @@ export default function AdminDepartmentsPage() {
                 />
               </div>
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Description (optional)</label>
-              <input id="dept-description" type="text" placeholder="Brief description..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="input" />
-            </div>
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
@@ -120,7 +116,7 @@ export default function AdminDepartmentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {departments.map((d) => (
-            <div key={d._id} className="card p-5 flex items-start gap-4">
+            <div key={d._id} className="card p-5 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-transparent border border-surface-200 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden aspect-square">
                 {isImageUrl(d.icon) ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -132,10 +128,9 @@ export default function AdminDepartmentsPage() {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-gray-900">{d.name}</p>
                 <p className="text-xs text-gray-400 mt-0.5">/browse/{d.slug}</p>
-                {d.description && <p className="text-sm text-gray-500 mt-1 line-clamp-1">{d.description}</p>}
               </div>
               <div className="flex gap-1 flex-shrink-0">
-                <button id={`edit-dept-${d._id}`} onClick={() => { setEditId(d._id); setForm({ name: d.name, description: d.description, icon: d.icon, color: d.color }); setShowForm(true); }} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                <button id={`edit-dept-${d._id}`} onClick={() => { setEditId(d._id); setForm({ name: d.name, description: d.description || '', icon: d.icon, color: d.color }); setShowForm(true); }} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
                 <button id={`delete-dept-${d._id}`} onClick={() => handleDelete(d._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg">

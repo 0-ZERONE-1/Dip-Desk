@@ -79,7 +79,7 @@ export default function BrowsePage() {
                   href={`/${dept.slug}`}
                   className="bg-white p-6 sm:p-7 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative h-full flex flex-col justify-between shadow-card hover:-translate-y-0.5"
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
                       {dept.icon && (dept.icon.startsWith('http') || dept.icon.startsWith('/')) ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -89,12 +89,9 @@ export default function BrowsePage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1.5 leading-snug break-normal [word-break:keep-all]">
+                      <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug break-normal [word-break:keep-all]">
                         {dept.name}
                       </h2>
-                      <p className="text-xs sm:text-sm text-gray-500 leading-relaxed line-clamp-2">
-                        {dept.description || 'Access curated semester-wise syllabus, notes, lab manuals, and previous question papers.'}
-                      </p>
                     </div>
                   </div>
 
