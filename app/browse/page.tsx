@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Link from 'next/link';
-import { BookOpen, ArrowRight } from 'lucide-react';
+import { BookOpen, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
 
@@ -32,8 +32,7 @@ export default function BrowsePage() {
   return (
     <>
       <Navbar />
-      <main className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8 sm:py-12 flex-1">
-        {/* Original Centered Header Title */}
+      <main className="w-full max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-12 flex-1 overflow-x-hidden">
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
@@ -67,8 +66,7 @@ export default function BrowsePage() {
             <p className="text-sm text-gray-400 mt-1">Admin can add engineering departments from the admin panel.</p>
           </div>
         ) : (
-          /* Fluid responsive grid: automatically resizes and expands columns on browser zoom out / wide screens */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:gap-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full">
             {departments.map((dept, i) => (
               <motion.div
                 key={dept._id}
@@ -82,8 +80,7 @@ export default function BrowsePage() {
                   className="bg-white p-6 sm:p-7 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative h-full flex flex-col justify-between shadow-card hover:-translate-y-0.5"
                 >
                   <div className="flex items-center gap-4">
-                    {/* Original Icon Container background */}
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
                       {dept.icon && (dept.icon.startsWith('http') || dept.icon.startsWith('/')) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={dept.icon} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
@@ -111,5 +108,3 @@ export default function BrowsePage() {
     </>
   );
 }
-
-
