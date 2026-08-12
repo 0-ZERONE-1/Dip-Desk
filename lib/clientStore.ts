@@ -124,9 +124,9 @@ export function syncAndFilterItems<T = any>(
   if (typeof window === 'undefined') return serverItems || [];
   const rawList = Array.isArray(serverItems) ? [...serverItems] : [];
 
-  // If server returned items, filter client-deleted items and return
-  if (rawList.length > 0) {
-    return filterClientDeleted(rawList);
+  // If server returned an array from API (even if empty []), trust server DB 100%!
+  if (Array.isArray(serverItems)) {
+    return filterClientDeleted(serverItems);
   }
 
   const customList = getClientCustomItems<any>(category);

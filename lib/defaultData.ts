@@ -133,23 +133,4 @@ export const defaultDevelopers = [
   },
 ];
 
-export const defaultNotices = [
-  {
-    _id: 'notice_1',
-    title: 'Upcoming Diploma Semester Final Examination Schedule 2026',
-    content: 'The official end-semester diploma examination schedule has been published for CST, EE, and ETC branches. Check model question papers for revision.',
-    badge: 'Exam',
-    isPinned: true,
-    isActive: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: 'notice_2',
-    title: 'New Lab Manuals & Solution Codes Uploaded',
-    content: 'Updated C Programming & Data Structures practical lab manuals with verified output screenshots are now available under 2nd and 3rd semester subjects.',
-    badge: 'Update',
-    isPinned: false,
-    isActive: true,
-    createdAt: new Date().toISOString(),
-  },
-];
+export const defaultNotices: any[] = [];
