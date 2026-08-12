@@ -62,42 +62,42 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
         ]}
       />
 
-      {/* Top Banner (Semester Header matching Department page banner layout) */}
-      <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md rounded-xl flex items-center justify-center text-xl sm:text-2xl font-extrabold flex-shrink-0 aspect-square">
+      {/* Top Banner (Full width & generous height matching top red box layout) */}
+      <div className="w-full mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-sm relative overflow-hidden">
+        <div className="flex items-center gap-5 relative z-10">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-extrabold flex-shrink-0 aspect-square">
             {semesterNumber}
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
               Semester {semesterNumber}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-500 mt-1.5 max-w-2xl leading-relaxed">
               {subjects.length} subject{subjects.length !== 1 ? 's' : ''} · {formattedDeptName}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Bottom Container Layout */}
+      {/* Bottom Container Layout (Increased size filling full bottom red box area) */}
       {subjects.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full bg-white rounded-2xl border border-surface-200/90 shadow-sm p-12 sm:p-16 text-center flex flex-col items-center justify-center min-h-[300px]"
+          className="w-full bg-white rounded-2xl sm:rounded-3xl border border-surface-200/90 shadow-sm p-12 sm:p-20 md:p-24 text-center flex flex-col items-center justify-center min-h-[480px] sm:min-h-[560px] my-4"
         >
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-surface-50 border border-surface-200/80 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-300 shadow-xs">
-            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-gray-300 stroke-[1.5]" />
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-surface-50 border border-surface-200/80 rounded-3xl flex items-center justify-center mx-auto mb-6 text-gray-300 shadow-xs">
+            <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 stroke-[1.5]" />
           </div>
-          <h3 className="text-lg sm:text-xl font-extrabold text-gray-800 mb-1">
+          <h3 className="text-xl sm:text-2xl font-extrabold text-gray-800 mb-2">
             No subjects yet
           </h3>
-          <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
             Admins haven&apos;t added subjects for this semester yet.
           </p>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[400px]">
           {subjects.map((subject, i) => (
             <motion.div
               key={subject._id}
