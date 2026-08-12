@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import {
-  LayoutDashboard, BookOpen, Users, MessageSquare, Heart, Building2, BookMarked, LogOut, Menu, X, Code2, Bell, ArrowLeft, Globe
+  LayoutDashboard, BookOpen, Users, MessageSquare, Heart, Building2, BookMarked, LogOut, Menu, X, Code2, Bell, ArrowLeft, Globe, RotateCcw
 } from 'lucide-react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { clearAllClientStorage } from '@/lib/clientStore';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -71,8 +73,21 @@ export default function AdminNav() {
       </nav>
 
       {/* Admin User Info Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center justify-between">
+      <div className="p-4 border-t border-gray-200 space-y-2">
+        <button
+          onClick={() => {
+            clearAllClientStorage();
+            toast.success('Local browser cache cleared! Synced with live DB.');
+            setTimeout(() => window.location.reload(), 500);
+          }}
+          className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-primary-50 hover:bg-primary-100 text-primary-700 font-bold rounded-xl text-xs transition-all border border-primary-200"
+          title="Clear local browser cache and force load live database data"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Sync Live DB / Clear Cache</span>
+        </button>
+
+        <div className="flex items-center justify-between pt-1">
           <div className="truncate">
             <p className="text-xs font-bold text-gray-900 truncate">Administrator</p>
             <p className="text-[11px] text-gray-400 truncate">{user?.email || 'admin@dipdesk.com'}</p>

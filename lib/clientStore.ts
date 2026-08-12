@@ -156,3 +156,14 @@ export function syncAndFilterItems<T = any>(
 
   return filterClientDeleted(rawList);
 }
+
+export function clearAllClientStorage() {
+  if (typeof window === 'undefined') return;
+  try {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('dipdesk_')) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch {}
+}
