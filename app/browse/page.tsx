@@ -32,7 +32,7 @@ export default function BrowsePage() {
   return (
     <>
       <Navbar />
-      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 overflow-x-hidden">
+      <main className="w-full max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-12 flex-1 overflow-x-hidden">
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
@@ -66,7 +66,7 @@ export default function BrowsePage() {
             <p className="text-sm text-gray-400 mt-1">Admin can add engineering departments from the admin panel.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full">
             {departments.map((dept, i) => (
               <motion.div
                 key={dept._id}
@@ -77,19 +77,19 @@ export default function BrowsePage() {
               >
                 <Link
                   href={`/${dept.slug}`}
-                  className="card p-5 sm:p-6 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative overflow-hidden bg-white h-full flex flex-col justify-between"
+                  className="card p-4.5 sm:p-5.5 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative overflow-hidden bg-white h-full flex flex-col justify-between"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/80 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
+                  <div className="flex items-start gap-3.5 sm:gap-4">
+                    <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-2xl bg-surface-100/80 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
                       {dept.icon && (dept.icon.startsWith('http') || dept.icon.startsWith('/')) ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={dept.icon} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
+                        <img src={dept.icon} alt={dept.name} className="w-full h-full object-cover rounded-xl" />
                       ) : (
                         dept.icon || '📚'
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1 leading-snug">
+                      <h2 className="text-sm sm:text-base xl:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1 leading-snug break-normal [word-break:keep-all]">
                         {dept.name}
                       </h2>
                       <p className="text-xs sm:text-sm text-gray-500 leading-relaxed line-clamp-2">
@@ -98,7 +98,7 @@ export default function BrowsePage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3.5 border-t border-surface-100 flex items-center justify-between text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors">
+                  <div className="mt-4 pt-3 border-t border-surface-100 flex items-center justify-between text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors">
                     <span>Browse Semesters</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
