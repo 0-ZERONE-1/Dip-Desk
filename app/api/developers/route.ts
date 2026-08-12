@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { getDevelopersStore, createDeveloperStore } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
@@ -21,11 +19,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any)?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await req.json();
     if (!body.name || !body.role) {
       return NextResponse.json({ error: 'Name and role are required' }, { status: 400 });
