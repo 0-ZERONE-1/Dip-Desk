@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Bell, Pin, ExternalLink, Calendar, Search, Filter } from 'lucide-react';
+import { Bell, Pin, ExternalLink, Calendar, Search, Filter, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
 
@@ -111,10 +111,8 @@ export default function PublicNoticesPage() {
         {/* Notices Grid */}
         <div className="max-w-4xl mx-auto w-full">
           {loading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="skeleton h-28 rounded-2xl" />
-              ))}
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
             </div>
           ) : filteredNotices.length === 0 ? (
             <div className="card p-8 sm:p-12 text-center">
