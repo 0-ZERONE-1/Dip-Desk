@@ -77,6 +77,8 @@ Designed with a focus on modern aesthetic excellence, dynamic theme transitions,
 | Role | Access URL | Email | Password |
 | :--- | :--- | :--- | :--- |
 | **Student** | `/login` ➔ **Register / Sign In** | *Create any email & password* | *Any password* |
+| **Admin** | `/login` ➔ **Register / Sign In** | admin@dipdesk.com | Admin.DipDesk |
+
 
 ---
 
