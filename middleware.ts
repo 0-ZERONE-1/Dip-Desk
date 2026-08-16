@@ -3,7 +3,7 @@ import { getToken } from 'next-auth/jwt';
 
 const AUTH_SECRET = process.env.NEXTAUTH_SECRET || 'dip-desk-super-secret-production-key-2026-xyz-987654321';
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: AUTH_SECRET });
   const { pathname } = req.nextUrl;
 
@@ -34,8 +34,6 @@ export async function proxy(req: NextRequest) {
 
   return NextResponse.next();
 }
-
-export default proxy;
 
 export const config = {
   matcher: ['/admin/:path*', '/dashboard/:path*', '/complete-profile/:path*'],

@@ -11,6 +11,35 @@ export async function GET(request: NextRequest) {
   try {
     const decodedUrl = decodeURIComponent(targetUrl).trim();
 
+    // SSRF Guard: Validate URL protocol & host
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(decodedUrl);
+    } catch {
+      return new NextResponse('Invalid URL format', { status: 400 });
+    }
+
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return new NextResponse('Disallowed protocol', { status: 400 });
+    }
+
+    const host = parsedUrl.hostname.toLowerCase();
+    const isPrivate =
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '::1' ||
+      host.endsWith('.local') ||
+      host.endsWith('.internal') ||
+      /^10\./.test(host) ||
+      /^192\.168\./.test(host) ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+      /^169\.254\./.test(host);
+
+    if (isPrivate) {
+      return new NextResponse('Access to local/private network addresses is forbidden', { status: 403 });
+    }
+
     // 1. Google Drive direct link handling
     if (decodedUrl.includes('drive.google.com')) {
       const fileIdMatch = decodedUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || decodedUrl.match(/id=([a-zA-Z0-9_-]+)/);
@@ -25,15 +54,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(rawUrl, 302);
     }
 
-    // 2. Fetch page/image content
+    // 3. Fetch page/image content with strict timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+
     const res = await fetch(decodedUrl, {
+      signal: controller.signal,
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
       },
-      next: { revalidate: 3600 },
     });
+    clearTimeout(timeout);
 
     if (!res.ok) {
       return new NextResponse('Failed to fetch target URL', { status: res.status });

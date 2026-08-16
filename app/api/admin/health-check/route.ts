@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
 import Resource from '@/lib/models/Resource';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   try {
     await dbConnect();
     const isConnected = (mongoose.connection.readyState as number) === 1;
@@ -27,6 +31,9 @@ export async function GET() {
 
 // Admin: check link health for all resources
 export async function POST(req: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   try {
     await dbConnect();
     const resources = await Resource.find({}).select('url _id');
