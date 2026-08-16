@@ -44,7 +44,7 @@ const ResourceSchema = new Schema<IResource>(
       required: true,
     },
     subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: true },
-    uploaderId: { type: Schema.Types.ObjectId, required: true },
+    uploaderId: { type: Schema.Types.ObjectId, required: false },
     uploaderModel: { type: String, enum: ['Admin', 'User'], default: 'Admin' },
     ratings: [RatingSchema],
     upvotes: { type: Number, default: 0 },

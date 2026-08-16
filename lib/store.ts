@@ -453,14 +453,21 @@ export async function createResourceStore(data: any) {
         if (foundSub) subId = foundSub._id;
       }
 
+      const defaultUploaderId = new mongoose.Types.ObjectId();
       const created = await Resource.create({
         ...data,
         subjectId: subId,
+        uploaderId: data.uploaderId || defaultUploaderId,
         isActive: true,
         upvotes: 0,
         downvotes: 0,
       });
-      return created;
+      const populated = await Resource.findById(created._id).populate({
+        path: 'subjectId',
+        select: 'name slug semesterNumber',
+        populate: { path: 'departmentId', select: 'name slug' },
+      });
+      return populated || created;
     } catch (err) {
       console.error('Failed to create resource in MongoDB:', err);
     }
