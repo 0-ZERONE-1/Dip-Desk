@@ -12,6 +12,7 @@ interface Resource {
   title: string;
   description?: string;
   url: string;
+  coverImage?: string;
   category: string;
   subjectId: Subject;
   tags?: string[];
@@ -25,6 +26,7 @@ const emptyForm = {
   title: '',
   description: '',
   url: '',
+  coverImage: '',
   category: 'Notes',
   subjectId: '',
   tags: '',
@@ -84,13 +86,28 @@ export default function AdminResourcesPage() {
   };
 
   const handleSave = async () => {
-    if (!form.title || !form.url || !form.subjectId) {
+    if (!form.title.trim() || !form.url.trim() || !form.subjectId) {
       toast.error('Title, URL, and subject are required');
       return;
     }
     setSaving(true);
     try {
-      const body = { ...form, tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean) };
+      let normalizedUrl = form.url.trim();
+      if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://') && normalizedUrl.includes('.')) {
+        normalizedUrl = `https://${normalizedUrl}`;
+      }
+
+      let normalizedCover = (form.coverImage || '').trim();
+      if (normalizedCover && !normalizedCover.startsWith('http://') && !normalizedCover.startsWith('https://') && normalizedCover.includes('.')) {
+        normalizedCover = `https://${normalizedCover}`;
+      }
+
+      const body = {
+        ...form,
+        url: normalizedUrl,
+        coverImage: normalizedCover,
+        tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
+      };
       const url = editId ? `/api/resources/${editId}` : '/api/resources';
       const method = editId ? 'PUT' : 'POST';
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -128,6 +145,7 @@ export default function AdminResourcesPage() {
       title: r.title,
       description: r.description || '',
       url: r.url,
+      coverImage: r.coverImage || '',
       category: r.category,
       subjectId: subIdStr,
       tags: '',
@@ -190,6 +208,19 @@ export default function AdminResourcesPage() {
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-1">URL</label>
               <input id="resource-url" type="url" placeholder="https://drive.google.com/..." value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="input" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Cover Image URL {['Books', 'Model Question Papers', 'Syllabus'].includes(form.category) ? '(Recommended for 3:4 Card Layout)' : '(optional)'}
+              </label>
+              <input
+                id="resource-cover-image"
+                type="url"
+                placeholder="https://images.unsplash.com/... or direct image link"
+                value={form.coverImage || ''}
+                onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
+                className="input"
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Category</label>

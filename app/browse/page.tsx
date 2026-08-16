@@ -15,6 +15,38 @@ interface Department {
   color: string;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.09,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const popUpCardVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.65,
+    y: 35,
+    filter: 'blur(6px)',
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: {
+      type: 'spring',
+      stiffness: 280,
+      damping: 18,
+      mass: 0.8,
+    },
+  },
+};
+
 export default function BrowsePage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,21 +98,31 @@ export default function BrowsePage() {
             <p className="text-sm text-gray-400 mt-1">Admin can add engineering departments from the admin panel.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full">
-            {departments.map((dept, i) => (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full"
+          >
+            {departments.map((dept) => (
               <motion.div
                 key={dept._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
+                variants={popUpCardVariants}
+                whileHover={{ y: -6, transition: { duration: 0.25, ease: 'easeOut' } }}
                 className="h-full flex flex-col"
               >
                 <Link
                   href={`/${dept.slug}`}
-                  className="bg-white p-6 sm:p-7 block hover:shadow-xl border border-surface-200/90 hover:border-primary-300 transition-all duration-300 group rounded-3xl relative h-full flex flex-col justify-between shadow-card hover:-translate-y-0.5"
+                  className="group bg-white p-6 sm:p-7 block border border-surface-200/90 hover:border-primary-300 rounded-3xl relative h-full flex flex-col justify-between shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out overflow-hidden"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/60 group-hover:scale-105 group-hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
+                  {/* Smooth Rounded Top Accent Gradient Bar blended with card */}
+                  <div className="absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
+
+                  {/* Ambient Soft Glow in corner on Hover */}
+                  <div className="absolute -top-10 -right-10 w-28 h-28 bg-primary-500/10 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/70 group-hover:bg-primary-50 group-hover:border-primary-200 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-primary-500/15 transition-all duration-300 overflow-hidden flex-shrink-0">
                       {dept.icon && (dept.icon.startsWith('http') || dept.icon.startsWith('/')) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={dept.icon} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
@@ -92,17 +134,24 @@ export default function BrowsePage() {
                       <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug break-normal [word-break:keep-all]">
                         {dept.name}
                       </h2>
+                      {dept.description && (
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-1 leading-relaxed">
+                          {dept.description}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  <div className="mt-5 pt-4 border-t border-surface-100 flex items-center justify-between text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors">
-                    <span>Browse Semesters</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <div className="mt-5 pt-4 border-t border-surface-100/90 flex items-center justify-between text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors relative z-10">
+                    <span className="tracking-tight">Browse Semesters</span>
+                    <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-600 text-primary-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs group-hover:shadow-sm">
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
                   </div>
                 </Link>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </main>
     </>

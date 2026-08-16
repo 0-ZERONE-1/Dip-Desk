@@ -20,14 +20,37 @@ interface Props {
   branchSlug: string;
 }
 
-const semesterColors = [
-  'from-blue-500 to-indigo-600 shadow-blue-500/20',
-  'from-violet-500 to-purple-600 shadow-purple-500/20',
-  'from-emerald-500 to-teal-600 shadow-teal-500/20',
-  'from-amber-500 to-orange-600 shadow-orange-500/20',
-  'from-pink-500 to-rose-600 shadow-pink-500/20',
-  'from-cyan-500 to-blue-600 shadow-cyan-500/20',
-];
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.04,
+    },
+  },
+};
+
+const semesterCardVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.68,
+    y: 32,
+    filter: 'blur(6px)',
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: {
+      type: 'spring',
+      stiffness: 280,
+      damping: 18,
+      mass: 0.8,
+    },
+  },
+};
 
 export default function BranchPage({ branchSlug }: Props) {
   const [dept, setDept] = useState<Department | null>(null);
@@ -96,33 +119,43 @@ export default function BranchPage({ branchSlug }: Props) {
       </div>
 
       {/* Semester Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-        {[1, 2, 3, 4, 5, 6].map((sem, i) => (
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+      >
+        {[1, 2, 3, 4, 5, 6].map((sem) => (
           <motion.div
             key={sem}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06 }}
-            className="h-full"
+            variants={semesterCardVariants}
+            whileHover={{ y: -6, transition: { duration: 0.25, ease: 'easeOut' } }}
+            className="h-full flex flex-col"
           >
             <Link
               href={`/${branchSlug}/semester-${sem}`}
               id={`semester-${sem}-card`}
-              className="group bg-white rounded-2xl border border-surface-200/80 shadow-card hover:shadow-card-hover hover:border-primary-300 transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between h-full relative overflow-hidden"
+              className="group bg-white rounded-3xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out p-6 sm:p-7 flex flex-col justify-between h-full relative overflow-hidden"
             >
+              {/* Smooth Rounded Top Accent Gradient Bar blended with card */}
+              <div className="absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
+
+              {/* Ambient Soft Glow in corner on Hover */}
+              <div className="absolute -top-10 -right-10 w-28 h-28 bg-primary-500/10 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
               {/* Top Accent Pill */}
-              <div className="flex items-start justify-between mb-3">
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${semesterColors[i]} flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-all duration-300`}>
+              <div className="flex items-start justify-between mb-4 relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-white font-black text-lg shadow-md group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/25 transition-all duration-300">
                   {sem}
                 </div>
-                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-surface-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-700 transition-colors">
+                <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-surface-100/90 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-700 group-hover:border-primary-200/80 border border-transparent transition-all duration-300">
                   Semester {sem}
                 </span>
               </div>
 
               {/* Main Content */}
-              <div className="mb-4">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-700 transition-colors mb-1">
+              <div className="mb-5 relative z-10">
+                <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1.5 leading-snug">
                   Semester {sem} Resources
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
@@ -135,16 +168,16 @@ export default function BranchPage({ branchSlug }: Props) {
               </div>
 
               {/* Action Footer */}
-              <div className="flex items-center justify-between w-full pt-3 border-t border-surface-100 text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors mt-auto">
-                <span>View Subjects</span>
-                <div className="w-7 h-7 rounded-full bg-primary-50 group-hover:bg-primary-600 text-primary-600 group-hover:text-white flex items-center justify-center transition-all duration-300">
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              <div className="flex items-center justify-between w-full pt-4 border-t border-surface-100/90 text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors mt-auto relative z-10">
+                <span className="tracking-tight">View Subjects</span>
+                <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-600 text-primary-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs group-hover:shadow-sm">
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
             </Link>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -24,6 +24,7 @@ interface Resource {
   title: string;
   description: string;
   url: string;
+  coverImage?: string;
   category: string;
   upvotes: number;
   downvotes: number;
@@ -43,7 +44,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
   const { data: session } = useSession();
   const [subject, setSubject] = useState<Subject | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>('Notes');
+  const [activeCategory, setActiveCategory] = useState<string>(CATEGORIES[0]);
   const [loading, setLoading] = useState(true);
   const [resourcesLoading, setResourcesLoading] = useState(false);
   const [showRequestForm, setShowRequestForm] = useState(false);
@@ -130,7 +131,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       </div>
 
       {/* Category Tabs Bar */}
-      <div className="flex items-center gap-2.5 flex-wrap mb-8">
+      <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat;
           return (
@@ -139,10 +140,10 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
               id={`tab-${cat.toLowerCase().replace(/\s+/g, '-')}`}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                'px-5 py-2.5 sm:px-6 sm:py-3 rounded-2xl text-sm sm:text-base font-bold transition-all duration-200',
+                'px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-200 shadow-2xs flex-shrink-0',
                 isActive
-                  ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/20 scale-[1.02]'
-                  : 'bg-white border border-surface-200 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
+                  ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.02]'
+                  : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
               )}
             >
               {cat}
@@ -186,13 +187,18 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         <AnimatePresence mode="wait">
           <motion.div
             key={activeCategory}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            className={cn(
+              'grid gap-3.5 sm:gap-4.5',
+              ['Books', 'Model Question Papers', 'Syllabus'].includes(activeCategory)
+                ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5'
+                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+            )}
           >
-            {resources.map((resource) => (
-              <ResourceCard key={resource._id} resource={resource} />
+            {resources.map((resource, i) => (
+              <ResourceCard key={resource._id} resource={resource} index={i} />
             ))}
           </motion.div>
         </AnimatePresence>

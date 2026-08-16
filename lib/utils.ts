@@ -23,6 +23,7 @@ export function formatDate(date: Date | string): string {
 
 export function categoryIcon(category: string): string {
   const icons: Record<string, string> = {
+    Syllabus: '📑',
     Notes: '📝',
     Books: '📚',
     'Model Question Papers': '📋',
@@ -33,6 +34,7 @@ export function categoryIcon(category: string): string {
 
 export function categoryColor(category: string): string {
   const colors: Record<string, string> = {
+    Syllabus: 'bg-rose-50 text-rose-700 border-rose-200',
     Notes: 'bg-blue-50 text-blue-700 border-blue-200',
     Books: 'bg-violet-50 text-violet-700 border-violet-200',
     'Model Question Papers': 'bg-amber-50 text-amber-700 border-amber-200',
@@ -109,5 +111,5 @@ export function isImageUrl(str: string): boolean {
   );
 }
 
-export const CATEGORIES = ['Notes', 'Books', 'Model Question Papers', 'Lab Manuals'] as const;
+export const CATEGORIES = ['Syllabus', 'Notes', 'Books', 'Model Question Papers', 'Lab Manuals'] as const;
 export const SEMESTERS = [1, 2, 3, 4, 5, 6] as const;

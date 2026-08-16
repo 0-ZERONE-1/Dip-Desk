@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type ResourceCategory = 'Notes' | 'Books' | 'Model Question Papers' | 'Lab Manuals';
+export type ResourceCategory = 'Syllabus' | 'Notes' | 'Books' | 'Model Question Papers' | 'Lab Manuals';
 
 export interface IRating {
   userId: mongoose.Types.ObjectId;
@@ -12,6 +12,7 @@ export interface IResource extends Document {
   description: string;
   url: string;
   category: ResourceCategory;
+  coverImage?: string;
   subjectId: mongoose.Types.ObjectId;
   uploaderId: mongoose.Types.ObjectId;
   uploaderModel: 'Admin' | 'User';
@@ -38,9 +39,10 @@ const ResourceSchema = new Schema<IResource>(
     title: { type: String, required: true },
     description: { type: String, default: '' },
     url: { type: String, required: true },
+    coverImage: { type: String, default: '' },
     category: {
       type: String,
-      enum: ['Notes', 'Books', 'Model Question Papers', 'Lab Manuals'],
+      enum: ['Syllabus', 'Notes', 'Books', 'Model Question Papers', 'Lab Manuals'],
       required: true,
     },
     subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: true },

@@ -17,7 +17,7 @@ const ResourceRequestSchema = new Schema<IResourceRequest>(
     subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: true },
     category: {
       type: String,
-      enum: ['Notes', 'Books', 'Model Question Papers', 'Lab Manuals', 'Other'],
+      enum: ['Syllabus', 'Notes', 'Books', 'Model Question Papers', 'Lab Manuals', 'Other'],
       required: true,
     },
     description: { type: String, required: true },
