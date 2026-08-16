@@ -28,6 +28,9 @@ import {
   Compass,
   FolderTree,
   BookmarkCheck,
+  ShieldAlert,
+  Target,
+  Rocket,
 } from 'lucide-react';
 
 const softwareTableData = [
@@ -218,13 +221,13 @@ export default function AboutPage() {
       <Navbar />
       <main className="container-max px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full max-w-full overflow-x-hidden">
         {/* Header Hero Section */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20 pt-2 sm:pt-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary-500/10 via-accent-500/10 to-primary-500/10 border border-primary-200 text-xs sm:text-sm font-semibold text-primary-700 mb-4 shadow-sm"
           >
-            <Sparkles className="w-4 h-4 text-primary-600 animate-spin-slow flex-shrink-0" />
+            <Terminal className="w-3.5 h-3.5 text-primary-600 flex-shrink-0" />
             <span>Dip-Desk is running on Beta 0.7.3</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping flex-shrink-0" />
           </motion.div>
@@ -251,25 +254,33 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card overflow-hidden border border-surface-200 mb-12 sm:mb-16 shadow-sm w-full"
+          whileHover={{ y: -3, transition: { duration: 0.2 } }}
+          className="group bg-white rounded-3xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 mb-14 sm:mb-20 w-full relative overflow-hidden"
         >
-          <div className="bg-gradient-to-r from-surface-50 via-white to-primary-50/40 px-4 sm:px-6 py-4 border-b border-surface-200 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                ⚙️
+          {/* Top Accent Gradient Bar on Hover */}
+          <div className="absolute top-0 inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-10" />
+
+          <div className="bg-gradient-to-r from-surface-50 via-white to-primary-50/40 px-5 sm:px-8 py-5 sm:py-6 border-b border-surface-200 flex items-center justify-between">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0 shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300">
+                <Cpu className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="font-extrabold text-gray-900 text-sm sm:text-lg">Software & Technologies Used</h2>
-                <p className="text-xs text-gray-500 hidden sm:block">Core software dependencies and framework version manifest</p>
+                <h2 className="font-extrabold text-gray-900 text-base sm:text-xl group-hover:text-primary-600 transition-colors leading-snug">
+                  Software & Technologies Used
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-500 hidden sm:block mt-0.5">Core software dependencies and framework version manifest</p>
               </div>
             </div>
-            <span className="badge-primary text-xs flex-shrink-0">Package Manifest</span>
+            <span className="badge-primary text-xs font-bold flex-shrink-0 px-3.5 py-1 rounded-full shadow-2xs">
+              Package Manifest
+            </span>
           </div>
 
           {/* Mobile Card List Layout (Visible on Small Screens) */}
           <div className="sm:hidden divide-y divide-surface-100">
             {softwareTableData.map((item) => (
-              <div key={item.name} className="p-4 space-y-2">
+              <div key={item.name} className="p-4 space-y-2 hover:bg-primary-50/30 transition-colors">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-bold text-sm text-gray-900 truncate">
                     <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${item.color}`} />
@@ -302,18 +313,18 @@ export default function AboutPage() {
               </thead>
               <tbody className="divide-y divide-surface-100 font-medium">
                 {softwareTableData.map((item) => (
-                  <tr key={item.name} className="hover:bg-surface-50/70 transition-colors">
-                    <td className="px-6 py-4 font-bold text-gray-900 flex items-center gap-2.5">
-                      <span className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+                  <tr key={item.name} className="hover:bg-primary-50/40 transition-colors group/row">
+                    <td className="px-6 py-4 font-bold text-gray-900 flex items-center gap-2.5 group-hover/row:text-primary-600 transition-colors">
+                      <span className={`w-2.5 h-2.5 rounded-full ${item.color} group-hover/row:scale-125 transition-transform`} />
                       {item.name}
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-primary-600 text-xs sm:text-sm whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded-md bg-primary-50 border border-primary-200/70">
+                      <span className="px-2 py-0.5 rounded-md bg-primary-50 border border-primary-200/70 shadow-2xs">
                         {item.version}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${item.badgeClass}`}>
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border shadow-2xs ${item.badgeClass}`}>
                         {item.category}
                       </span>
                     </td>
@@ -331,66 +342,85 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/50 p-6 sm:p-10 shadow-sm mb-12 sm:mb-16 border border-surface-200/90 w-full"
+          whileHover={{ y: -3, transition: { duration: 0.2 } }}
+          className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/50 p-6 sm:p-10 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 mb-12 sm:mb-16 border border-surface-200/90 w-full"
         >
+          {/* Top Accent Gradient Bar on Hover */}
+          <div className="absolute top-0 inset-x-10 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-10" />
+
           {/* Header Banner */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-8 border-b border-surface-200">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-8 border-b border-surface-200/90">
             <div className="space-y-2 max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-100/80 border border-primary-200 text-xs font-extrabold text-primary-800">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-100/80 border border-primary-200 text-xs font-extrabold text-primary-800 shadow-2xs">
                 <Globe2 className="w-4 h-4 text-primary-600 flex-shrink-0" />
                 <span>Purpose & Core Vision</span>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black text-gray-900 leading-tight">
+              <h2 className="text-2xl sm:text-4xl font-black text-gray-900 leading-tight group-hover:text-primary-600 transition-colors">
                 Empowering Polytechnic Diploma Engineering Students Nationwide
               </h2>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+              <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold shadow-2xs hover:scale-105 transition-transform">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Free Open Access
               </span>
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
+              <span className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold shadow-2xs hover:scale-105 transition-transform">
                 <CheckCircle2 className="w-4 h-4 text-blue-600" /> Zero Subscription Fees
               </span>
             </div>
           </div>
 
           {/* 3 Pillar Grid of Deep Content */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="p-6 rounded-2xl bg-white border border-surface-200/80 shadow-xs flex flex-col justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+              className="p-6 rounded-2xl bg-white border border-surface-200/90 hover:border-rose-300 shadow-xs hover:shadow-lg hover:shadow-rose-500/10 transition-all duration-300 flex flex-col justify-between group/pillar relative overflow-hidden"
+            >
+              <div className="absolute top-0 inset-x-4 h-[2px] bg-gradient-to-r from-rose-500/0 via-rose-500 to-rose-500/0 rounded-full opacity-0 group-hover/pillar:opacity-100 transition-opacity" />
               <div>
-                <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center font-bold text-lg mb-4">
-                  ⚠️
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 text-white flex items-center justify-center mb-3.5 shadow-md group-hover/pillar:scale-110 group-hover/pillar:shadow-lg transition-all duration-300 flex-shrink-0">
+                  <ShieldAlert className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">The Problem We Solved</h3>
+                <h3 className="text-lg font-bold text-gray-900 group-hover/pillar:text-rose-600 transition-colors mb-2">The Problem We Solved</h3>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   Polytechnic diploma students across various institutes frequently struggle to locate reliable, syllabus-aligned study materials. Notes are often scattered across random messaging groups, broken Google Drive links, or paywalled platforms filled with aggressive popup advertisements.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="p-6 rounded-2xl bg-white border border-surface-200/80 shadow-xs flex flex-col justify-between">
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+              className="p-6 rounded-2xl bg-white border border-surface-200/90 hover:border-primary-300 shadow-xs hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 flex flex-col justify-between group/pillar relative overflow-hidden"
+            >
+              <div className="absolute top-0 inset-x-4 h-[2px] bg-gradient-to-r from-primary-500/0 via-primary-500 to-primary-500/0 rounded-full opacity-0 group-hover/pillar:opacity-100 transition-opacity" />
               <div>
-                <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-200 text-primary-600 flex items-center justify-center font-bold text-lg mb-4">
-                  🎯
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-primary-600 to-indigo-600 text-white flex items-center justify-center mb-3.5 shadow-md group-hover/pillar:scale-110 group-hover/pillar:shadow-lg transition-all duration-300 flex-shrink-0">
+                  <Target className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Our Mission & Goal</h3>
+                <h3 className="text-lg font-bold text-gray-900 group-hover/pillar:text-primary-600 transition-colors mb-2">Our Mission & Goal</h3>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   Dip-Desk was built to centralize polytechnic education into a fast, unified digital hub. We organize all diploma curriculum resources — handwritten lecture notes, official council model question papers, standard textbooks, and lab solution manuals — categorized cleanly by engineering branch and semester.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="p-6 rounded-2xl bg-white border border-surface-200/80 shadow-xs flex flex-col justify-between">
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+              className="p-6 rounded-2xl bg-white border border-surface-200/90 hover:border-emerald-300 shadow-xs hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 flex flex-col justify-between group/pillar relative overflow-hidden"
+            >
+              <div className="absolute top-0 inset-x-4 h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500 to-emerald-500/0 rounded-full opacity-0 group-hover/pillar:opacity-100 transition-opacity" />
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
-                  🚀
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white flex items-center justify-center mb-3.5 shadow-md group-hover/pillar:scale-110 group-hover/pillar:shadow-lg transition-all duration-300 flex-shrink-0">
+                  <Rocket className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Student-Centric Vision</h3>
+                <h3 className="text-lg font-bold text-gray-900 group-hover/pillar:text-emerald-600 transition-colors mb-2">Student-Centric Vision</h3>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   We believe high-quality study resources must be open and accessible to every student, regardless of financial background. Dip-Desk offers sub-second instant search, in-browser PDF previewers, personal bookmarks, and zero mandatory downloads or registration barriers for browsing.
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
 
@@ -410,13 +440,19 @@ export default function AboutPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.05 * i }}
-                className="card p-5 border border-surface-200/80 hover:shadow-md transition-all duration-200 group flex flex-col justify-between"
+                whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
+                className="group bg-white rounded-2xl sm:rounded-3xl border border-surface-200/90 hover:border-primary-300 p-5 sm:p-6 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between"
               >
+                {/* Top Accent Gradient Bar on Hover */}
+                <div className="absolute top-0 inset-x-6 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
+
                 <div>
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${cap.color} text-white flex items-center justify-center mb-3 shadow-md group-hover:scale-110 transition-transform duration-200 flex-shrink-0`}>
+                  <div className={`w-11 h-11 rounded-2xl bg-gradient-to-r ${cap.color} text-white flex items-center justify-center mb-3.5 shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300 flex-shrink-0`}>
                     <cap.icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-bold text-base text-gray-900 mb-1.5">{cap.title}</h3>
+                  <h3 className="font-bold text-base text-gray-900 group-hover:text-primary-600 transition-colors mb-1.5 leading-snug">
+                    {cap.title}
+                  </h3>
                   <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{cap.desc}</p>
                 </div>
               </motion.div>
@@ -427,7 +463,7 @@ export default function AboutPage() {
         {/* User Guide & How-To Section */}
         <div className="mb-16">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent-50 border border-accent-200 text-xs font-semibold text-accent-700 mb-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent-50 border border-accent-200 text-xs font-semibold text-accent-700 mb-3 shadow-2xs">
               <HelpCircle className="w-3.5 h-3.5 text-accent-600 flex-shrink-0" /> Site User Guide
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">How to Use Dip-Desk</h2>
@@ -443,22 +479,28 @@ export default function AboutPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * idx }}
-                className="card p-6 sm:p-7 border border-surface-200/90 hover:border-primary-300 transition-all duration-300 flex flex-col justify-between"
+                whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
+                className="group bg-white rounded-2xl sm:rounded-3xl border border-surface-200/90 hover:border-primary-300 p-6 sm:p-7 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between"
               >
+                {/* Top Accent Gradient Bar on Hover */}
+                <div className="absolute top-0 inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
+
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm flex-shrink-0">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-600 to-accent-600 text-white flex items-center justify-center font-extrabold text-sm shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
                         {item.step}
                       </div>
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900">{item.title}</h3>
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug">
+                        {item.title}
+                      </h3>
                     </div>
                   </div>
                   <p className="text-xs sm:text-sm text-gray-500 mb-5 leading-relaxed font-medium">{item.summary}</p>
 
                   <div className="space-y-3">
                     {item.details.map((detail) => (
-                      <div key={detail.label} className="p-3 rounded-xl bg-surface-50 border border-surface-100">
+                      <div key={detail.label} className="p-3.5 rounded-2xl bg-surface-50/80 border border-surface-100/90 hover:bg-primary-50/40 hover:border-primary-200/60 transition-colors">
                         <div className="font-semibold text-xs sm:text-sm text-gray-900 mb-1 flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary-500 flex-shrink-0" />
                           {detail.label}
@@ -474,18 +516,27 @@ export default function AboutPage() {
         </div>
 
         {/* Bottom CTA Card */}
-        <div className="card p-6 sm:p-8 text-center bg-gradient-to-r from-primary-500/5 via-accent-500/5 to-primary-500/5 border border-primary-200/80 max-w-3xl mx-auto">
-          <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-2">Explore Diploma Study Materials Now</h3>
-          <p className="text-sm text-gray-600 mb-6">Start browsing subject materials for your semester or check out the developer team.</p>
+        <motion.div
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+          className="group bg-gradient-to-r from-primary-500/5 via-accent-500/5 to-primary-500/5 border border-primary-200/90 hover:border-primary-400 rounded-3xl p-6 sm:p-10 text-center shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 relative overflow-hidden max-w-3xl mx-auto"
+        >
+          <div className="absolute top-0 inset-x-12 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
+
+          <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 group-hover:text-primary-600 transition-colors mb-2">
+            Explore Diploma Study Materials Now
+          </h3>
+          <p className="text-sm text-gray-600 mb-6 max-w-xl mx-auto">
+            Start browsing subject materials for your semester or check out the developer team.
+          </p>
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <Link href="/browse" className="btn-primary">
+            <Link href="/browse" className="btn-primary hover:scale-105 transition-all shadow-md">
               <BookOpen className="w-4 h-4" /> Browse Resources
             </Link>
-            <Link href="/developers" className="btn-secondary">
+            <Link href="/developers" className="btn-secondary hover:scale-105 transition-all">
               <Code2 className="w-4 h-4" /> Meet Developers
             </Link>
           </div>
-        </div>
+        </motion.div>
       </main>
     </>
   );
