@@ -610,7 +610,58 @@
       }
     }
   ],
-  "notices": [],
+  "notices": [
+    {
+      "_id": "notice_1786903702590",
+      "badge": "General",
+      "isPinned": false,
+      "isActive": true,
+      "createdAt": "2026-08-16T18:08:22.590Z",
+      "title": "SDVDSV",
+      "content": "DVdSV",
+      "link": "DSVdsv"
+    },
+    {
+      "_id": "notice_1786903695930",
+      "badge": "Urgent",
+      "isPinned": false,
+      "isActive": true,
+      "createdAt": "2026-08-16T18:08:15.930Z",
+      "title": "vsV SFV",
+      "content": "SDFV sDV ",
+      "link": "sdv SDV"
+    },
+    {
+      "_id": "notice_1786903684450",
+      "badge": "Update",
+      "isPinned": false,
+      "isActive": true,
+      "createdAt": "2026-08-16T18:08:04.450Z",
+      "title": "rgzrsdfgv",
+      "content": "vsdvsv",
+      "link": "SDVsdvds"
+    },
+    {
+      "_id": "notice_1786903678117",
+      "badge": "Exam",
+      "isPinned": false,
+      "isActive": true,
+      "createdAt": "2026-08-16T18:07:58.117Z",
+      "title": "EFFSEFsef",
+      "content": "SEFSEFF",
+      "link": "FSEFf"
+    },
+    {
+      "_id": "notice_1786903670704",
+      "badge": "Important",
+      "isPinned": false,
+      "isActive": true,
+      "createdAt": "2026-08-16T18:07:50.704Z",
+      "title": "fSEFsF",
+      "content": "SEFsef",
+      "link": "fESfsEF"
+    }
+  ],
   "deletedIds": [
     "notice_2",
     "dept_1786233140390"

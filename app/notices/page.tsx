@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Bell, Pin, ExternalLink, Calendar, Search, Filter, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Bell, Pin, ExternalLink, Calendar, Search, Filter, Loader2, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
+import { cn } from '@/lib/utils';
 
 interface Notice {
   _id: string;
@@ -16,12 +17,48 @@ interface Notice {
   createdAt: string;
 }
 
-const badgeStyles: Record<string, string> = {
-  Urgent: 'bg-red-50 text-red-700 border-red-200',
-  Exam: 'bg-amber-50 text-amber-700 border-amber-200',
-  Update: 'bg-blue-50 text-blue-700 border-blue-200',
-  Important: 'bg-purple-50 text-purple-700 border-purple-200',
-  General: 'bg-gray-50 text-gray-700 border-gray-200',
+const noticeCardThemes: Record<string, {
+  border: string;
+  glow: string;
+  topAccent: string;
+  badge: string;
+  indicator: string;
+}> = {
+  Urgent: {
+    border: 'border-red-300/90 hover:border-red-500',
+    glow: 'hover:shadow-red-500/10',
+    topAccent: 'from-red-500/0 via-red-500 to-red-500/0',
+    badge: 'bg-red-50 text-red-700 border-red-200',
+    indicator: 'bg-red-500',
+  },
+  Exam: {
+    border: 'border-amber-300/90 hover:border-amber-500',
+    glow: 'hover:shadow-amber-500/10',
+    topAccent: 'from-amber-500/0 via-amber-500 to-amber-500/0',
+    badge: 'bg-amber-50 text-amber-700 border-amber-200',
+    indicator: 'bg-amber-500',
+  },
+  Important: {
+    border: 'border-purple-300/90 hover:border-purple-500',
+    glow: 'hover:shadow-purple-500/10',
+    topAccent: 'from-purple-500/0 via-purple-500 to-purple-500/0',
+    badge: 'bg-purple-50 text-purple-700 border-purple-200',
+    indicator: 'bg-purple-500',
+  },
+  Update: {
+    border: 'border-blue-300/90 hover:border-blue-500',
+    glow: 'hover:shadow-blue-500/10',
+    topAccent: 'from-blue-500/0 via-blue-500 to-blue-500/0',
+    badge: 'bg-blue-50 text-blue-700 border-blue-200',
+    indicator: 'bg-blue-500',
+  },
+  General: {
+    border: 'border-slate-300/90 hover:border-slate-400',
+    glow: 'hover:shadow-slate-500/10',
+    topAccent: 'from-slate-400/0 via-slate-400 to-slate-400/0',
+    badge: 'bg-slate-50 text-slate-700 border-slate-200',
+    indicator: 'bg-slate-400',
+  },
 };
 
 const categories = ['All', 'Important', 'Exam', 'Update', 'Urgent', 'General'];
@@ -88,23 +125,28 @@ export default function PublicNoticesPage() {
             />
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-none max-w-full">
-            <span className="text-xs font-semibold text-gray-400 flex items-center gap-1 mr-1 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+            <span className="text-xs font-bold text-gray-400 flex items-center gap-1 mr-1 flex-shrink-0">
               <Filter className="w-3.5 h-3.5" /> Filter:
             </span>
-            {categories.map((c) => (
-              <button
-                key={c}
-                onClick={() => setSelectedBadge(c)}
-                className={`px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all flex-shrink-0 ${
-                  selectedBadge === c
-                    ? 'bg-primary-600 text-white shadow-xs'
-                    : 'bg-white border border-surface-200 text-gray-600 hover:bg-surface-100'
-                }`}
-              >
-                {c}
-              </button>
-            ))}
+            {categories.map((c) => {
+              const isActive = selectedBadge === c;
+              return (
+                <button
+                  key={c}
+                  id={`filter-${c.toLowerCase()}`}
+                  onClick={() => setSelectedBadge(c)}
+                  className={cn(
+                    'px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 flex-shrink-0 shadow-2xs',
+                    isActive
+                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.03] border-transparent'
+                      : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
+                  )}
+                >
+                  {c}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -115,7 +157,7 @@ export default function PublicNoticesPage() {
               <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
             </div>
           ) : filteredNotices.length === 0 ? (
-            <div className="card p-8 sm:p-12 text-center">
+            <div className="card p-8 sm:p-12 text-center rounded-3xl">
               <Bell className="w-10 h-10 text-gray-300 mx-auto mb-3" />
               <h3 className="font-bold text-gray-700 mb-1">No Notices Found</h3>
               <p className="text-xs text-gray-400">
@@ -125,67 +167,93 @@ export default function PublicNoticesPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3.5 sm:space-y-4">
-              {filteredNotices.map((notice, i) => (
-                <motion.div
-                  key={notice._id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className={`card p-4 sm:p-6 border transition-all duration-200 break-words overflow-hidden ${
-                    notice.isPinned
-                      ? 'bg-amber-50/30 border-amber-200/90 shadow-xs'
-                      : 'bg-white border-surface-200/80 hover:border-primary-200'
-                  }`}
-                >
-                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 mb-2.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {notice.isPinned && (
-                        <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-amber-700 bg-amber-100/90 px-2 py-0.5 rounded-md">
-                          <Pin className="w-3 h-3 fill-amber-700" /> Pinned
-                        </span>
+            <div className="space-y-3 sm:space-y-4">
+              <AnimatePresence>
+                {filteredNotices.map((notice, i) => {
+                  const theme = noticeCardThemes[notice.badge] || noticeCardThemes.General;
+
+                  return (
+                    <motion.div
+                      key={notice._id}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ delay: i * 0.04, duration: 0.25 }}
+                      whileHover={{ y: -4, transition: { duration: 0.2, ease: 'easeOut' } }}
+                      className={cn(
+                        'group bg-white rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 p-3.5 sm:p-5 relative overflow-hidden shadow-card hover:shadow-xl break-words',
+                        theme.border,
+                        theme.glow,
+                        notice.isPinned && 'bg-gradient-to-br from-amber-50/40 via-white to-white'
                       )}
-                      <span
-                        className={`text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full border ${
-                          badgeStyles[notice.badge] || badgeStyles.General
-                        }`}
-                      >
-                        {notice.badge}
-                      </span>
-                    </div>
-
-                    {notice.createdAt && (
-                      <span className="text-[11px] sm:text-xs font-medium text-gray-400 flex items-center gap-1 flex-shrink-0">
-                        <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        {new Date(notice.createdAt).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    )}
-                  </div>
-
-                  <h2 className="text-base sm:text-lg font-extrabold text-gray-900 mb-1.5 leading-snug break-words">
-                    {notice.title}
-                  </h2>
-
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3 break-words whitespace-pre-wrap">
-                    {notice.content}
-                  </p>
-
-                  {notice.link && (
-                    <a
-                      href={notice.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 hover:underline break-all"
+                      id={`notice-${notice._id}`}
                     >
-                      View Related Attachment / Link <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
-                    </a>
-                  )}
-                </motion.div>
-              ))}
+                      {/* Top Accent Gradient Bar on Hover */}
+                      <div
+                        className={cn(
+                          'absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none',
+                          theme.topAccent
+                        )}
+                      />
+
+                      {/* Header Row */}
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {notice.isPinned && (
+                            <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-extrabold text-amber-800 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200 shadow-2xs">
+                              <Pin className="w-3 h-3 fill-amber-800" /> Pinned
+                            </span>
+                          )}
+                          <span
+                            className={cn(
+                              'text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full border shadow-2xs',
+                              theme.badge
+                            )}
+                          >
+                            {notice.badge}
+                          </span>
+                        </div>
+
+                        {notice.createdAt && (
+                          <span className="text-[11px] sm:text-xs font-semibold text-gray-400 flex items-center gap-1 flex-shrink-0">
+                            <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            {new Date(notice.createdAt).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1.5 leading-snug break-words">
+                        {notice.title}
+                      </h2>
+
+                      {/* Content */}
+                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3.5 break-words whitespace-pre-wrap">
+                        {notice.content}
+                      </p>
+
+                      {/* Link */}
+                      {notice.link && (
+                        <div className="pt-2.5 border-t border-surface-100">
+                          <a
+                            href={notice.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-primary-600 hover:text-primary-700 hover:underline break-all group-hover:translate-x-0.5 transition-transform"
+                          >
+                            <span>View Related Attachment / Link</span>
+                            <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+                          </a>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
           )}
         </div>
