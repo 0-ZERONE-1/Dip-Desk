@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getResourcesStore, createResourceStore } from '@/lib/store';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -22,6 +23,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   try {
     const body = await req.json();
     const { title, url, category, subjectId } = body;

@@ -4,7 +4,45 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import { findUserByEmailStore, createUserStore } from '@/lib/store';
 
+// ─── Simple in-memory rate limiter ──────────────────────────────────────────
+// Max 5 registration attempts per IP per 15 minutes
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true; // allowed
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false; // blocked
+  }
+
+  entry.count += 1;
+  return true; // allowed
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 export async function POST(req: NextRequest) {
+  // Rate limit check
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
+
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { error: 'Too many registration attempts. Please try again after 15 minutes.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const { name, email, password } = await req.json();
 

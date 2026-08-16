@@ -24,8 +24,8 @@ if (fs.existsSync(envPath)) {
 }
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@diplomahub.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@123';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@dipdesk.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin.DipDesk';
 
 if (!MONGODB_URI) {
   console.error('❌ MONGODB_URI not set in .env.local');

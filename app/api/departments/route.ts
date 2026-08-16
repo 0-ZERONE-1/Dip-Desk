@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDepartmentsStore, createDepartmentStore } from '@/lib/store';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -18,6 +19,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   try {
     const body = await req.json();
     if (!body.name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
