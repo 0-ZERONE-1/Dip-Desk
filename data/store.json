@@ -4,23 +4,23 @@
       "_id": "dev_1",
       "name": "Lead Developer & Architect",
       "role": "Full-Stack Developer was",
-      "bio": "Creator & Lead Engineer of Dip-Desk. Passionate about empowering engineering diploma students with accessible study materials. wesrgf esrdged gr",
-      "imageUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-      "githubUrl": "https://github.com",
+      "bio": "",
+      "imageUrl": "",
+      "githubUrl": "",
       "linkedinUrl": "https://linkedin.com",
       "instagramUrl": "https://instagram.com",
       "emailUrl": "mailto:developer@diplomahub.com",
       "portfolioUrl": "https://diplomahub.com",
       "order": 1,
       "isActive": true,
-      "updatedAt": "2026-08-08T23:04:26.892Z"
+      "updatedAt": "2026-08-16T12:38:56.593Z"
     },
     {
       "_id": "dev_2",
       "name": "UI/UX Specialist",
       "role": "Product & Frontend Designerazertgdc",
-      "bio": "Crafts intuitive, responsive user interfaces and modern visual experiences for diploma students across all devices.",
-      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+      "bio": "8764762354762351452387452764dfbvgfdbfgbgfbgfbfgbgfbgfbgfbfgbgfbgfb523745273451237645712635472135472354725347652374523745237645237452374523745tr345r476",
+      "imageUrl": "https://github.com/0-ZERONE-1/Image-Asset/blob/7c586c195a2abef604cd847236a7cf81d4f66e17/Dip-Desk/Nikhil%20Mandal.jpg",
       "githubUrl": "https://github.com",
       "linkedinUrl": "https://linkedin.com",
       "instagramUrl": "https://instagram.com",
@@ -28,7 +28,7 @@
       "portfolioUrl": "https://diplomahub.com",
       "order": 2,
       "isActive": true,
-      "updatedAt": "2026-08-08T23:53:35.714Z"
+      "updatedAt": "2026-08-16T12:59:34.701Z"
     }
   ],
   "departments": [
@@ -541,6 +541,10 @@
     }
   ],
   "notices": [],
+  "deletedIds": [
+    "notice_2",
+    "dept_1786233140390"
+  ],
   "users": [
     {
       "_id": "demo_student_id",
@@ -551,9 +555,5 @@
       "regNumber": "D242535681",
       "isProfileComplete": true
     }
-  ],
-  "deletedIds": [
-    "notice_2",
-    "dept_1786233140390"
   ]
 }
