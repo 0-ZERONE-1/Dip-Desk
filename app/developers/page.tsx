@@ -31,11 +31,11 @@ interface DeveloperItem {
 /* Shard origins for the entry animation */
 const shardOrigins = [
   { x: -180, y: -120, rotate: -38, scale: 0.22 },
-  { x: 170, y: -100, rotate: 32, scale: 0.18 },
-  { x: -150, y: 110, rotate: 45, scale: 0.28 },
-  { x: 130, y: 140, rotate: -25, scale: 0.22 },
-  { x: 200, y: -55, rotate: -52, scale: 0.18 },
-  { x: -200, y: 65, rotate: 40, scale: 0.28 },
+  { x: 170,  y: -100, rotate: 32,  scale: 0.18 },
+  { x: -150, y: 110,  rotate: 45,  scale: 0.28 },
+  { x: 130,  y: 140,  rotate: -25, scale: 0.22 },
+  { x: 200,  y: -55,  rotate: -52, scale: 0.18 },
+  { x: -200, y: 65,   rotate: 40,  scale: 0.28 },
 ];
 
 /* ─── Animated RGB Gradient Border Wrapper ────────────────────────── */
@@ -105,8 +105,8 @@ function TiltCard({
   const springConfig = { stiffness: 200, damping: 22, mass: 0.6 };
   const rotateX = useSpring(rawX, springConfig);
   const rotateY = useSpring(rawY, springConfig);
-  const glowX = useSpring(rawGlowX, { stiffness: 150, damping: 20 });
-  const glowY = useSpring(rawGlowY, { stiffness: 150, damping: 20 });
+  const glowX   = useSpring(rawGlowX, { stiffness: 150, damping: 20 });
+  const glowY   = useSpring(rawGlowY, { stiffness: 150, damping: 20 });
 
   /* Mouse spotlight gradient inside card */
   const glowBackground = useTransform(
@@ -203,14 +203,14 @@ function TiltCard({
             style={{ background: glowBackground }}
           />
 
-          {/* Photo Header — aspect-square ensures 1:1 ratio; img is absolute so it fills without affecting container size */}
+          {/* Photo Header */}
           <div className="w-full aspect-square relative overflow-hidden bg-surface-100 flex-shrink-0">
             {dev.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={formatImageUrl(dev.imageUrl)}
                 alt={dev.name}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-white text-5xl font-black">
@@ -219,24 +219,21 @@ function TiltCard({
             )}
           </div>
 
-          {/* Info Panel — fixed h-[310px] matching full green box height for all cards */}
-          <div className="px-6 pt-5 pb-6 flex flex-col text-center items-center h-[250px] flex-shrink-0 relative z-10 bg-white w-full min-w-0 box-border justify-between overflow-hidden">
+          {/* Info Panel - min-h and flex layout so all cards maintain identical uniform height */}
+          <div className="px-6 pt-5 pb-4 flex flex-col text-center items-center flex-1 relative z-10 bg-white w-full min-w-0 box-border min-h-[195px] justify-between">
             <div className="w-full flex flex-col items-center">
               <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight max-w-full truncate">{dev.name}</h3>
-              <span className="badge-primary mb-0 text-xs px-2.5 py-0.5 max-w-full truncate">{dev.role}</span>
+              <span className="badge-primary mb-3 text-xs px-2.5 py-0.5">{dev.role}</span>
 
-              {/* Reserved Bio Slot — fixed h-[140px] overflow-hidden so empty/short bios keep the full green box height */}
-              <div className="w-full h-[130px] flex-shrink-0 overflow-hidden flex items-center justify-center mb-0 px-0">
-                {dev.bio ? (
-                  <p className="text-sm text-gray-600 leading-snug line-clamp-5 text-center break-words [overflow-wrap:anywhere] max-w-full w-full">
-                    {dev.bio}
-                  </p>
-                ) : (
-                  <p className="text-xs text-gray-400 italic text-center">
-                    Platform Developer & Contributor
-                  </p>
-                )}
-              </div>
+              {dev.bio ? (
+                <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-4 break-words [overflow-wrap:anywhere] max-w-full w-full">
+                  {dev.bio}
+                </p>
+              ) : (
+                <div className="w-full flex items-center justify-center my-auto min-h-[52px]">
+                  <p className="text-xs text-gray-400 italic">Platform Developer & Contributor</p>
+                </div>
+              )}
             </div>
 
             {/* Social Links Pinned to Bottom */}
