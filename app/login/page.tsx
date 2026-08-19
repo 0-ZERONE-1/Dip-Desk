@@ -9,13 +9,31 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
+import { cn } from '@/lib/utils';
+
 type Tab = 'student' | 'admin';
+
+const slideVariants = {
+  initial: (direction: number) => ({
+    x: direction > 0 ? 50 : -50,
+    opacity: 0,
+  }),
+  animate: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 50 : -50,
+    opacity: 0,
+  }),
+};
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   const [tab, setTab] = useState<Tab>('student');
+  const [direction, setDirection] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +45,8 @@ export default function LoginPage() {
 
   // Reset fields when switching tabs
   const switchTab = (t: Tab) => {
+    if (t === tab) return;
+    setDirection(t === 'admin' ? 1 : -1);
     setTab(t);
     setEmail('');
     setPassword('');
@@ -149,7 +169,7 @@ export default function LoginPage() {
           }`}>
             Welcome to Dip-Desk
           </h1>
-          <p className={`text-xs sm:text-sm mt-1 transition-colors duration-500 ${
+          <p className={`h-5 text-xs sm:text-sm mt-1 flex items-center justify-center transition-colors duration-500 ${
             isAdmin ? 'text-purple-300/80' : 'text-gray-500'
           }`}>
             {isAdmin ? 'Administrator Management Console' : 'Sign in or register to access study materials'}
@@ -171,49 +191,63 @@ export default function LoginPage() {
           <div className={`p-2 transition-colors duration-500 ${
             isAdmin ? 'bg-gray-900/80 border-b border-gray-800' : 'bg-surface-50 border-b border-surface-200'
           }`}>
-            <div className={`flex gap-1 p-1 rounded-xl transition-colors duration-500 ${
+            <div className={`relative flex gap-1 p-1 rounded-xl transition-colors duration-500 ${
               isAdmin ? 'bg-gray-800/80' : 'bg-surface-100'
             }`}>
               <button
                 id="tab-student"
                 type="button"
                 onClick={() => switchTab('student')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  !isAdmin
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
-                    : 'text-gray-400 hover:text-gray-200'
-                }`}
+                className={cn(
+                  'relative flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors duration-200 z-10',
+                  !isAdmin ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+                )}
               >
-                <GraduationCap className="w-4 h-4" />
-                Student
+                {!isAdmin && (
+                  <motion.span
+                    layoutId="login-tab-pill"
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md shadow-blue-500/25"
+                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                  />
+                )}
+                <GraduationCap className="relative z-10 w-4 h-4" />
+                <span className="relative z-10">Student</span>
               </button>
               <button
                 id="tab-admin"
                 type="button"
                 onClick={() => switchTab('admin')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  isAdmin
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={cn(
+                  'relative flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors duration-200 z-10',
+                  isAdmin ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                )}
               >
-                <ShieldCheck className="w-4 h-4" />
-                Admin
+                {isAdmin && (
+                  <motion.span
+                    layoutId="login-tab-pill"
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-600 to-violet-600 shadow-md shadow-purple-500/30"
+                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                  />
+                )}
+                <ShieldCheck className="relative z-10 w-4 h-4" />
+                <span className="relative z-10">Admin</span>
               </button>
             </div>
           </div>
 
           <motion.div layout className="p-6 sm:p-8 overflow-hidden">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" custom={direction}>
 
               {/* ===== STUDENT PANEL ===== */}
               {!isAdmin && (
                 <motion.div
                   key="student"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
                 >
                   <form onSubmit={handleStudentSignIn} className="space-y-4">
                     <div>
@@ -282,10 +316,12 @@ export default function LoginPage() {
               {isAdmin && (
                 <motion.div
                   key="admin"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
                 >
                   <form onSubmit={handleAdminSignIn} className="space-y-4">
                     <div>
@@ -327,17 +363,19 @@ export default function LoginPage() {
                       </div>
                     </div>
 
-                    <button
-                      type="submit"
-                      id="admin-login-btn"
-                      disabled={loading}
-                      className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 mt-4 transition-all duration-200 shadow-md shadow-purple-600/30"
-                    >
-                      {loading
-                        ? <Loader2 className="w-4 h-4 animate-spin" />
-                        : <><ShieldCheck className="w-4 h-4" /><span>Sign In as Administrator</span></>
-                      }
-                    </button>
+                    <div className="pt-2">
+                      <button
+                        type="submit"
+                        id="admin-login-btn"
+                        disabled={loading}
+                        className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-purple-600/30"
+                      >
+                        {loading
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <><ShieldCheck className="w-4 h-4" /><span>Sign In as Administrator</span></>
+                        }
+                      </button>
+                    </div>
                   </form>
                 </motion.div>
               )}

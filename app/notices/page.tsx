@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Bell, Pin, ExternalLink, Calendar, Search, Filter, Loader2, Sparkles } from 'lucide-react';
+import { Bell, Pin, ExternalLink, Calendar, Search, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
 import { cn } from '@/lib/utils';
@@ -126,9 +126,6 @@ export default function PublicNoticesPage() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
-            <span className="text-xs font-bold text-gray-400 flex items-center gap-1 mr-1 flex-shrink-0">
-              <Filter className="w-3.5 h-3.5" /> Filter:
-            </span>
             {categories.map((c) => {
               const isActive = selectedBadge === c;
               return (
