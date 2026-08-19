@@ -95,11 +95,11 @@
 
   /* ---- Navigation ---- */
   .nav-item {
-    @apply px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-surface-100 transition-all duration-150;
+    @apply px-3.5 py-1.5 rounded-xl text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-surface-100 transition-all duration-150;
   }
 
   .nav-item-active {
-    @apply nav-item bg-primary-50 text-primary-700 hover:bg-primary-100 hover:text-primary-700;
+    @apply nav-item bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-sm shadow-primary-500/25 hover:text-white hover:bg-gradient-to-r hover:from-primary-600 hover:to-accent-600;
   }
 
   /* ---- Section ---- */

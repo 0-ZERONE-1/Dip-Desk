@@ -647,6 +647,16 @@
       "institute": "Itahar Gov Poly",
       "regNumber": "D242535681",
       "isProfileComplete": true
+    },
+    {
+      "_id": "user_1787163752303",
+      "role": "student",
+      "isProfileComplete": true,
+      "createdAt": "2026-08-19T18:22:32.303Z",
+      "name": "admin",
+      "email": "admin@diplomahub.com",
+      "password": "Admin@123",
+      "hashedPassword": "$2a$10$VI6IkuCJ7tEburR0/9CuI.euIyFGwNeiM1wk3t1l59MNuNjWxrcoK"
     }
   ]
 }

@@ -63,6 +63,7 @@ export default function AdminNav() {
               {active && (
                 <motion.span
                   layoutId="mobile-admin-pill"
+                  layout="position"
                   className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-600 to-accent-600 shadow-md shadow-primary-500/25"
                   transition={{ type: 'spring', stiffness: 380, damping: 34 }}
                 />
@@ -113,6 +114,7 @@ export default function AdminNav() {
                   {active && (
                     <motion.span
                       layoutId="desktop-admin-pill"
+                      layout="position"
                       className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary-600 to-accent-600 shadow-md shadow-primary-500/25"
                       transition={{ type: 'spring', stiffness: 420, damping: 36 }}
                     />

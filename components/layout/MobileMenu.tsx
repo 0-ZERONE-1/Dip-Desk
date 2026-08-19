@@ -92,8 +92,8 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
                   onClick={onClose}
                   className={cn(
                     'flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
-                    pathname === href
-                      ? 'bg-primary-50 text-primary-700'
+                    pathname === href || (href !== '/' && pathname.startsWith(href))
+                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-sm font-bold'
                       : 'text-gray-700 hover:bg-surface-100'
                   )}
                 >

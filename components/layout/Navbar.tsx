@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Menu, X, BookOpen, LogOut, Settings, Bookmark, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NavbarSearch from '@/components/NavbarSearch';
@@ -24,6 +25,16 @@ export default function Navbar() {
 
   const user = session?.user as any;
   const isAdmin = user?.role === 'admin';
+
+  const topNavItems = [
+    { href: '/', label: 'Home', exact: true },
+    { href: '/browse', label: 'Browse', exact: false },
+    { href: '/notices', label: 'Notice', exact: false },
+    { href: '/developers', label: 'Developers', exact: true },
+    { href: '/about', label: 'About', exact: true },
+    ...(status === 'authenticated' && !isAdmin ? [{ href: '/dashboard', label: 'Student Panel', exact: true }] : []),
+    ...(isAdmin ? [{ href: '/admin', label: 'Admin Panel', exact: false }] : []),
+  ];
 
   return (
     <>
@@ -50,31 +61,33 @@ export default function Navbar() {
 
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-1">
-              <Link href="/" className={cn('nav-item', pathname === '/' && 'nav-item-active')}>
-                Home
-              </Link>
-              <Link href="/browse" className={cn('nav-item', pathname.startsWith('/browse') && 'nav-item-active')}>
-                Browse
-              </Link>
-              <Link href="/notices" className={cn('nav-item', pathname.startsWith('/notices') && 'nav-item-active')}>
-                Notice
-              </Link>
-              <Link href="/developers" className={cn('nav-item', pathname === '/developers' && 'nav-item-active')}>
-                Developers
-              </Link>
-              <Link href="/about" className={cn('nav-item', pathname === '/about' && 'nav-item-active')}>
-                About
-              </Link>
-              {status === 'authenticated' && !isAdmin && (
-                <Link href="/dashboard" className={cn('nav-item', pathname === '/dashboard' && 'nav-item-active')}>
-                  Student Panel
-                </Link>
-              )}
-              {isAdmin && (
-                <Link href="/admin" className={cn('nav-item', pathname.startsWith('/admin') && 'nav-item-active')}>
-                  Admin Panel
-                </Link>
-              )}
+              {topNavItems.map(({ href, label, exact }) => {
+                const active = exact ? pathname === href : pathname.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    scroll={false}
+                    className={cn(
+                      'relative px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-colors duration-150 group',
+                      active ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                    )}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="top-navbar-pill"
+                        layout="position"
+                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-600 to-accent-600 shadow-sm shadow-primary-500/25"
+                        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                      />
+                    )}
+                    {!active && (
+                      <span className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-surface-100 transition-opacity duration-150" />
+                    )}
+                    <span className="relative z-10">{label}</span>
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Right Section */}
