@@ -32,8 +32,15 @@ export default function AdminHealthCheckPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-extrabold text-gray-900">Link Health Checker</h1>
-        <p className="text-gray-500 mt-1">Verify that all uploaded resource URLs are still accessible</p>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+            <Heart className="w-4 h-4" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold gradient-text">
+            Link Health Checker
+          </h1>
+        </div>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">Verify that all uploaded resource URLs are still accessible</p>
       </div>
 
       {/* Action card */}

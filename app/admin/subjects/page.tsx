@@ -1,13 +1,46 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Edit2, Save, X, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, Loader2, RotateCcw, BookMarked } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SEMESTERS } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
-interface Department { _id: string; name: string; slug?: string; }
-interface Subject { _id: string; name: string; slug: string; semesterNumber: number; description: string; departmentId: Department; }
-const emptyForm = { name: '', semesterNumber: 1, departmentId: '', description: '' };
+interface Department {
+  _id: string;
+  name: string;
+  slug?: string;
+}
+
+interface Subject {
+  _id: string;
+  name: string;
+  slug: string;
+  semesterNumber: number;
+  description: string;
+  departmentId: Department;
+}
+
+const emptyForm = {
+  name: '',
+  semesterNumber: 1,
+  departmentId: 'all',
+  description: '',
+};
+
+// Sanitizer for text inputs: Allows letters, numbers, spaces, and basic symbols (., -&/()')
+const sanitizeText = (val: string) => {
+  return val
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+    .replace(/[^a-zA-Z0-9\s.,\-&/()']/g, '');
+};
+
+// Sanitizer for single continuous text: Strips newlines, emojis, and unwanted symbols
+const sanitizeOneLineText = (val: string) => {
+  return val
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+    .replace(/[^a-zA-Z0-9\s.,\-&/()']/g, '');
+};
 
 const getDeptIdStr = (dept: any) => {
   if (!dept) return '';
@@ -17,8 +50,12 @@ const getDeptIdStr = (dept: any) => {
 
 const getDeptName = (dept: any, departmentsList: Department[]) => {
   if (!dept) return '';
-  if (typeof dept === 'object' && dept.name) return dept.name;
-  const idStr = typeof dept === 'string' ? dept : dept._id;
+  if (typeof dept === 'object') {
+    if (dept.slug === 'all' || dept._id === 'all' || dept.name === 'All Departments') return 'All Departments';
+    if (dept.name) return dept.name;
+  }
+  const idStr = typeof dept === 'string' ? dept : dept?._id;
+  if (idStr === 'all') return 'All Departments';
   const found = departmentsList.find((d) => d._id === idStr || d.slug === idStr);
   return found ? found.name : '';
 };
@@ -34,7 +71,9 @@ export default function AdminSubjectsPage() {
   const [filterDept, setFilterDept] = useState('');
   const [filterSem, setFilterSem] = useState('');
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -48,46 +87,80 @@ export default function AdminSubjectsPage() {
     setLoading(false);
   };
 
-  const handleSave = async () => {
-    if (!form.name || !form.departmentId) { toast.error('Name and department are required'); return; }
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!form.name.trim() || !form.departmentId || !form.description.trim()) {
+      toast.error('Subject Name, Department, and Description are required');
+      return;
+    }
+
     setSaving(true);
     try {
+      const normalizedPayload = {
+        ...form,
+        name: sanitizeText(form.name).trim(),
+        description: sanitizeText(form.description).trim(),
+      };
+
       const url = editId ? `/api/subjects/${editId}` : '/api/subjects';
       const method = editId ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(normalizedPayload),
+      });
+
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Failed to save');
+      }
+
       const resData = await res.json().catch(() => null);
-      const foundDept = departments.find((d) => d._id === form.departmentId || d.slug === form.departmentId);
+      const foundDept = departments.find(
+        (d) => d._id === form.departmentId || d.slug === form.departmentId
+      );
       const savedObj = resData?.subject || resData || {
         _id: editId || `sub_${Date.now()}`,
-        ...form,
+        ...normalizedPayload,
         createdAt: new Date().toISOString(),
       };
-      if (foundDept) {
+
+      if (form.departmentId === 'all') {
+        savedObj.departmentId = { _id: 'all', name: 'All Departments', slug: 'all' };
+        savedObj.departmentSlug = 'all';
+      } else if (foundDept) {
         savedObj.departmentId = foundDept;
         savedObj.departmentSlug = foundDept.slug;
       } else if (typeof savedObj.departmentId === 'string') {
-        const match = departments.find((d) => d._id === savedObj.departmentId || d.slug === savedObj.departmentId);
+        const match = departments.find(
+          (d) => d._id === savedObj.departmentId || d.slug === savedObj.departmentId
+        );
         if (match) {
           savedObj.departmentId = match;
           savedObj.departmentSlug = match.slug;
         }
       }
+
       saveClientCustomItem('subjects', savedObj);
-      toast.success(editId ? 'Updated!' : 'Subject created!');
-      setShowForm(false); setEditId(null); setForm(emptyForm);
+      toast.success(editId ? 'Subject updated!' : 'Subject created!');
+      setShowForm(false);
+      setEditId(null);
+      setForm(emptyForm);
       load();
     } catch (e: any) {
       toast.error(e.message || 'Failed to save');
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEdit = (s: Subject) => {
     setEditId(s._id);
+    const deptStr = getDeptIdStr(s.departmentId);
     setForm({
       name: s.name,
       semesterNumber: s.semesterNumber,
-      departmentId: getDeptIdStr(s.departmentId),
+      departmentId: deptStr === 'all' || !deptStr ? 'all' : deptStr,
       description: s.description || '',
     });
     setShowForm(true);
@@ -96,25 +169,59 @@ export default function AdminSubjectsPage() {
   const handleDelete = async (id: string) => {
     addClientDeletedId(id);
     setSubjects((prev) => prev.filter((s) => s._id !== id));
-    await fetch(`/api/subjects/${id}`, { method: 'DELETE' });
-    toast.success('Deleted');
-    load();
+    try {
+      await fetch(`/api/subjects/${id}`, { method: 'DELETE' });
+      toast.success('Subject deleted');
+      load();
+    } catch {
+      toast.error('Failed to delete');
+      load();
+    }
   };
 
   const filtered = subjects.filter((s) => {
-    if (filterDept && getDeptIdStr(s.departmentId) !== filterDept) return false;
+    if (filterDept) {
+      const sDept = getDeptIdStr(s.departmentId);
+      if (sDept !== 'all' && sDept !== filterDept) return false;
+    }
     if (filterSem && s.semesterNumber !== parseInt(filterSem)) return false;
     return true;
   });
+
+  const hasActiveFilters = Boolean(filterDept || filterSem);
+  const resetFilters = () => {
+    setFilterDept('');
+    setFilterSem('');
+  };
 
   return (
     <div>
       {/* Page Header */}
       <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Subjects</h1>
+        <div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center font-bold">
+              <BookMarked className="w-4 h-4" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-extrabold gradient-text">
+              Manage Subjects
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            {loading
+              ? 'Loading subjects...'
+              : hasActiveFilters
+              ? `Showing ${filtered.length} of ${subjects.length} ${subjects.length === 1 ? 'Subject' : 'Subjects'}`
+              : `${subjects.length} ${subjects.length === 1 ? 'Subject' : 'Subjects'}`}
+          </p>
+        </div>
         <button
           id="add-subject-btn"
-          onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }}
+          onClick={() => {
+            setShowForm(true);
+            setEditId(null);
+            setForm(emptyForm);
+          }}
           className="btn-primary flex-shrink-0 text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4"
         >
           <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add Subject
@@ -123,85 +230,253 @@ export default function AdminSubjectsPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 flex-wrap">
-        <select id="filter-dept" value={filterDept} onChange={(e) => setFilterDept(e.target.value)} className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[200px]">
+        <select
+          id="filter-dept"
+          value={filterDept}
+          onChange={(e) => setFilterDept(e.target.value)}
+          className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[200px]"
+        >
           <option value="">All Departments</option>
-          {departments.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+          {departments.map((d) => (
+            <option key={d._id} value={d._id}>
+              {d.name}
+            </option>
+          ))}
         </select>
-        <select id="filter-sem" value={filterSem} onChange={(e) => setFilterSem(e.target.value)} className="select text-xs sm:text-sm flex-1 min-w-[110px] max-w-[160px]">
+        <select
+          id="filter-sem"
+          value={filterSem}
+          onChange={(e) => setFilterSem(e.target.value)}
+          className="select text-xs sm:text-sm flex-1 min-w-[110px] max-w-[160px]"
+        >
           <option value="">All Semesters</option>
-          {SEMESTERS.map((s) => <option key={s} value={s}>Semester {s}</option>)}
+          {SEMESTERS.map((s) => (
+            <option key={s} value={s}>
+              Semester {s}
+            </option>
+          ))}
         </select>
+        {hasActiveFilters && (
+          <button
+            onClick={resetFilters}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-600 hover:text-primary-600 bg-surface-100 hover:bg-surface-200 rounded-xl transition-all border border-surface-200"
+            title="Reset all filters"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset</span>
+          </button>
+        )}
       </div>
 
-      {showForm && (
-        <div className="card p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-gray-900">{editId ? 'Edit Subject' : 'New Subject'}</h2>
-            <button onClick={() => { setShowForm(false); setEditId(null); }} className="btn-ghost p-1.5"><X className="w-4 h-4" /></button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Subject Name</label>
-              <input id="subject-name" type="text" placeholder="e.g. Database Management Systems" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Department</label>
-              <select id="subject-dept" value={form.departmentId} onChange={(e) => setForm({ ...form, departmentId: e.target.value })} className="select">
-                <option value="">Select Department...</option>
-                {departments.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Semester</label>
-              <select id="subject-semester" value={form.semesterNumber} onChange={(e) => setForm({ ...form, semesterNumber: parseInt(e.target.value) })} className="select">
-                {SEMESTERS.map((s) => <option key={s} value={s}>Semester {s}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Description (optional)</label>
-              <input id="subject-description" type="text" placeholder="Brief description..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="input" />
-            </div>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-            <button id="save-subject-btn" onClick={handleSave} disabled={saving} className="btn-primary">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {editId ? 'Update' : 'Create'}
-            </button>
+      {/* Subjects Table */}
+      {loading ? (
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="skeleton h-14 rounded-xl" />
+          ))}
+        </div>
+      ) : (
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-200 bg-surface-50 text-left">
+                  <th className="px-4 py-3 font-semibold text-gray-600">Subject</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Department</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600">Semester</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((s) => {
+                  const deptName = getDeptName(s.departmentId, departments);
+                  const isAllDept = deptName === 'All Departments' || getDeptIdStr(s.departmentId) === 'all';
+                  return (
+                    <tr
+                      key={s._id}
+                      className="border-b border-surface-100 hover:bg-surface-50 transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <p className="font-bold text-gray-900">{s.name}</p>
+                        {s.description && (
+                          <p className="text-xs text-gray-400 line-clamp-1 mt-0.5 max-w-md">{s.description}</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-600">
+                        {deptName}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                        Sem {s.semesterNumber}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            id={`edit-subject-${s._id}`}
+                            onClick={() => handleEdit(s)}
+                            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            id={`delete-subject-${s._id}`}
+                            onClick={() => handleDelete(s._id)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-12 text-center text-gray-400">
+                      No subjects found matching the selected filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {loading ? (
-        <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>
-      ) : (
-        <div className="card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-200 bg-surface-50 text-left">
-                <th className="px-4 py-3 font-semibold text-gray-600">Subject</th>
-                <th className="px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Department</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Semester</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s) => (
-                <tr key={s._id} className="border-b border-surface-100 hover:bg-surface-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
-                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{getDeptName(s.departmentId, departments)}</td>
-                  <td className="px-4 py-3 text-gray-500">Sem {s.semesterNumber}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      <button id={`edit-subject-${s._id}`} onClick={() => handleEdit(s)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"><Edit2 className="w-3.5 h-3.5" /></button>
-                      <button id={`delete-subject-${s._id}`} onClick={() => handleDelete(s._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-gray-400">No subjects found</td></tr>}
-            </tbody>
-          </table>
+      {/* Modal with curved gradient cap */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          {/* Outer gradient cap wrapper matching the reference drawing */}
+          <div className="relative bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 p-[1.5px] pt-3.5 rounded-[32px] shadow-2xl max-w-2xl sm:max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            {/* Inner modal body with rounded top corners under the top gradient band */}
+            <div className="bg-white rounded-b-[30px] rounded-t-[20px] w-full flex-1 flex flex-col overflow-hidden">
+              {/* Modal Header */}
+              <div className="px-6 pt-5 pb-3 border-b border-surface-100 flex items-center justify-between bg-gradient-to-b from-primary-50/40 to-transparent flex-shrink-0">
+                <div>
+                  <h2 className="text-xl font-extrabold gradient-text">
+                    {editId ? 'Edit Subject' : 'Add New Subject'}
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {editId
+                      ? 'Update subject curriculum details & semester'
+                      : 'Create a new subject under a department and semester'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditId(null);
+                  }}
+                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-surface-100 rounded-xl transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Subject Name <span className="text-[11px] font-normal text-gray-400">(100 CH LIM)</span>
+                  </label>
+                  <input
+                    id="subject-name"
+                    type="text"
+                    required
+                    maxLength={100}
+                    placeholder="e.g. Database Management Systems"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: sanitizeText(e.target.value) })}
+                    className="input"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Department
+                    </label>
+                    <select
+                      id="subject-dept"
+                      required
+                      value={form.departmentId || 'all'}
+                      onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
+                      className="select"
+                    >
+                      <option value="all">All Departments</option>
+                      {departments.map((d) => (
+                        <option key={d._id} value={d._id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Semester
+                    </label>
+                    <select
+                      id="subject-semester"
+                      required
+                      value={form.semesterNumber}
+                      onChange={(e) => setForm({ ...form, semesterNumber: parseInt(e.target.value) })}
+                      className="select"
+                    >
+                      {SEMESTERS.map((s) => (
+                        <option key={s} value={s}>
+                          Semester {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Subject Description <span className="text-[11px] font-normal text-gray-400">(100 CH LIM)</span>
+                  </label>
+                  <textarea
+                    id="subject-description"
+                    rows={3}
+                    required
+                    maxLength={100}
+                    placeholder="Brief overview of the subject curriculum..."
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: sanitizeOneLineText(e.target.value) })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="input py-2.5 resize-none min-h-[75px]"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-100 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForm(false);
+                      setEditId(null);
+                    }}
+                    className="btn-ghost text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    id="save-subject-btn"
+                    type="submit"
+                    disabled={saving}
+                    className="btn-primary"
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editId ? 'Save Changes' : 'Create Subject'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </div>

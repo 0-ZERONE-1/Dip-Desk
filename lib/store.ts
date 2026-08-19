@@ -292,7 +292,9 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
     if (semesterNumber) filter.semesterNumber = semesterNumber;
     if (departmentSlug) {
       const dept = await Department.findOne({ $or: [{ slug: departmentSlug }, { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined }] });
-      if (dept) filter.departmentId = dept._id;
+      if (dept) {
+        filter.$or = [{ departmentId: dept._id }, { departmentId: 'all' }, { departmentSlug: 'all' }];
+      }
     }
     const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
     return subjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
@@ -304,6 +306,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
   if (departmentSlug) {
     list = list.filter((s) => {
       const deptSlug = s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId.replace(/^dept_/, '') : '');
+      if (deptSlug === 'all' || s.departmentId === 'all' || s.departmentSlug === 'all') return true;
       return deptSlug === departmentSlug || s.departmentId === departmentSlug;
     });
   }

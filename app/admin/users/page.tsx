@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { UserX, UserCheck, Loader2 } from 'lucide-react';
+import { UserX, UserCheck, Loader2, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatDate } from '@/lib/utils';
 
@@ -38,8 +38,15 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Student Users</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">{users.length} registered students</p>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
+            <Users className="w-4 h-4" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold gradient-text">
+            Manage Users
+          </h1>
+        </div>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">{users.length} Users</p>
       </div>
 
       <div className="mb-4 sm:mb-5">

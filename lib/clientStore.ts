@@ -62,6 +62,10 @@ export function getClientCustomItems<T = any>(category: string): T[] {
 function itemMatchesDept(customItem: any, targetDeptSlug: string): boolean {
   if (!targetDeptSlug) return true;
 
+  // If item is assigned to All Departments, it matches every department
+  if (customItem.departmentSlug === 'all' || customItem.departmentId === 'all') return true;
+  if (typeof customItem.departmentId === 'object' && (customItem.departmentId?.slug === 'all' || customItem.departmentId?._id === 'all')) return true;
+
   // Direct slug checks
   if (customItem.departmentSlug === targetDeptSlug) return true;
   if (typeof customItem.departmentId === 'object' && customItem.departmentId?.slug === targetDeptSlug) return true;

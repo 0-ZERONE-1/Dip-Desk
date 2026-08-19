@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, Clock, ChevronDown } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ChevronDown, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatDate } from '@/lib/utils';
 
@@ -37,6 +37,10 @@ export default function AdminRequestsPage() {
 
   const filtered = requests.filter((r) => filter === 'All' || r.status === filter);
 
+  const pendingCount = requests.filter((r) => r.status === 'Pending').length;
+  const fulfilledCount = requests.filter((r) => r.status === 'Fulfilled').length;
+  const rejectedCount = requests.filter((r) => r.status === 'Rejected').length;
+
   const statusIcon = (s: string) => ({
     Pending: <Clock className="w-4 h-4 text-amber-500" />,
     Fulfilled: <CheckCircle className="w-4 h-4 text-emerald-500" />,
@@ -52,16 +56,37 @@ export default function AdminRequestsPage() {
   return (
     <div>
       <div className="mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Resource Requests</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">{requests.filter((r) => r.status === 'Pending').length} pending · {requests.length} total</p>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+            <MessageSquare className="w-4 h-4" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold gradient-text">
+            Manage Requests
+          </h1>
+        </div>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">
+          {pendingCount} pending · {fulfilledCount} fulfilled · {rejectedCount} rejected · {requests.length} total
+        </p>
       </div>
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-5 flex-wrap">
-        {['Pending', 'Fulfilled', 'Rejected', 'All'].map((s) => (
-          <button key={s} onClick={() => setFilter(s)}
-            className={filter === s ? 'tab-active' : 'tab-inactive'}>
-            {s}
+        {[
+          { label: 'Pending', count: pendingCount },
+          { label: 'Fulfilled', count: fulfilledCount },
+          { label: 'Rejected', count: rejectedCount },
+          { label: 'All', count: requests.length },
+        ].map(({ label, count }) => (
+          <button
+            key={label}
+            onClick={() => setFilter(label)}
+            className={`px-4 py-2 text-xs font-bold rounded-2xl transition-all duration-200 ${
+              filter === label
+                ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.02]'
+                : 'bg-white text-gray-600 border border-surface-200 hover:border-primary-300 hover:text-primary-600'
+            }`}
+          >
+            {label} ({count})
           </button>
         ))}
       </div>

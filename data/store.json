@@ -2,9 +2,9 @@
   "developers": [
     {
       "_id": "dev_1",
-      "name": "Lead Developer & Architect",
-      "role": "Full-Stack Developer was",
-      "bio": "",
+      "name": "advsdvsdvdsvsdvsdvsdvdsvs",
+      "role": "11111111111111111111111111111111111sdvsdvsdvsdvsdv",
+      "bio": "123131231fesd gfersdvb ergkhearg vkjsardfh vksadujvhrsdiuv hjkvh gifud vhukyfgvukyfdsg vuyhjukjmkjkhjkhjkhjkhjkhjkhjkhjkhjkkk jjhkjhkjhkhjkjkhjkhjkjhk",
       "imageUrl": "",
       "githubUrl": "",
       "linkedinUrl": "https://linkedin.com",
@@ -13,22 +13,7 @@
       "portfolioUrl": "https://diplomahub.com",
       "order": 1,
       "isActive": true,
-      "updatedAt": "2026-08-16T12:38:56.593Z"
-    },
-    {
-      "_id": "dev_2",
-      "name": "UI/UX Specialist",
-      "role": "Product & Frontend Designerazertgdc",
-      "bio": "",
-      "imageUrl": "",
-      "githubUrl": "https://github.com",
-      "linkedinUrl": "https://linkedin.com",
-      "instagramUrl": "https://instagram.com",
-      "emailUrl": "mailto:design@diplomahub.com",
-      "portfolioUrl": "https://diplomahub.com",
-      "order": 2,
-      "isActive": true,
-      "updatedAt": "2026-08-16T13:09:05.707Z"
+      "updatedAt": "2026-08-17T06:42:50.346Z"
     }
   ],
   "departments": [
@@ -52,46 +37,31 @@
     },
     {
       "_id": "dept_etc",
-      "name": "Electronics & Telecommunication",
+      "name": "Electronics & Tele-communication",
       "slug": "etc",
       "description": "Communication systems, signal processing, and electronic devices",
-      "icon": "📡",
+      "icon": "",
       "color": "#10b981",
+      "isActive": true
+    },
+    {
+      "_id": "dept_1786949667729",
+      "name": "12345",
+      "description": "sgfsfgv",
+      "icon": "",
+      "color": "#6366f1",
+      "slug": "12345",
       "isActive": true
     }
   ],
   "subjects": [
     {
       "_id": "sub_cst_1_1",
-      "name": "Mathematics-I",
+      "name": "Mathematics-Iujouikl",
       "slug": "mathematics-i",
       "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Calculus, matrices, and analytical geometry"
-    },
-    {
-      "_id": "sub_cst_1_2",
-      "name": "Physics",
-      "slug": "physics",
-      "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Applied physics fundamentals"
+      "departmentId": "dept_cst",
+      "description": "df vdfbdfb dfb dtxfhbydtjnthkl jrj rj hfhg"
     },
     {
       "_id": "sub_cst_1_3",
@@ -548,7 +518,7 @@
       "description": "Comprehensive chapter-wise handwritten notes covering Stacks, Queues, Trees, and Sorting algorithms.",
       "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
       "category": "Notes",
-      "upvotes": 42,
+      "upvotes": 500,
       "downvotes": 1,
       "isActive": true,
       "createdAt": "2026-08-08T23:02:12.267Z",
@@ -624,7 +594,7 @@
     {
       "_id": "notice_1786903695930",
       "badge": "Urgent",
-      "isPinned": false,
+      "isPinned": true,
       "isActive": true,
       "createdAt": "2026-08-16T18:08:15.930Z",
       "title": "vsV SFV",
@@ -664,7 +634,9 @@
   ],
   "deletedIds": [
     "notice_2",
-    "dept_1786233140390"
+    "dept_1786233140390",
+    "dev_2",
+    "sub_cst_1_2"
   ],
   "users": [
     {
