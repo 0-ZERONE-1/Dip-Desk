@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Navbar from '@/components/layout/Navbar';
 import ResourceCard from '@/components/ResourceCard';
+import GenericLottieLoader from '@/components/GenericLottieLoader';
+import AnimatedSelect from '@/components/AnimatedSelect';
 import {
   Bookmark, BookOpen, ThumbsUp, ThumbsDown, MessageSquarePlus, User, Edit3, Save, Loader2, CheckCircle, Clock, ShieldCheck, GraduationCap, X, Camera, LogOut, ExternalLink, Building2, Link as LinkIcon, LayoutDashboard, Bell, ArrowRight, ShieldAlert
 } from 'lucide-react';
@@ -86,7 +88,7 @@ export default function StudentPanelPage() {
         });
       }
     } catch {}
-    setLoading(false);
+    setTimeout(() => setLoading(false), 2500);
   };
 
   const fetchAllResources = async () => {
@@ -500,9 +502,7 @@ export default function StudentPanelPage() {
             {activeTab === 'saved' && (
               <div className="w-full space-y-4">
                 {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-36 rounded-2xl" />)}
-                  </div>
+                  <GenericLottieLoader text="Loading Saved Resources..." />
                 ) : !profile?.bookmarks?.length ? (
                   <div className="card p-12 text-center flex flex-col items-center justify-center min-h-[400px] w-full">
                     <Bookmark className="w-12 h-12 text-gray-300 mx-auto mb-3 stroke-[1.5]" />
@@ -580,34 +580,36 @@ export default function StudentPanelPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Department</label>
-                        <select
+                        <AnimatedSelect
                           value={requestDept}
-                          onChange={(e) => setRequestDept(e.target.value)}
-                          className="select"
-                        >
-                          <option value="Computer Science & Technology">Computer Science & Technology</option>
-                          <option value="Electrical Engineering">Electrical Engineering</option>
-                          <option value="Civil Engineering">Civil Engineering</option>
-                          <option value="Mechanical Engineering">Mechanical Engineering</option>
-                          <option value="Electronics & Telecommunication">Electronics & Telecommunication</option>
-                          <option value="General / Other">General / Other</option>
-                        </select>
+                          onChange={(val) => setRequestDept(val)}
+                          options={[
+                            { value: 'Computer Science & Technology', label: 'Computer Science & Technology' },
+                            { value: 'Electrical Engineering', label: 'Electrical Engineering' },
+                            { value: 'Civil Engineering', label: 'Civil Engineering' },
+                            { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
+                            { value: 'Electronics & Telecommunication', label: 'Electronics & Telecommunication' },
+                            { value: 'General / Other', label: 'General / Other' },
+                          ]}
+                          className="w-full"
+                        />
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Semester</label>
-                        <select
+                        <AnimatedSelect
                           value={requestSemester}
-                          onChange={(e) => setRequestSemester(e.target.value)}
-                          className="select"
-                        >
-                          <option value="Semester 1">Semester 1</option>
-                          <option value="Semester 2">Semester 2</option>
-                          <option value="Semester 3">Semester 3</option>
-                          <option value="Semester 4">Semester 4</option>
-                          <option value="Semester 5">Semester 5</option>
-                          <option value="Semester 6">Semester 6</option>
-                          <option value="All Semesters">All Semesters</option>
-                        </select>
+                          onChange={(val) => setRequestSemester(val)}
+                          options={[
+                            { value: 'Semester 1', label: 'Semester 1' },
+                            { value: 'Semester 2', label: 'Semester 2' },
+                            { value: 'Semester 3', label: 'Semester 3' },
+                            { value: 'Semester 4', label: 'Semester 4' },
+                            { value: 'Semester 5', label: 'Semester 5' },
+                            { value: 'Semester 6', label: 'Semester 6' },
+                            { value: 'All Semesters', label: 'All Semesters' },
+                          ]}
+                          className="w-full"
+                        />
                       </div>
                     </div>
 
@@ -625,16 +627,20 @@ export default function StudentPanelPage() {
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Category</label>
-                        <select
+                        <AnimatedSelect
                           value={requestCategory}
-                          onChange={(e) => setRequestCategory(e.target.value)}
-                          className="select"
-                        >
-                          <option value="Notes">Notes</option>
-                          <option value="Textbooks">Textbooks</option>
-                          <option value="Model Question Papers">Model Question Papers</option>
-                          <option value="Lab Manuals">Lab Manuals</option>
-                        </select>
+                          onChange={(val) => setRequestCategory(val)}
+                          options={[
+                            { value: 'Notes', label: 'Notes' },
+                            { value: 'Textbooks', label: 'Textbooks' },
+                            { value: 'Model Question Papers', label: 'Model Question Papers' },
+                            { value: 'Lab Manuals', label: 'Lab Manuals' },
+                            { value: 'Syllabus', label: 'Syllabus' },
+                            { value: 'Routines', label: 'Routines' },
+                            { value: 'Other', label: 'Other' },
+                          ]}
+                          className="w-full"
+                        />
                       </div>
                     </div>
 

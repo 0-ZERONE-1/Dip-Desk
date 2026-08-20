@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, Clock, ChevronDown, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import GenericLottieLoader from '@/components/GenericLottieLoader';
 import { formatDate } from '@/lib/utils';
 
 interface Request {
@@ -23,8 +24,8 @@ export default function AdminRequestsPage() {
   useEffect(() => {
     fetch('/api/admin/requests').then((r) => r.json()).then((d) => {
       setRequests(d.requests || []);
-      setLoading(false);
-    });
+      setTimeout(() => setLoading(false), 2500);
+    }).catch(() => setTimeout(() => setLoading(false), 2500));
   }, []);
 
   const updateStatus = async (id: string, status: string, adminNote: string = '') => {
@@ -92,7 +93,7 @@ export default function AdminRequestsPage() {
       </div>
 
       {loading ? (
-        <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="skeleton h-24 rounded-xl" />)}</div>
+        <GenericLottieLoader text="Loading Requests..." />
       ) : (
         <div className="space-y-3">
           {filtered.map((r) => (

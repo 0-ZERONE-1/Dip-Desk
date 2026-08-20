@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import { SEMESTERS } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
+import GenericLottieLoader from '@/components/GenericLottieLoader';
+import AnimatedSelect from '@/components/AnimatedSelect';
 
 interface Department {
   _id: string;
@@ -87,7 +89,7 @@ export default function AdminSubjectsPage() {
     ]);
     setSubjects(syncAndFilterItems<Subject>('subjects', subData.subjects || []));
     setDepartments(syncAndFilterItems<Department>('departments', deptData.departments || []));
-    setLoading(false);
+    setTimeout(() => setLoading(false), 2500);
   };
 
   const handleSave = async (e?: React.FormEvent) => {
@@ -237,32 +239,28 @@ export default function AdminSubjectsPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 flex-wrap">
-        <select
+        <AnimatedSelect
           id="filter-dept"
           value={filterDept}
-          onChange={(e) => setFilterDept(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[200px]"
-        >
-          <option value="">All Departments</option>
-          {departments.map((d) => (
-            <option key={d._id} value={d._id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-        <select
+          onChange={(val) => setFilterDept(val)}
+          options={[
+            { value: '', label: 'All Departments' },
+            ...departments.map((d) => ({ value: d._id, label: d.name })),
+          ]}
+          placeholder="All Departments"
+          className="min-w-[160px]"
+        />
+        <AnimatedSelect
           id="filter-sem"
           value={filterSem}
-          onChange={(e) => setFilterSem(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[110px] max-w-[160px]"
-        >
-          <option value="">All Semesters</option>
-          {SEMESTERS.map((s) => (
-            <option key={s} value={s}>
-              Semester {s}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setFilterSem(val)}
+          options={[
+            { value: '', label: 'All Semesters' },
+            ...SEMESTERS.map((s) => ({ value: String(s), label: `Semester ${s}` })),
+          ]}
+          placeholder="All Semesters"
+          className="min-w-[140px]"
+        />
         {hasActiveFilters && (
           <button
             onClick={resetFilters}
@@ -277,11 +275,7 @@ export default function AdminSubjectsPage() {
 
       {/* Subjects Table */}
       {loading ? (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="skeleton h-14 rounded-xl" />
-          ))}
-        </div>
+        <GenericLottieLoader text="Loading Subjects..." />
       ) : (
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
@@ -404,39 +398,29 @@ export default function AdminSubjectsPage() {
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
                       Department
                     </label>
-                    <select
+                    <AnimatedSelect
                       id="subject-dept"
-                      required
                       value={form.departmentId || 'all'}
-                      onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
-                      className="select"
-                    >
-                      <option value="all">All Departments</option>
-                      {departments.map((d) => (
-                        <option key={d._id} value={d._id}>
-                          {d.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setForm({ ...form, departmentId: val })}
+                      options={[
+                        { value: 'all', label: 'All Departments' },
+                        ...departments.map((d) => ({ value: d._id, label: d.name })),
+                      ]}
+                      className="w-full"
+                    />
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
                       Semester
                     </label>
-                    <select
+                    <AnimatedSelect
                       id="subject-semester"
-                      required
                       value={form.semesterNumber}
-                      onChange={(e) => setForm({ ...form, semesterNumber: parseInt(e.target.value) })}
-                      className="select"
-                    >
-                      {SEMESTERS.map((s) => (
-                        <option key={s} value={s}>
-                          Semester {s}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setForm({ ...form, semesterNumber: parseInt(val) })}
+                      options={SEMESTERS.map((s) => ({ value: s, label: `Semester ${s}` }))}
+                      className="w-full"
+                    />
                   </div>
                 </div>
 

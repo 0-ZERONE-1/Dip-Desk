@@ -4,6 +4,8 @@ import { UserX, UserCheck, Loader2, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatDate } from '@/lib/utils';
 
+import GenericLottieLoader from '@/components/GenericLottieLoader';
+
 interface User { _id: string; name: string; email: string; title: string; institute: string; regNumber: string; isBanned: boolean; createdAt: string; }
 
 export default function AdminUsersPage() {
@@ -14,8 +16,8 @@ export default function AdminUsersPage() {
   useEffect(() => {
     fetch('/api/admin/users').then((r) => r.json()).then((d) => {
       setUsers(d.users || []);
-      setLoading(false);
-    });
+      setTimeout(() => setLoading(false), 2500);
+    }).catch(() => setTimeout(() => setLoading(false), 2500));
   }, []);
 
   const toggleBan = async (user: User) => {
@@ -54,7 +56,7 @@ export default function AdminUsersPage() {
       </div>
 
       {loading ? (
-        <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>
+        <GenericLottieLoader text="Loading Users..." />
       ) : (
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">

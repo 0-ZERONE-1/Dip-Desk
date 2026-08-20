@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import { CATEGORIES, formatImageUrl, isImageUrl } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
+import GenericLottieLoader from '@/components/GenericLottieLoader';
+import AnimatedSelect from '@/components/AnimatedSelect';
 
 interface Department {
   _id: string;
@@ -161,7 +163,7 @@ export default function AdminResourcesPage() {
     } catch {
       toast.error('Failed to load resources');
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 2500);
     }
   };
 
@@ -350,55 +352,49 @@ export default function AdminResourcesPage() {
       {/* Filter Buttons & Dropdowns Bar */}
       <div className="flex items-center gap-2 sm:gap-3 mb-5 flex-wrap">
         {/* Category Filter */}
-        <select
+        <AnimatedSelect
           id="filter-category"
           value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[180px]"
-        >
-          <option value="">All Categories</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setFilterCategory(val)}
+          options={[
+            { value: '', label: 'All Categories' },
+            ...CATEGORIES.map((c) => ({ value: c, label: c })),
+          ]}
+          placeholder="All Categories"
+          className="min-w-[150px]"
+        />
 
         {/* Department Filter */}
-        <select
+        <AnimatedSelect
           id="filter-dept"
           value={filterDept}
-          onChange={(e) => {
-            setFilterDept(e.target.value);
+          onChange={(val) => {
+            setFilterDept(val);
             setFilterSubject('');
           }}
-          className="select text-xs sm:text-sm flex-1 min-w-[140px] max-w-[210px]"
-        >
-          <option value="">All Departments</option>
-          {departments.map((d) => (
-            <option key={d._id} value={d._id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: '', label: 'All Departments' },
+            ...departments.map((d) => ({ value: d._id, label: d.name })),
+          ]}
+          placeholder="All Departments"
+          className="min-w-[160px]"
+        />
 
         {/* Semester Filter */}
-        <select
+        <AnimatedSelect
           id="filter-sem"
           value={filterSem}
-          onChange={(e) => {
-            setFilterSem(e.target.value);
+          onChange={(val) => {
+            setFilterSem(val);
             setFilterSubject('');
           }}
-          className="select text-xs sm:text-sm flex-1 min-w-[110px] max-w-[150px]"
-        >
-          <option value="">All Semesters</option>
-          {[1, 2, 3, 4, 5, 6].map((s) => (
-            <option key={s} value={s}>
-              Semester {s}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: '', label: 'All Semesters' },
+            ...[1, 2, 3, 4, 5, 6].map((s) => ({ value: String(s), label: `Semester ${s}` })),
+          ]}
+          placeholder="All Semesters"
+          className="min-w-[140px]"
+        />
 
         {/* Clear Filters Button */}
         {hasActiveFilters && (
@@ -615,11 +611,7 @@ export default function AdminResourcesPage() {
 
       {/* Resources Table */}
       {loading ? (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="skeleton h-14 rounded-xl" />
-          ))}
-        </div>
+        <GenericLottieLoader text="Loading Resources..." />
       ) : (
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">

@@ -4,6 +4,8 @@ import { Plus, Trash2, Edit2, Save, X, Loader2, Pin, Bell, ExternalLink, RotateC
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
+import GenericLottieLoader from '@/components/GenericLottieLoader';
+import AnimatedSelect from '@/components/AnimatedSelect';
 
 interface Notice {
   _id: string;
@@ -103,7 +105,7 @@ export default function AdminNoticesPage() {
     } catch {
       toast.error('Failed to load notices');
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 2500);
     }
   };
 
@@ -271,42 +273,44 @@ export default function AdminNoticesPage() {
       {/* Filter Buttons & Dropdowns Bar */}
       <div className="flex items-center gap-2 sm:gap-3 mb-5 flex-wrap">
         {/* Category / Badge Tag Filter */}
-        <select
+        <AnimatedSelect
           id="filter-notice-badge"
           value={filterBadge}
-          onChange={(e) => setFilterBadge(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[180px]"
-        >
-          <option value="">All Categories</option>
-          {BADGES.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setFilterBadge(val)}
+          options={[
+            { value: '', label: 'All Categories' },
+            ...BADGES.map((b) => ({ value: b, label: b })),
+          ]}
+          placeholder="All Categories"
+          className="min-w-[150px]"
+        />
 
         {/* Pin Status Filter */}
-        <select
+        <AnimatedSelect
           id="filter-notice-pin"
           value={filterPin}
-          onChange={(e) => setFilterPin(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[180px]"
-        >
-          <option value="">All Notices</option>
-          <option value="pinned">Pinned Only</option>
-          <option value="unpinned">Unpinned Only</option>
-        </select>
+          onChange={(val) => setFilterPin(val)}
+          options={[
+            { value: '', label: 'All Notices' },
+            { value: 'pinned', label: 'Pinned Only' },
+            { value: 'unpinned', label: 'Unpinned Only' },
+          ]}
+          placeholder="All Notices"
+          className="min-w-[140px]"
+        />
 
         {/* Sort Order */}
-        <select
+        <AnimatedSelect
           id="filter-notice-sort"
           value={filterSort}
-          onChange={(e) => setFilterSort(e.target.value as any)}
-          className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[170px]"
-        >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-        </select>
+          onChange={(val) => setFilterSort(val as any)}
+          options={[
+            { value: 'newest', label: 'Newest First' },
+            { value: 'oldest', label: 'Oldest First' },
+          ]}
+          placeholder="Sort Order"
+          className="min-w-[140px]"
+        />
 
         {/* Clear Filters Button */}
         {hasActiveFilters && (
@@ -453,11 +457,7 @@ export default function AdminNoticesPage() {
 
       {/* Notices List */}
       {loading ? (
-        <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="skeleton h-20 rounded-2xl" />
-          ))}
-        </div>
+        <GenericLottieLoader text="Loading Notices..." />
       ) : notices.length === 0 ? (
         <div className="card p-12 text-center">
           <Bell className="w-10 h-10 text-gray-300 mx-auto mb-3" />

@@ -80,9 +80,9 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
         const deptFound = deptList.find((d: any) => d.slug === branchSlug);
         if (deptFound) setDeptName(deptFound.name);
         setSubjects(subList);
-        setTimeout(() => setLoading(false), 1200);
+        setTimeout(() => setLoading(false), 2500);
       })
-      .catch(() => setLoading(false));
+      .catch(() => setTimeout(() => setLoading(false), 2500));
   }, [branchSlug, semesterNumber]);
 
   // formattedDeptName is always available immediately

@@ -64,9 +64,9 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         const filteredList = syncAndFilterItems<Subject>('subjects', rawList, { departmentSlug: branchSlug, semesterNumber: semesterNumber });
         const found = filteredList.find((s: Subject) => s.slug === subjectSlug);
         setSubject(found || null);
-        setTimeout(() => setLoading(false), 1200);
+        setTimeout(() => setLoading(false), 2500);
       })
-      .catch(() => setTimeout(() => setLoading(false), 1200));
+      .catch(() => setTimeout(() => setLoading(false), 2500));
   }, [branchSlug, semesterNumber, subjectSlug]);
 
   // Load resources when subject and category change
@@ -81,9 +81,9 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       .then((data) => {
         const rawList = data.resources || [];
         setResources(syncAndFilterItems<Resource>('resources', rawList, { subjectId: subject._id, category: activeCategory }));
-        setTimeout(() => setResourcesLoading(false), 800);
+        setTimeout(() => setResourcesLoading(false), 2500);
       })
-      .catch(() => setResourcesLoading(false));
+      .catch(() => setTimeout(() => setResourcesLoading(false), 2500));
   }, [subject, activeCategory]);
 
   if (!loading && !subject) {

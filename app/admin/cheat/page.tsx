@@ -15,6 +15,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AnimatedSelect from '@/components/AnimatedSelect';
 import { CATEGORIES } from '@/lib/utils';
 import { saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 
@@ -292,58 +293,55 @@ export default function AdminCheatPage() {
       {/* 4 Filters in One Horizontal Line */}
       <div className="flex items-center gap-2 sm:gap-3 mb-6 flex-wrap">
         {/* Category Filter */}
-        <select
+        <AnimatedSelect
           value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[130px] max-w-[180px]"
-        >
-          <option value="">All Categories</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setFilterCategory(val)}
+          options={[
+            { value: '', label: 'All Categories' },
+            ...CATEGORIES.map((c) => ({ value: c, label: c })),
+          ]}
+          placeholder="All Categories"
+          className="min-w-[140px]"
+        />
 
         {/* Department Filter */}
-        <select
+        <AnimatedSelect
           value={filterDept}
-          onChange={(e) => setFilterDept(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[140px] max-w-[210px]"
-        >
-          <option value="">All Departments</option>
-          {departments.map((d) => (
-            <option key={d._id} value={d._id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setFilterDept(val)}
+          options={[
+            { value: '', label: 'All Departments' },
+            ...departments.map((d) => ({ value: d._id, label: d.name })),
+          ]}
+          placeholder="All Departments"
+          className="min-w-[150px]"
+        />
 
         {/* Semester Filter */}
-        <select
+        <AnimatedSelect
           value={filterSem}
-          onChange={(e) => setFilterSem(e.target.value)}
-          className="select text-xs sm:text-sm flex-1 min-w-[110px] max-w-[150px]"
-        >
-          <option value="">All Semesters</option>
-          {[1, 2, 3, 4, 5, 6].map((s) => (
-            <option key={s} value={s}>
-              Semester {s}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setFilterSem(val)}
+          options={[
+            { value: '', label: 'All Semesters' },
+            ...[1, 2, 3, 4, 5, 6].map((s) => ({ value: String(s), label: `Semester ${s}` })),
+          ]}
+          placeholder="All Semesters"
+          className="min-w-[130px]"
+        />
 
         {/* Sort Order */}
-        <select
+        <AnimatedSelect
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
-          className="select text-xs sm:text-sm flex-1 min-w-[120px] max-w-[160px]"
-        >
-          <option value="most_up">Most Likes</option>
-          <option value="least_up">Least Likes</option>
-          <option value="most_down">Most Dislikes</option>
-          <option value="newest">Newest First</option>
-        </select>
+          onChange={(val) => setSortBy(val as any)}
+          options={[
+            { value: 'most_up', label: 'Most Likes' },
+            { value: 'least_up', label: 'Least Likes' },
+            { value: 'most_down', label: 'Most Dislikes' },
+            { value: 'newest', label: 'Newest First' },
+            { value: 'oldest', label: 'Oldest First' },
+          ]}
+          placeholder="Sort Order"
+          className="min-w-[140px]"
+        />
 
         {/* Clear Filters */}
         {hasActiveFilters && (

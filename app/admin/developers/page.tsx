@@ -18,6 +18,7 @@ import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import { formatImageUrl } from '@/lib/utils';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
+import GenericLottieLoader from '@/components/GenericLottieLoader';
 
 interface Developer {
   _id: string;
@@ -112,7 +113,7 @@ export default function AdminDevelopersPage() {
     } catch {
       toast.error('Failed to fetch developers');
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 2500);
     }
   };
 
@@ -273,9 +274,7 @@ export default function AdminDevelopersPage() {
 
       {/* List */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
-        </div>
+        <GenericLottieLoader text="Loading Developers..." />
       ) : developers.length === 0 ? (
         <div className="card p-12 text-center">
           <Code2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />

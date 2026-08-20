@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
+import GenericLottieLoader from '@/components/GenericLottieLoader';
 
 interface Department {
   _id: string;
@@ -77,7 +78,7 @@ export default function AdminDepartmentsPage() {
     } catch {
       toast.error('Failed to load departments');
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 2500);
     }
   };
 
@@ -202,11 +203,7 @@ export default function AdminDepartmentsPage() {
 
       {/* Departments List Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="skeleton h-32 rounded-2xl" />
-          ))}
-        </div>
+        <GenericLottieLoader text="Loading Departments..." />
       ) : departments.length === 0 ? (
         <div className="card p-12 text-center">
           <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
