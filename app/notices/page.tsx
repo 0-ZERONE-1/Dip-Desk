@@ -6,6 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
 import { cn } from '@/lib/utils';
 
+import dynamic from 'next/dynamic';
+
+const NoticeLottieLoader = dynamic(
+  () => import('@/components/NoticeLottieLoader'),
+  { ssr: false }
+);
+
 interface Notice {
   _id: string;
   title: string;
@@ -115,12 +122,7 @@ export default function PublicNoticesPage() {
         {/* Content Area */}
         <div className="max-w-4xl mx-auto w-full">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 min-h-[350px]">
-              <Loader2 className="w-9 h-9 text-primary-600 animate-spin mb-3" />
-              <p className="text-xs sm:text-sm font-semibold text-gray-400 animate-pulse">
-                Loading Notice Board...
-              </p>
-            </div>
+            <NoticeLottieLoader />
           ) : (
             <>
               {/* Controls: Search & Category Filter Pills */}
