@@ -28,6 +28,8 @@ interface DeveloperItem {
   order?: number;
 }
 
+import DeveloperLottieLoader from '@/components/DeveloperLottieLoader';
+
 /* Shard origins for the entry animation */
 const shardOrigins = [
   { x: -180, y: -120, rotate: -38, scale: 0.22 },
@@ -353,9 +355,7 @@ export default function DevelopersPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
-          </div>
+          <DeveloperLottieLoader />
         ) : developers.length === 0 ? (
           <div className="card p-12 text-center max-w-md mx-auto">
             <Code2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
