@@ -17,6 +17,7 @@ import {
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import { formatImageUrl } from '@/lib/utils';
+import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 
 interface Developer {
   _id: string;
@@ -80,6 +81,8 @@ export default function AdminDevelopersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingDev, setEditingDev] = useState<Developer | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -228,6 +231,7 @@ export default function AdminDevelopersPage() {
   };
 
   const handleDelete = async (id: string) => {
+    setDeleteLoading(true);
     addClientDeletedId(id);
     setDevelopers((prev) => prev.filter((d) => d._id !== id));
     try {
@@ -238,6 +242,9 @@ export default function AdminDevelopersPage() {
     } catch {
       toast.error('Failed to delete developer');
       fetchDevelopers();
+    } finally {
+      setDeleteLoading(false);
+      setDeleteId(null);
     }
   };
 
@@ -341,7 +348,7 @@ export default function AdminDevelopersPage() {
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(dev._id)}
+                    onClick={() => setDeleteId(dev._id)}
                     className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
                     title="Delete"
                   >
@@ -549,6 +556,16 @@ export default function AdminDevelopersPage() {
         </div>
       </div>
     )}
+
+      <ConfirmDeleteModal
+        open={!!deleteId}
+        title="Remove this developer?"
+        description="This will permanently remove the developer profile from the team page."
+        itemName={developers.find((d) => d._id === deleteId)?.name}
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        loading={deleteLoading}
+      />
   </div>
 );
 }

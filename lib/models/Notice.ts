@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface INotice extends Document {
   title: string;
   content: string;
-  badge: 'Important' | 'Exam' | 'Update' | 'Urgent' | 'General';
+  badge: 'Important' | 'Exam' | 'Update' | 'General';
   isPinned: boolean;
   isActive: boolean;
   link?: string;
@@ -17,7 +17,7 @@ const NoticeSchema = new Schema<INotice>(
     content: { type: String, required: true },
     badge: {
       type: String,
-      enum: ['Important', 'Exam', 'Update', 'Urgent', 'General'],
+      enum: ['Important', 'Exam', 'Update', 'General'],
       default: 'Important',
     },
     isPinned: { type: Boolean, default: false },

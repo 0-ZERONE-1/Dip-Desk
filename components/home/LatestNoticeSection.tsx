@@ -10,7 +10,7 @@ interface Notice {
   _id: string;
   title: string;
   content: string;
-  badge: 'Important' | 'Exam' | 'Update' | 'Urgent' | 'General';
+  badge: 'Important' | 'Exam' | 'Update' | 'General';
   isPinned: boolean;
   isActive: boolean;
   link?: string;
@@ -18,7 +18,6 @@ interface Notice {
 }
 
 const badgeStyles: Record<string, string> = {
-  Urgent: 'bg-red-50 text-red-700 border-red-200',
   Exam: 'bg-amber-50 text-amber-700 border-amber-200',
   Update: 'bg-blue-50 text-blue-700 border-blue-200',
   Important: 'bg-purple-50 text-purple-700 border-purple-200',

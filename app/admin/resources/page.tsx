@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, X, Save, Loader2, RotateCcw, BookOpen } from 'luci
 import toast from 'react-hot-toast';
 import { CATEGORIES, formatImageUrl, isImageUrl } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
+import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 
 interface Department {
   _id: string;
@@ -125,6 +126,8 @@ export default function AdminResourcesPage() {
   const [form, setForm] = useState(emptyForm);
   const [formDept, setFormDept] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Filters state
   const [filterCategory, setFilterCategory] = useState('');
@@ -251,6 +254,7 @@ export default function AdminResourcesPage() {
   };
 
   const handleDelete = async (id: string) => {
+    setDeleteLoading(true);
     addClientDeletedId(id);
     setResources((prev) => prev.filter((r) => r._id !== id));
     try {
@@ -260,6 +264,9 @@ export default function AdminResourcesPage() {
     } catch {
       toast.error('Failed to delete');
       loadAll();
+    } finally {
+      setDeleteLoading(false);
+      setDeleteId(null);
     }
   };
 
@@ -678,7 +685,7 @@ export default function AdminResourcesPage() {
                           </button>
                           <button
                             id={`delete-resource-${r._id}`}
-                            onClick={() => handleDelete(r._id)}
+                            onClick={() => setDeleteId(r._id)}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                           >
@@ -701,6 +708,16 @@ export default function AdminResourcesPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        open={!!deleteId}
+        title="Delete this resource?"
+        description="This will permanently remove the resource for all students. This cannot be undone."
+        itemName={resources.find((r) => r._id === deleteId)?.title}
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        loading={deleteLoading}
+      />
     </div>
   );
 }

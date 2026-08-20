@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, X, Save, Loader2, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
+import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 
 interface Department {
   _id: string;
@@ -61,6 +62,8 @@ export default function AdminDepartmentsPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     load();
@@ -153,6 +156,7 @@ export default function AdminDepartmentsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    setDeleteLoading(true);
     addClientDeletedId(id);
     setDepartments((prev) => prev.filter((d) => d._id !== id));
     try {
@@ -162,6 +166,9 @@ export default function AdminDepartmentsPage() {
     } catch {
       toast.error('Failed to delete');
       load();
+    } finally {
+      setDeleteLoading(false);
+      setDeleteId(null);
     }
   };
 
@@ -262,7 +269,7 @@ export default function AdminDepartmentsPage() {
                   </button>
                   <button
                     id={`delete-dept-${d._id}`}
-                    onClick={() => handleDelete(d._id)}
+                    onClick={() => setDeleteId(d._id)}
                     className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete Department"
                   >
@@ -396,6 +403,16 @@ export default function AdminDepartmentsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        open={!!deleteId}
+        title="Delete this department?"
+        description="All associated subjects and resources may become inaccessible. This cannot be undone."
+        itemName={departments.find((d) => d._id === deleteId)?.name}
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        loading={deleteLoading}
+      />
     </div>
   );
 }

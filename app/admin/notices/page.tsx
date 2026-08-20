@@ -3,19 +3,20 @@ import { useEffect, useState } from 'react';
 import { Plus, Trash2, Edit2, Save, X, Loader2, Pin, Bell, ExternalLink, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
+import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 
 interface Notice {
   _id: string;
   title: string;
   content: string;
-  badge: 'Important' | 'Exam' | 'Update' | 'Urgent' | 'General';
+  badge: 'Important' | 'Exam' | 'Update' | 'General';
   isPinned: boolean;
   isActive: boolean;
   link?: string;
   createdAt: string;
 }
 
-const BADGES = ['Important', 'Exam', 'Update', 'Urgent', 'General'] as const;
+const BADGES = ['Important', 'Exam', 'Update', 'General'] as const;
 
 // Sanitizer for text inputs: Allows letters, numbers, spaces, and basic symbols (., -&/()')
 const sanitizeText = (val: string) => {
@@ -49,8 +50,6 @@ const normalizeUrl = (urlStr: string) => {
 
 const getBadgeStyle = (badge: string) => {
   switch (badge) {
-    case 'Urgent':
-      return 'bg-rose-50 text-rose-700 border-rose-200';
     case 'Exam':
       return 'bg-amber-50 text-amber-700 border-amber-200';
     case 'Important':
@@ -65,7 +64,7 @@ const getBadgeStyle = (badge: string) => {
 const emptyForm: {
   title: string;
   content: string;
-  badge: 'Important' | 'Exam' | 'Update' | 'Urgent' | 'General';
+  badge: 'Important' | 'Exam' | 'Update' | 'General';
   isPinned: boolean;
   link: string;
 } = {
@@ -83,6 +82,8 @@ export default function AdminNoticesPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Filters
   const [filterBadge, setFilterBadge] = useState('');
@@ -178,6 +179,7 @@ export default function AdminNoticesPage() {
   };
 
   const handleDelete = async (id: string) => {
+    setDeleteLoading(true);
     addClientDeletedId(id);
     setNotices((prev) => prev.filter((n) => n._id !== id));
     try {
@@ -188,6 +190,9 @@ export default function AdminNoticesPage() {
     } catch {
       toast.error('Could not delete notice');
       load();
+    } finally {
+      setDeleteLoading(false);
+      setDeleteId(null);
     }
   };
 
@@ -374,7 +379,6 @@ export default function AdminNoticesPage() {
                       <option value="Important">Important (Purple)</option>
                       <option value="Exam">Exam (Amber)</option>
                       <option value="Update">Update (Blue)</option>
-                      <option value="Urgent">Urgent (Red)</option>
                       <option value="General">General (Gray)</option>
                     </select>
                   </div>
@@ -549,7 +553,7 @@ export default function AdminNoticesPage() {
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => handleDelete(n._id)}
+                  onClick={() => setDeleteId(n._id)}
                   className="btn-ghost p-2 text-red-500 hover:bg-red-50 rounded-xl"
                   title="Delete Notice"
                 >
@@ -560,6 +564,16 @@ export default function AdminNoticesPage() {
           ))}
         </div>
       )}
+
+      <ConfirmDeleteModal
+        open={!!deleteId}
+        title="Delete this notice?"
+        description="This will permanently remove the notice. This action cannot be undone."
+        itemName={notices.find((n) => n._id === deleteId)?.title}
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        loading={deleteLoading}
+      />
     </div>
   );
 }

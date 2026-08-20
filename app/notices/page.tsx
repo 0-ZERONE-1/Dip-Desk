@@ -17,7 +17,7 @@ interface Notice {
   _id: string;
   title: string;
   content: string;
-  badge: 'Important' | 'Exam' | 'Update' | 'Urgent' | 'General';
+  badge: 'Important' | 'Exam' | 'Update' | 'General';
   isPinned: boolean;
   isActive: boolean;
   link?: string;
@@ -31,13 +31,7 @@ const noticeCardThemes: Record<string, {
   badge: string;
   indicator: string;
 }> = {
-  Urgent: {
-    border: 'border-red-300/90 hover:border-red-500',
-    glow: 'hover:shadow-red-500/10',
-    topAccent: 'from-red-500/0 via-red-500 to-red-500/0',
-    badge: 'bg-red-50 text-red-700 border-red-200',
-    indicator: 'bg-red-500',
-  },
+
   Exam: {
     border: 'border-amber-300/90 hover:border-amber-500',
     glow: 'hover:shadow-amber-500/10',
@@ -68,7 +62,7 @@ const noticeCardThemes: Record<string, {
   },
 };
 
-const categories = ['All', 'Important', 'Exam', 'Update', 'Urgent', 'General'];
+const categories = ['All', 'Important', 'Exam', 'Update', 'General'];
 
 export default function PublicNoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);

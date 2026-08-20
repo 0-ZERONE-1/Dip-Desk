@@ -4,6 +4,7 @@ import { Plus, Trash2, Edit2, Save, X, Loader2, RotateCcw, BookMarked } from 'lu
 import toast from 'react-hot-toast';
 import { SEMESTERS } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
+import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 
 interface Department {
   _id: string;
@@ -70,6 +71,8 @@ export default function AdminSubjectsPage() {
   const [saving, setSaving] = useState(false);
   const [filterDept, setFilterDept] = useState('');
   const [filterSem, setFilterSem] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     load();
@@ -167,6 +170,7 @@ export default function AdminSubjectsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    setDeleteLoading(true);
     addClientDeletedId(id);
     setSubjects((prev) => prev.filter((s) => s._id !== id));
     try {
@@ -176,6 +180,9 @@ export default function AdminSubjectsPage() {
     } catch {
       toast.error('Failed to delete');
       load();
+    } finally {
+      setDeleteLoading(false);
+      setDeleteId(null);
     }
   };
 
@@ -320,7 +327,7 @@ export default function AdminSubjectsPage() {
                           </button>
                           <button
                             id={`delete-subject-${s._id}`}
-                            onClick={() => handleDelete(s._id)}
+                            onClick={() => setDeleteId(s._id)}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                           >
@@ -479,6 +486,16 @@ export default function AdminSubjectsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        open={!!deleteId}
+        title="Delete this subject?"
+        description="All resources linked to this subject may become inaccessible. This cannot be undone."
+        itemName={subjects.find((s) => s._id === deleteId)?.name}
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        loading={deleteLoading}
+      />
     </div>
   );
 }

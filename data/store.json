@@ -56,14 +56,6 @@
   ],
   "subjects": [
     {
-      "_id": "sub_cst_1_1",
-      "name": "Mathematics-Iujouikl",
-      "slug": "mathematics-i",
-      "semesterNumber": 1,
-      "departmentId": "dept_cst",
-      "description": "df vdfbdfb dfb dtxfhbydtjnthkl jrj rj hfhg"
-    },
-    {
       "_id": "sub_cst_1_3",
       "name": "English Communication",
       "slug": "english-communication",
@@ -443,20 +435,6 @@
   ],
   "resources": [
     {
-      "_id": "res_1786902133436",
-      "upvotes": 0,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-16T17:42:13.436Z",
-      "title": "AWDAWDx",
-      "description": "DAaDawd",
-      "url": "ADAD",
-      "coverImage": "https://github.com/0-ZERONE-1/Image-Asset/blob/7c586c195a2abef604cd847236a7cf81d4f66e17/Dip-Desk/Nikhil%20Mandal.jpg",
-      "category": "Syllabus",
-      "subjectId": "sub_cst_3_1",
-      "tags": []
-    },
-    {
       "_id": "res_1786901408737",
       "upvotes": 0,
       "downvotes": 0,
@@ -592,16 +570,6 @@
       "link": "DSVdsv"
     },
     {
-      "_id": "notice_1786903695930",
-      "badge": "Urgent",
-      "isPinned": true,
-      "isActive": true,
-      "createdAt": "2026-08-16T18:08:15.930Z",
-      "title": "vsV SFV",
-      "content": "SDFV sDV ",
-      "link": "sdv SDV"
-    },
-    {
       "_id": "notice_1786903684450",
       "badge": "Update",
       "isPinned": false,
@@ -636,7 +604,10 @@
     "notice_2",
     "dept_1786233140390",
     "dev_2",
-    "sub_cst_1_2"
+    "sub_cst_1_2",
+    "notice_1786903695930",
+    "res_1786902133436",
+    "sub_cst_1_1"
   ],
   "users": [
     {
