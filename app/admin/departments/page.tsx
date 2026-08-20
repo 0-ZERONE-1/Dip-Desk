@@ -223,7 +223,7 @@ export default function AdminDepartmentsPage() {
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-13 h-13 rounded-2xl bg-primary-50/60 border border-primary-100/80 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden aspect-square shadow-2xs">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary-50/60 border border-primary-100/80 flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0 overflow-hidden aspect-square shadow-sm">
                       {isImageUrl(d.icon) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

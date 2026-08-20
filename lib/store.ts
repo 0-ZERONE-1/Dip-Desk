@@ -617,23 +617,31 @@ export async function updateUserStore(id: string, data: any) {
 }
 
 // --- NOTICES ---
-export async function getNoticesStore() {
+export async function getNoticesStore(includeInactive = false) {
   try {
     await dbConnect();
-    const notices = await Notice.find({ isActive: true }).sort({ isPinned: -1, createdAt: -1 });
+    const query = includeInactive ? {} : { isActive: { $ne: false } };
+    const notices = await Notice.find(query).sort({ isPinned: -1, createdAt: -1 });
     return notices;
   } catch (err) {
     console.error('Failed to fetch notices from DB:', err);
   }
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
-  return (store.notices || []).filter((n) => !deleted.includes(n._id));
+  let list = (store.notices || []).filter((n) => !deleted.includes(n._id));
+  if (!includeInactive) {
+    list = list.filter((n: any) => n.isActive !== false);
+  }
+  return list;
 }
 
 export async function createNoticeStore(data: any) {
   try {
     await dbConnect();
-    const created = await Notice.create({ ...data, isActive: true });
+    const created = await Notice.create({
+      ...data,
+      isActive: data.isActive !== undefined ? data.isActive : true,
+    });
     return created;
   } catch (err) {
     console.error('Failed to create notice in DB:', err);
@@ -645,7 +653,7 @@ export async function createNoticeStore(data: any) {
     _id: `notice_${Date.now()}`,
     badge: data.badge || 'Important',
     isPinned: data.isPinned || false,
-    isActive: true,
+    isActive: data.isActive !== undefined ? data.isActive : true,
     createdAt: new Date().toISOString(),
     ...data,
   };

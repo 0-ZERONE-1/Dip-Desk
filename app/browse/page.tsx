@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BookOpen, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
+import { formatImageUrl, isImageUrl } from '@/lib/utils';
 
 import dynamic from 'next/dynamic';
 
@@ -103,7 +104,7 @@ export default function BrowsePage() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full"
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 w-full"
           >
             {departments.map((dept) => (
               <motion.div
@@ -114,7 +115,7 @@ export default function BrowsePage() {
               >
                 <Link
                   href={`/${dept.slug}`}
-                  className="group bg-white p-6 sm:p-7 block border border-surface-200/90 hover:border-primary-300 rounded-3xl relative h-full flex flex-col justify-between shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out overflow-hidden"
+                  className="group bg-white p-5 sm:p-6 block border border-surface-200/90 hover:border-primary-300 rounded-3xl relative h-full flex flex-col justify-between shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out overflow-hidden"
                 >
                   {/* Smooth Rounded Top Accent Gradient Bar blended with card */}
                   <div className="absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
@@ -122,17 +123,17 @@ export default function BrowsePage() {
                   {/* Ambient Soft Glow in corner on Hover */}
                   <div className="absolute -top-10 -right-10 w-28 h-28 bg-primary-500/10 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                  <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/70 group-hover:bg-primary-50 group-hover:border-primary-200 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-primary-500/15 transition-all duration-300 overflow-hidden flex-shrink-0">
-                      {dept.icon && (dept.icon.startsWith('http') || dept.icon.startsWith('/')) ? (
+                  <div className="flex items-center gap-3.5 sm:gap-4 relative z-10">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/80 group-hover:bg-primary-50 group-hover:border-primary-200 group-hover:scale-105 group-hover:shadow-md group-hover:shadow-primary-500/15 transition-all duration-300 overflow-hidden flex-shrink-0 aspect-square shadow-sm">
+                      {isImageUrl(dept.icon) ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={dept.icon} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
+                        <img src={formatImageUrl(dept.icon)} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
                       ) : (
                         dept.icon || '📚'
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug break-normal [word-break:keep-all]">
+                      <h2 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug break-words">
                         {dept.name}
                       </h2>
                       {dept.description && (

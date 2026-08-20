@@ -37,7 +37,7 @@
     },
     {
       "_id": "dept_etc",
-      "name": "Electronics & Tele-communication",
+      "name": "Electronics & Tele-communication Engineering",
       "slug": "etc",
       "description": "Communication systems, signal processing, and electronic devices",
       "icon": "",
@@ -48,7 +48,7 @@
       "_id": "dept_1786949667729",
       "name": "12345",
       "description": "sgfsfgv",
-      "icon": "",
+      "icon": "https://github.com/0-ZERONE-1/Assets_01/blob/435bcad3b3721cc7bba04fc66bd9c772f7ea1b84/Dip-Desk/Developes/Nikhil%20Mandal.png",
       "color": "#6366f1",
       "slug": "12345",
       "isActive": true

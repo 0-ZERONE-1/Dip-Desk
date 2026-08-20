@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Edit2, Save, X, Loader2, Pin, Bell, ExternalLink, RotateCcw } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, Loader2, Pin, Bell, ExternalLink, RotateCcw, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
@@ -13,9 +13,9 @@ interface Notice {
   content: string;
   badge: 'Important' | 'Exam' | 'Update' | 'General';
   isPinned: boolean;
-  isActive: boolean;
+  isActive?: boolean;
   link?: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 const BADGES = ['Important', 'Exam', 'Update', 'General'] as const;
@@ -68,12 +68,14 @@ const emptyForm: {
   content: string;
   badge: 'Important' | 'Exam' | 'Update' | 'General';
   isPinned: boolean;
+  isActive: boolean;
   link: string;
 } = {
   title: '',
   content: '',
   badge: 'Important',
   isPinned: false,
+  isActive: true,
   link: '',
 };
 
@@ -99,9 +101,13 @@ export default function AdminNoticesPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await fetch(`/api/notices?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
+      const data = await fetch(`/api/notices?all=true&t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
       const rawList = data.notices || [];
-      setNotices(syncAndFilterItems<Notice>('notices', rawList));
+      const formatted = rawList.map((n: Notice) => ({
+        ...n,
+        isActive: n.isActive ?? true
+      }));
+      setNotices(syncAndFilterItems<Notice>('notices', formatted));
     } catch {
       toast.error('Failed to load notices');
     } finally {
@@ -116,6 +122,7 @@ export default function AdminNoticesPage() {
       content: n.content,
       badge: n.badge || 'Important',
       isPinned: !!n.isPinned,
+      isActive: n.isActive !== false,
       link: n.link || '',
     });
     setShowForm(true);
@@ -199,16 +206,38 @@ export default function AdminNoticesPage() {
   };
 
   const togglePin = async (notice: Notice) => {
+    const updatedPin = !notice.isPinned;
+    setNotices((prev) =>
+      prev.map((n) => (n._id === notice._id ? { ...n, isPinned: updatedPin } : n))
+    );
     try {
       await fetch(`/api/notices/${notice._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPinned: !notice.isPinned }),
+        body: JSON.stringify({ isPinned: updatedPin }),
       });
-      toast.success(notice.isPinned ? 'Unpinned notice' : 'Pinned notice to top!');
-      load();
+      toast.success(updatedPin ? 'Notice pinned to top' : 'Notice unpinned');
     } catch {
       toast.error('Failed to update pin status');
+      load();
+    }
+  };
+
+  const toggleActive = async (notice: Notice) => {
+    const updatedActive = notice.isActive === false ? true : false;
+    setNotices((prev) =>
+      prev.map((n) => (n._id === notice._id ? { ...n, isActive: updatedActive } : n))
+    );
+    try {
+      await fetch(`/api/notices/${notice._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: updatedActive }),
+      });
+      toast.success(updatedActive ? 'Notice activated (visible to students)' : 'Notice deactivated (hidden from students)');
+    } catch {
+      toast.error('Failed to update active status');
+      load();
     }
   };
 
@@ -417,17 +446,33 @@ export default function AdminNoticesPage() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2.5 pt-1">
-                  <input
-                    type="checkbox"
-                    id="pin-notice"
-                    checked={form.isPinned}
-                    onChange={(e) => setForm({ ...form, isPinned: e.target.checked })}
-                    className="w-4 h-4 text-primary-600 rounded cursor-pointer accent-primary-600"
-                  />
-                  <label htmlFor="pin-notice" className="text-xs font-semibold text-gray-700 cursor-pointer select-none">
-                    Pin this notice to the top of the Notice Board
-                  </label>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
+                  <div className="flex items-center gap-2.5">
+                    <input
+                      type="checkbox"
+                      id="pin-notice"
+                      checked={form.isPinned}
+                      onChange={(e) => setForm({ ...form, isPinned: e.target.checked })}
+                      className="w-4 h-4 text-primary-600 rounded cursor-pointer accent-primary-600"
+                    />
+                    <label htmlFor="pin-notice" className="text-xs font-semibold text-gray-700 cursor-pointer select-none">
+                      Pin to top of Notice Board
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <input
+                      type="checkbox"
+                      id="active-notice"
+                      checked={form.isActive}
+                      onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                      className="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600"
+                    />
+                    <label htmlFor="active-notice" className="text-xs font-semibold text-gray-700 cursor-pointer select-none flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${form.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
+                      Active (Visible to Students)
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-100 mt-6">
@@ -505,12 +550,32 @@ export default function AdminNoticesPage() {
                   >
                     <Pin className="w-3.5 h-3.5" />
                   </button>
+                  <button
+                    onClick={() => toggleActive(n)}
+                    title={n.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                    className={`p-1 rounded-lg transition-colors ${
+                      n.isActive !== false
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {n.isActive !== false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  </button>
                   <span
                     className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${getBadgeStyle(
                       n.badge
                     )}`}
                   >
                     {n.badge}
+                  </span>
+                  <span
+                    className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                      n.isActive !== false
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}
+                  >
+                    {n.isActive !== false ? 'Active' : 'Inactive'}
                   </span>
                   {n.createdAt && (
                     <span className="text-xs text-gray-400 font-medium">
