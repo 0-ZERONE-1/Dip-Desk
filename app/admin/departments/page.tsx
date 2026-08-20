@@ -78,7 +78,7 @@ export default function AdminDepartmentsPage() {
     } catch {
       toast.error('Failed to load departments');
     } finally {
-      setTimeout(() => setLoading(false), 2500);
+      setLoading(false);
     }
   };
 

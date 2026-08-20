@@ -24,8 +24,8 @@ export default function AdminRequestsPage() {
   useEffect(() => {
     fetch('/api/admin/requests').then((r) => r.json()).then((d) => {
       setRequests(d.requests || []);
-      setTimeout(() => setLoading(false), 2500);
-    }).catch(() => setTimeout(() => setLoading(false), 2500));
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   const updateStatus = async (id: string, status: string, adminNote: string = '') => {

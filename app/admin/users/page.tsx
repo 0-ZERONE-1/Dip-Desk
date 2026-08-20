@@ -16,8 +16,8 @@ export default function AdminUsersPage() {
   useEffect(() => {
     fetch('/api/admin/users').then((r) => r.json()).then((d) => {
       setUsers(d.users || []);
-      setTimeout(() => setLoading(false), 2500);
-    }).catch(() => setTimeout(() => setLoading(false), 2500));
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   const toggleBan = async (user: User) => {

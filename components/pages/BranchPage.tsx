@@ -79,9 +79,9 @@ export default function BranchPage({ branchSlug }: Props) {
         const filteredList = syncAndFilterItems<Department>('departments', rawList);
         const found = filteredList.find((d: Department) => d.slug === branchSlug);
         setDept(found || null);
-        setTimeout(() => setLoading(false), 2500);
+        setLoading(false);
       })
-      .catch(() => setTimeout(() => setLoading(false), 2500));
+      .catch(() => setLoading(false));
   }, [branchSlug]);
 
   return (

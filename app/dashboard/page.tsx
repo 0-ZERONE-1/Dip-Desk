@@ -88,7 +88,7 @@ export default function StudentPanelPage() {
         });
       }
     } catch {}
-    setTimeout(() => setLoading(false), 2500);
+    setLoading(false);
   };
 
   const fetchAllResources = async () => {

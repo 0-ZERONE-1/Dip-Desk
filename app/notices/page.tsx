@@ -76,9 +76,9 @@ export default function PublicNoticesPage() {
       .then((data) => {
         const rawList = data.notices || [];
         setNotices(syncAndFilterItems<Notice>('notices', rawList));
-        setTimeout(() => setLoading(false), 2500);
+        setLoading(false);
       })
-      .catch(() => setTimeout(() => setLoading(false), 2500));
+      .catch(() => setLoading(false));
   }, []);
 
   const filteredNotices = notices.filter((n) => {

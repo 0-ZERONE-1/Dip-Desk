@@ -105,7 +105,7 @@ export default function AdminNoticesPage() {
     } catch {
       toast.error('Failed to load notices');
     } finally {
-      setTimeout(() => setLoading(false), 2500);
+      setLoading(false);
     }
   };
 

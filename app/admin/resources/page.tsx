@@ -163,7 +163,7 @@ export default function AdminResourcesPage() {
     } catch {
       toast.error('Failed to load resources');
     } finally {
-      setTimeout(() => setLoading(false), 2500);
+      setLoading(false);
     }
   };
 

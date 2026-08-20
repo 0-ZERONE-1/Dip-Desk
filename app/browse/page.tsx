@@ -63,9 +63,9 @@ export default function BrowsePage() {
       .then((r) => r.json())
       .then((data) => {
         setDepartments(syncAndFilterItems<Department>('departments', data.departments || []));
-        setTimeout(() => setLoading(false), 2500);
+        setLoading(false);
       })
-      .catch(() => setTimeout(() => setLoading(false), 2500));
+      .catch(() => setLoading(false));
   }, []);
 
   return (

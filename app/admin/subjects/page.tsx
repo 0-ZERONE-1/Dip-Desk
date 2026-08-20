@@ -89,7 +89,7 @@ export default function AdminSubjectsPage() {
     ]);
     setSubjects(syncAndFilterItems<Subject>('subjects', subData.subjects || []));
     setDepartments(syncAndFilterItems<Department>('departments', deptData.departments || []));
-    setTimeout(() => setLoading(false), 2500);
+    setLoading(false);
   };
 
   const handleSave = async (e?: React.FormEvent) => {

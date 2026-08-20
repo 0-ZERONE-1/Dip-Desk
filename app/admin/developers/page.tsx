@@ -113,7 +113,7 @@ export default function AdminDevelopersPage() {
     } catch {
       toast.error('Failed to fetch developers');
     } finally {
-      setTimeout(() => setLoading(false), 2500);
+      setLoading(false);
     }
   };
 
