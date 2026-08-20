@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const userId = (session.user as any).id || session.user?.email || 'demo_student_id';
     const userEmail = session.user?.email ? session.user.email.toLowerCase().trim() : '';
-    const { name, title, institute, regNumber } = await req.json();
+    const { name, title, institute, regNumber, image } = await req.json();
 
     if (!name || !title || !institute || !regNumber) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
       title,
       institute,
       regNumber,
+      image: image || '',
       isProfileComplete: true,
     };
 
@@ -104,6 +105,7 @@ export async function GET() {
               title: dbUser.title || 'Student',
               institute: dbUser.institute || '',
               regNumber: dbUser.regNumber || '',
+              image: dbUser.image || session.user?.image || '',
               role: dbUser.role || 'student',
               isProfileComplete: dbUser.isProfileComplete ?? true,
               bookmarks: dbUser.bookmarks || [],

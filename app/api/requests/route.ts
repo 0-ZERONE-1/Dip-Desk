@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const userId = (session.user as any).id || 'demo_student_id';
-    const { subjectTitle, category, description } = await req.json();
+    const { subjectTitle, category, description, department, semester, url } = await req.json();
 
     if (!category || !description) {
       return NextResponse.json({ error: 'Category and description are required' }, { status: 400 });
@@ -23,6 +23,10 @@ export async function POST(req: NextRequest) {
         studentId: userId,
         category,
         description,
+        subjectTitle,
+        department,
+        semester,
+        url,
       });
     } catch {}
 
@@ -32,6 +36,9 @@ export async function POST(req: NextRequest) {
       subjectTitle: subjectTitle || 'General',
       category,
       description,
+      department: department || '',
+      semester: semester || '',
+      url: url || '',
     });
 
     return NextResponse.json({ request: newReq }, { status: 201 });

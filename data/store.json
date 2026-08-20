@@ -657,6 +657,20 @@
       "email": "admin@diplomahub.com",
       "password": "Admin@123",
       "hashedPassword": "$2a$10$VI6IkuCJ7tEburR0/9CuI.euIyFGwNeiM1wk3t1l59MNuNjWxrcoK"
+    },
+    {
+      "_id": "user_1787169236156",
+      "role": "student",
+      "isProfileComplete": true,
+      "createdAt": "2026-08-19T19:53:56.156Z",
+      "name": "Student #123",
+      "email": "admin@dipdesk.com",
+      "password": "Admin.DipDesk",
+      "hashedPassword": "$2a$10$8WZ8EVcgdMi2tZ4OHzR.xuBXUa9uuN/qGcJpzbpbm24cijCLsjwZ.",
+      "title": "Student",
+      "institute": "sadcds",
+      "regNumber": "DSACdsc",
+      "image": ""
     }
   ]
 }

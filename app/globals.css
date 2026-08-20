@@ -131,7 +131,7 @@
 
   /* ---- Gradient text ---- */
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 inline-block;
   }
 
   /* ---- Page hero ---- */
