@@ -60,32 +60,36 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Nav Links */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1.5">
               {topNavItems.map(({ href, label, exact }) => {
                 const active = exact ? pathname === href : pathname.startsWith(href);
                 return (
-                  <Link
+                  <motion.div
                     key={href}
-                    href={href}
-                    scroll={false}
-                    className={cn(
-                      'relative px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-colors duration-150 group',
-                      active ? 'text-white' : 'text-gray-600 hover:text-gray-900'
-                    )}
+                    whileHover={{ scale: 1.04, y: -1 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 25 }}
                   >
-                    {active && (
-                      <motion.span
-                        layoutId="top-navbar-pill"
-                        layout="position"
-                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-600 to-accent-600 shadow-sm shadow-primary-500/25"
-                        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                      />
-                    )}
-                    {!active && (
-                      <span className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-surface-100 transition-opacity duration-150" />
-                    )}
-                    <span className="relative z-10">{label}</span>
-                  </Link>
+                    <Link
+                      href={href}
+                      className={cn(
+                        'relative px-3.5 py-1.5 rounded-xl text-sm font-bold transition-colors duration-200 group flex items-center justify-center overflow-hidden',
+                        active ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                      )}
+                    >
+                      {active ? (
+                        <motion.span
+                          initial={{ scale: 0.88, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-600 via-indigo-600 to-accent-600 shadow-md shadow-primary-500/30"
+                        />
+                      ) : (
+                        <span className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-surface-100/80 transition-all duration-200" />
+                      )}
+                      <span className="relative z-10">{label}</span>
+                    </Link>
+                  </motion.div>
                 );
               })}
             </nav>
