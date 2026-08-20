@@ -8,6 +8,13 @@ import { formatImageUrl, isImageUrl } from '@/lib/utils';
 
 import { syncAndFilterItems } from '@/lib/clientStore';
 
+import dynamic from 'next/dynamic';
+
+const SemesterLottieLoader = dynamic(
+  () => import('@/components/SemesterLottieLoader'),
+  { ssr: false }
+);
+
 interface Department {
   _id: string;
   name: string;
@@ -52,9 +59,17 @@ const semesterCardVariants = {
   },
 };
 
+// Derive a readable name from slug as immediate fallback
+function slugToName(slug: string) {
+  return slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
 export default function BranchPage({ branchSlug }: Props) {
   const [dept, setDept] = useState<Department | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Immediate display name — updates once API responds
+  const displayName = dept?.name || slugToName(branchSlug);
 
   useEffect(() => {
     fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' })
@@ -64,61 +79,53 @@ export default function BranchPage({ branchSlug }: Props) {
         const filteredList = syncAndFilterItems<Department>('departments', rawList);
         const found = filteredList.find((d: Department) => d.slug === branchSlug);
         setDept(found || null);
-        setLoading(false);
+        setTimeout(() => setLoading(false), 1200);
       })
       .catch(() => setLoading(false));
   }, [branchSlug]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!dept) {
-    return (
-      <div className="text-center py-24">
-        <p className="text-gray-500">Branch not found.</p>
-        <Link href="/" className="btn-primary mt-4 inline-flex">Go Home</Link>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full">
-      <Breadcrumb crumbs={[{ label: dept.name }]} />
+      {/* Breadcrumb & Header are always visible immediately */}
+      <Breadcrumb crumbs={[{ label: displayName }]} />
 
       {/* Header Banner */}
       <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
         <div className="flex items-center gap-4 relative z-10">
           <div
             className={`w-12 h-12 sm:w-14 sm:h-14 ${
-              isImageUrl(dept.icon)
+              dept && isImageUrl(dept.icon)
                 ? 'bg-transparent'
                 : 'bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md'
             } rounded-xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0 overflow-hidden aspect-square`}
           >
-            {isImageUrl(dept.icon) ? (
+            {dept && isImageUrl(dept.icon) ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={formatImageUrl(dept.icon)} alt={dept.name} className="w-full h-full object-cover rounded-xl" />
             ) : (
-              <span>{dept.icon || '📁'}</span>
+              <span>{dept?.icon || '📁'}</span>
             )}
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-              {dept.name}
+              {displayName}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
-              {dept.description || 'Select a semester to access syllabus, notes, model papers, and lab manuals.'}
+              {dept?.description || 'Select a semester to access syllabus, notes, model papers, and lab manuals.'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Semester Grid */}
+      {/* Semester Grid — shows Lottie loader until data is ready */}
+      {loading ? (
+        <SemesterLottieLoader />
+      ) : !dept ? (
+        <div className="text-center py-24">
+          <p className="text-gray-500">Branch not found.</p>
+          <Link href="/" className="btn-primary mt-4 inline-flex">Go Home</Link>
+        </div>
+      ) : (
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -178,6 +185,7 @@ export default function BranchPage({ branchSlug }: Props) {
           </motion.div>
         ))}
       </motion.div>
+      )}
     </div>
   );
 }

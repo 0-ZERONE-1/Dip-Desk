@@ -330,7 +330,7 @@ export default function DevelopersPage() {
         const rawDevs = syncAndFilterItems<DeveloperItem>('developers', data.developers || []);
         const sortedDevs = [...rawDevs].sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
         setDevelopers(sortedDevs);
-        setLoading(false);
+        setTimeout(() => setLoading(false), 1200);
       })
       .catch(() => setLoading(false));
   }, []);

@@ -7,8 +7,14 @@ import ResourceCard from '@/components/ResourceCard';
 import RequestForm from '@/components/RequestForm';
 import { syncAndFilterItems } from '@/lib/clientStore';
 import { BookOpen, Loader2, PlusCircle, FileText, Sparkles } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { cn, CATEGORIES, categoryIcon } from '@/lib/utils';
 import toast from 'react-hot-toast';
+
+const ResourceLottieLoader = dynamic(
+  () => import('@/components/ResourceLottieLoader'),
+  { ssr: false }
+);
 
 interface Subject {
   _id: string;
@@ -58,8 +64,9 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         const filteredList = syncAndFilterItems<Subject>('subjects', rawList, { departmentSlug: branchSlug, semesterNumber: semesterNumber });
         const found = filteredList.find((s: Subject) => s.slug === subjectSlug);
         setSubject(found || null);
-        setLoading(false);
-      });
+        setTimeout(() => setLoading(false), 1200);
+      })
+      .catch(() => setTimeout(() => setLoading(false), 1200));
   }, [branchSlug, semesterNumber, subjectSlug]);
 
   // Load resources when subject and category change
@@ -74,20 +81,12 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       .then((data) => {
         const rawList = data.resources || [];
         setResources(syncAndFilterItems<Resource>('resources', rawList, { subjectId: subject._id, category: activeCategory }));
-        setResourcesLoading(false);
+        setTimeout(() => setResourcesLoading(false), 800);
       })
       .catch(() => setResourcesLoading(false));
   }, [subject, activeCategory]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!subject) {
+  if (!loading && !subject) {
     return (
       <div className="text-center py-24">
         <p className="text-gray-500">Subject not found.</p>
@@ -95,8 +94,8 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
     );
   }
 
-  const deptName = subject.departmentId?.name || branchSlug.toUpperCase();
-  const deptSlug = subject.departmentId?.slug || branchSlug;
+  const deptName = subject?.departmentId?.name || branchSlug.toUpperCase();
+  const deptSlug = subject?.departmentId?.slug || branchSlug;
 
   return (
     <div className="w-full">
@@ -104,7 +103,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         crumbs={[
           { label: deptName, href: `/${deptSlug}` },
           { label: `Semester ${semesterNumber}`, href: `/${deptSlug}/semester-${semesterNumber}` },
-          { label: subject.name },
+          { label: subject ? subject.name : 'Loading...' },
         ]}
       />
 
@@ -112,9 +111,9 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       <div className="mt-6 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-white via-surface-50 to-primary-50/30 border border-surface-200/80 shadow-sm">
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            <span className="gradient-text">{subject.name}</span>
+            <span className="gradient-text">{subject ? subject.name : 'Loading Resources...'}</span>
           </h1>
-          {subject.description && (
+          {subject?.description && (
             <p className="text-sm sm:text-base text-gray-500 mt-2 max-w-2xl leading-relaxed">
               {subject.description}
             </p>
@@ -130,38 +129,36 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         </button>
       </div>
 
-      {/* Category Tabs Bar */}
-      <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
-        {CATEGORIES.map((cat) => {
-          const isActive = activeCategory === cat;
-          return (
-            <button
-              key={cat}
-              id={`tab-${cat.toLowerCase().replace(/\s+/g, '-')}`}
-              onClick={() => setActiveCategory(cat)}
-              className={cn(
-                'px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-200 shadow-2xs flex-shrink-0',
-                isActive
-                  ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.02]'
-                  : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
-              )}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Resources Main Panel */}
-      {resourcesLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-primary-100" />
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary-500 animate-spin" />
+      {loading ? (
+        <ResourceLottieLoader />
+      ) : (
+        <>
+          {/* Category Tabs Bar */}
+          <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+            {CATEGORIES.map((cat) => {
+              const isActive = activeCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  id={`tab-${cat.toLowerCase().replace(/\s+/g, '-')}`}
+                  onClick={() => setActiveCategory(cat)}
+                  className={cn(
+                    'px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-200 shadow-2xs flex-shrink-0',
+                    isActive
+                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.02]'
+                      : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
+                  )}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
-          <p className="text-sm text-gray-400 font-medium animate-pulse">Loading {activeCategory}...</p>
-        </div>
-      ) : resources.length === 0 ? (
+
+          {/* Resources Main Panel */}
+          {resourcesLoading ? (
+            <ResourceLottieLoader />
+          ) : resources.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -174,7 +171,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
             No {activeCategory} Available Yet
           </h3>
           <p className="text-sm sm:text-base text-gray-500 max-w-md mx-auto mb-6 leading-relaxed">
-            Be the first student to request materials for <span className="font-semibold text-gray-700">{subject.name}</span>. Our team will verify and upload it!
+            Be the first student to request materials for <span className="font-semibold text-gray-700">{subject?.name || ''}</span>. Our team will verify and upload it!
           </p>
           <button
             onClick={() => setShowRequestForm(true)}
@@ -203,6 +200,8 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
           </motion.div>
         </AnimatePresence>
       )}
+    </>
+  )}
 
       {/* Request Form Modal */}
       {showRequestForm && subject && (

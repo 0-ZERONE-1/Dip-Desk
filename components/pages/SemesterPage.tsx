@@ -7,6 +7,13 @@ import { ArrowRight, BookOpen, Loader2 } from 'lucide-react';
 
 import { syncAndFilterItems } from '@/lib/clientStore';
 
+import dynamic from 'next/dynamic';
+
+const SemesterLottieLoader = dynamic(
+  () => import('@/components/SemesterLottieLoader'),
+  { ssr: false }
+);
+
 interface Subject {
   _id: string;
   name: string;
@@ -55,7 +62,10 @@ const subjectCardVariants = {
 
 export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [deptName, setDeptName] = useState('');
+  const [deptName, setDeptName] = useState(
+    // Immediate fallback from slug
+    branchSlug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,23 +80,17 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
         const deptFound = deptList.find((d: any) => d.slug === branchSlug);
         if (deptFound) setDeptName(deptFound.name);
         setSubjects(subList);
-        setLoading(false);
+        setTimeout(() => setLoading(false), 1200);
       })
       .catch(() => setLoading(false));
   }, [branchSlug, semesterNumber]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-      </div>
-    );
-  }
-
-  const formattedDeptName = deptName || branchSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  // formattedDeptName is always available immediately
+  const formattedDeptName = deptName;
 
   return (
     <div className="w-full">
+      {/* Breadcrumb & Header always visible immediately */}
       <Breadcrumb
         crumbs={[
           { label: formattedDeptName, href: `/${branchSlug}` },
@@ -105,14 +109,16 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
               Semester {semesterNumber}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
-              {subjects.length} subject{subjects.length !== 1 ? 's' : ''} · {formattedDeptName}
+              {loading ? `${formattedDeptName}` : `${subjects.length} subject${subjects.length !== 1 ? 's' : ''} · ${formattedDeptName}`}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Bottom Container Layout */}
-      {subjects.length === 0 ? (
+      {/* Subject Cards — show Lottie loader until data is ready */}
+      {loading ? (
+        <SemesterLottieLoader />
+      ) : subjects.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
