@@ -112,48 +112,58 @@ export default function PublicNoticesPage() {
           </motion.p>
         </div>
 
-        {/* Controls: Search & Category Filter Pills */}
-        <div className="max-w-4xl mx-auto mb-6 sm:mb-8 space-y-3 sm:space-y-4">
-          <div className="relative">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search announcements..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input pl-10 py-2.5 sm:py-3 text-xs sm:text-sm rounded-xl sm:rounded-2xl border-surface-200 shadow-xs"
-            />
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
-            {categories.map((c) => {
-              const isActive = selectedBadge === c;
-              return (
-                <button
-                  key={c}
-                  id={`filter-${c.toLowerCase()}`}
-                  onClick={() => setSelectedBadge(c)}
-                  className={cn(
-                    'px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 flex-shrink-0 shadow-2xs',
-                    isActive
-                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.03] border-transparent'
-                      : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
-                  )}
-                >
-                  {c}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Notices Grid */}
+        {/* Content Area */}
         <div className="max-w-4xl mx-auto w-full">
           {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+            <div className="flex flex-col items-center justify-center py-20 min-h-[350px]">
+              <Loader2 className="w-9 h-9 text-primary-600 animate-spin mb-3" />
+              <p className="text-xs sm:text-sm font-semibold text-gray-400 animate-pulse">
+                Loading Notice Board...
+              </p>
             </div>
-          ) : filteredNotices.length === 0 ? (
+          ) : (
+            <>
+              {/* Controls: Search & Category Filter Pills */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 sm:mb-8 space-y-3 sm:space-y-4"
+              >
+                <div className="relative">
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search announcements..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="input pl-10 py-2.5 sm:py-3 text-xs sm:text-sm rounded-xl sm:rounded-2xl border-surface-200 shadow-xs"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+                  {categories.map((c) => {
+                    const isActive = selectedBadge === c;
+                    return (
+                      <button
+                        key={c}
+                        id={`filter-${c.toLowerCase()}`}
+                        onClick={() => setSelectedBadge(c)}
+                        className={cn(
+                          'px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 flex-shrink-0 shadow-2xs',
+                          isActive
+                            ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.03] border-transparent'
+                            : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
+                        )}
+                      >
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+
+              {/* Notices List */}
+              {filteredNotices.length === 0 ? (
             <div className="card p-8 sm:p-12 text-center rounded-3xl">
               <Bell className="w-10 h-10 text-gray-300 mx-auto mb-3" />
               <h3 className="font-bold text-gray-700 mb-1">No Notices Found</h3>
@@ -253,8 +263,10 @@ export default function PublicNoticesPage() {
               </AnimatePresence>
             </div>
           )}
-        </div>
-      </main>
+        </>
+      )}
+    </div>
+  </main>
     </>
   );
 }
