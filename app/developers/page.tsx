@@ -28,7 +28,12 @@ interface DeveloperItem {
   order?: number;
 }
 
-import DeveloperLottieLoader from '@/components/DeveloperLottieLoader';
+import dynamic from 'next/dynamic';
+
+const DeveloperLottieLoader = dynamic(
+  () => import('@/components/DeveloperLottieLoader'),
+  { ssr: false }
+);
 
 /* Shard origins for the entry animation */
 const shardOrigins = [
