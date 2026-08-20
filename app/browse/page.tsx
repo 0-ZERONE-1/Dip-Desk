@@ -6,6 +6,13 @@ import { BookOpen, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
 
+import dynamic from 'next/dynamic';
+
+const BrowseLottieLoader = dynamic(
+  () => import('@/components/BrowseLottieLoader'),
+  { ssr: false }
+);
+
 interface Department {
   _id: string;
   name: string;
@@ -84,13 +91,7 @@ export default function BrowsePage() {
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="relative w-14 h-14">
-              <div className="absolute inset-0 rounded-full border-4 border-primary-100" />
-              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary-500 animate-spin" />
-            </div>
-            <p className="text-sm text-gray-400 font-medium animate-pulse">Loading departments...</p>
-          </div>
+          <BrowseLottieLoader />
         ) : departments.length === 0 ? (
           <div className="card p-12 text-center max-w-md mx-auto">
             <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
