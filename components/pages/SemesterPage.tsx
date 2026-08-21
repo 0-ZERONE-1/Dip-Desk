@@ -3,14 +3,18 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
-import { ArrowRight, BookOpen, Loader2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
+import { ArrowRight, BookOpen, Loader2, PlusCircle, AlertTriangle } from 'lucide-react';
+import RequestForm from '@/components/RequestForm';
 
 import { syncAndFilterItems } from '@/lib/clientStore';
+import { getDepartmentNameBySlug } from '@/lib/utils';
 
 import dynamic from 'next/dynamic';
 
-const SemesterLottieLoader = dynamic(
-  () => import('@/components/SemesterLottieLoader'),
+const SubjectLottieLoader = dynamic(
+  () => import('@/components/SubjectLottieLoader'),
   { ssr: false }
 );
 
@@ -61,16 +65,35 @@ const subjectCardVariants = {
 };
 
 export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
+  const { data: session } = useSession();
+  const [isBanned, setIsBanned] = useState(false);
+
+  useEffect(() => {
+    if (session?.user) {
+      if ((session.user as any).isBanned) {
+        setIsBanned(true);
+      } else {
+        fetch('/api/user/profile')
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.user?.isBanned) setIsBanned(true);
+          })
+          .catch(() => {});
+      }
+    }
+  }, [session]);
+
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [deptName, setDeptName] = useState(
-    // Immediate fallback from slug
-    branchSlug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    getDepartmentNameBySlug(branchSlug)
   );
   const [loading, setLoading] = useState(true);
+  const [showRequestSubjectForm, setShowRequestSubjectForm] = useState(false);
 
   useEffect(() => {
     const t = Date.now();
-    Promise.all([
+    const minDelay = new Promise((res) => setTimeout(res, 2500));
+    const apiFetch = Promise.all([
       fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ])
@@ -78,11 +101,12 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
         const subList = syncAndFilterItems<Subject>('subjects', subData.subjects || [], { departmentSlug: branchSlug, semesterNumber: semesterNumber });
         const deptList = syncAndFilterItems<any>('departments', deptData.departments || []);
         const deptFound = deptList.find((d: any) => d.slug === branchSlug);
-        if (deptFound) setDeptName(deptFound.name);
-        setSubjects(subList);
-        setLoading(false);
+        if (deptFound) setDeptName(deptFound.name); // update name immediately
+        setSubjects(subList); // update subjects immediately
       })
-      .catch(() => setLoading(false));
+      .catch(() => {});
+    Promise.all([apiFetch, minDelay])
+      .finally(() => setLoading(false));
   }, [branchSlug, semesterNumber]);
 
   // formattedDeptName is always available immediately
@@ -94,30 +118,50 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
       <Breadcrumb
         crumbs={[
           { label: formattedDeptName, href: `/${branchSlug}` },
-          { label: `Semester ${semesterNumber}` },
+          { label: loading ? 'Loading...' : `Semester ${semesterNumber}` },
         ]}
       />
 
-      {/* Top Banner (Semester Header matching Department page banner layout) */}
-      <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
+      {/* Top Banner (Semester Header with Request Subject Button) */}
+      <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4 relative z-10">
           <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md rounded-xl flex items-center justify-center text-xl sm:text-2xl font-extrabold flex-shrink-0 aspect-square">
             {semesterNumber}
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-              Semester {semesterNumber}
+              {loading ? 'Loading Semester...' : `Semester ${semesterNumber}`}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
-              {loading ? `${formattedDeptName}` : `${subjects.length} subject${subjects.length !== 1 ? 's' : ''} · ${formattedDeptName}`}
+              {loading ? 'Access subjects, syllabus, and study resources.' : `${subjects.length} subject${subjects.length !== 1 ? 's' : ''} · ${formattedDeptName}`}
             </p>
           </div>
         </div>
+
+        {isBanned ? (
+          <button
+            onClick={() => toast.error('Your account has been suspended. You cannot submit new requests.', { icon: '🚫' })}
+            className="bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-200/90 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm shadow-xs flex items-center gap-2 flex-shrink-0 self-start sm:self-center transition-all relative z-10"
+            title="Account Restricted - Feature Unavailable"
+          >
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+            Feature Restricted
+          </button>
+        ) : (
+          <button
+            id="request-subject-btn"
+            onClick={() => setShowRequestSubjectForm(true)}
+            className="btn-primary px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm shadow-sm flex items-center gap-2 flex-shrink-0 self-start sm:self-center hover:scale-105 transition-all relative z-10"
+          >
+            <PlusCircle className="w-4 h-4" />
+            Request Subject
+          </button>
+        )}
       </div>
 
       {/* Subject Cards — show Lottie loader until data is ready */}
       {loading ? (
-        <SemesterLottieLoader />
+        <SubjectLottieLoader />
       ) : subjects.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -190,6 +234,18 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
             </motion.div>
           ))}
         </motion.div>
+      )}
+
+      {/* Request Subject Modal */}
+      {showRequestSubjectForm && (
+        <RequestForm
+          subjectId="subject_request"
+          subjectName={`Semester ${semesterNumber}`}
+          departmentName={formattedDeptName}
+          semesterNumber={semesterNumber}
+          defaultCategory="Subject Request"
+          onClose={() => setShowRequestSubjectForm(false)}
+        />
       )}
     </div>
   );

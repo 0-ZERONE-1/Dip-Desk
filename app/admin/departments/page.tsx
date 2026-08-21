@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, Save, Loader2, Building2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Loader2, Building2, GraduationCap, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
@@ -13,15 +13,15 @@ interface Department {
   slug: string;
   description?: string;
   icon: string;
-  color?: string;
   isActive?: boolean;
 }
 
 const emptyForm = {
   name: '',
+  slug: '',
   description: '',
   icon: '',
-  color: '#6366f1',
+  isActive: true,
 };
 
 // Sanitizer for text inputs: Allows letters, numbers, spaces, and basic symbols (., -&/()')
@@ -73,7 +73,7 @@ export default function AdminDepartmentsPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
+      const data = await fetch(`/api/departments?all=true&t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
       setDepartments(syncAndFilterItems<Department>('departments', data.departments || []));
     } catch {
       toast.error('Failed to load departments');
@@ -92,9 +92,10 @@ export default function AdminDepartmentsPage() {
     setEditId(d._id);
     setForm({
       name: d.name || '',
+      slug: d.slug || '',
       description: d.description || '',
       icon: d.icon || '',
-      color: d.color || '#6366f1',
+      isActive: d.isActive !== false,
     });
     setShowModal(true);
   };
@@ -113,11 +114,18 @@ export default function AdminDepartmentsPage() {
 
     setSaving(true);
     try {
+      const cleanSlug = (form.slug || form.name)
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-');
+
       const normalizedPayload = {
-        ...form,
         name: sanitizeText(form.name).trim(),
+        slug: cleanSlug,
         description: sanitizeDescription(form.description).trim(),
         icon: isImageUrl(form.icon) ? normalizeUrl(form.icon) : form.icon.trim(),
+        isActive: form.isActive,
       };
 
       const url = editId ? `/api/departments/${editId}` : '/api/departments';
@@ -139,7 +147,6 @@ export default function AdminDepartmentsPage() {
       } else {
         saveClientCustomItem('departments', {
           _id: editId || `dept_${Date.now()}`,
-          slug: form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           ...normalizedPayload,
         });
       }
@@ -158,18 +165,35 @@ export default function AdminDepartmentsPage() {
 
   const handleDelete = async (id: string) => {
     setDeleteLoading(true);
-    addClientDeletedId(id);
-    setDepartments((prev) => prev.filter((d) => d._id !== id));
     try {
+      addClientDeletedId(id);
+      setDepartments((prev) => prev.filter((d) => d._id !== id));
       await fetch(`/api/departments/${id}`, { method: 'DELETE' });
       toast.success('Department deleted');
-      load();
     } catch {
-      toast.error('Failed to delete');
+      toast.error('Failed to delete department');
       load();
     } finally {
       setDeleteLoading(false);
       setDeleteId(null);
+    }
+  };
+
+  const toggleActive = async (d: Department) => {
+    const updatedActive = d.isActive === false ? true : false;
+    setDepartments((prev) =>
+      prev.map((item) => (item._id === d._id ? { ...item, isActive: updatedActive } : item))
+    );
+    try {
+      await fetch(`/api/departments/${d._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: updatedActive }),
+      });
+      toast.success(updatedActive ? 'Department activated (visible to students)' : 'Department deactivated (hidden from students)');
+    } catch {
+      toast.error('Failed to update active status');
+      load();
     }
   };
 
@@ -223,19 +247,32 @@ export default function AdminDepartmentsPage() {
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary-50/60 border border-primary-100/80 flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0 overflow-hidden aspect-square shadow-sm">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden aspect-square">
                       {isImageUrl(d.icon) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={formatImageUrl(d.icon)}
                           alt={d.name}
-                          className="w-full h-full object-cover rounded-2xl"
+                          className="w-full h-full object-cover rounded-2xl shadow-sm"
                         />
                       ) : (
-                        <span>{d.icon || '📚'}</span>
+                        <div className="w-full h-full rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white shadow-md shadow-primary-500/25">
+                          <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-xs" />
+                        </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                        <span
+                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                            d.isActive !== false
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-red-50 text-red-700 border border-red-200'
+                          }`}
+                        >
+                          {d.isActive !== false ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
                       <h3 className="font-bold text-gray-900 text-base leading-tight break-words [overflow-wrap:anywhere]">
                         {d.name}
                       </h3>
@@ -257,9 +294,20 @@ export default function AdminDepartmentsPage() {
                 <span className="text-[11px] font-semibold text-gray-400">Department</span>
                 <div className="flex items-center gap-1.5">
                   <button
+                    onClick={() => toggleActive(d)}
+                    className={`p-1.5 rounded-xl transition-all border ${
+                      d.isActive !== false
+                        ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                        : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                    }`}
+                    title={d.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                  >
+                    {d.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </button>
+                  <button
                     id={`edit-dept-${d._id}`}
                     onClick={() => openEditModal(d)}
-                    className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-surface-100 rounded-lg transition-colors"
+                    className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
                     title="Edit Department"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -267,7 +315,7 @@ export default function AdminDepartmentsPage() {
                   <button
                     id={`delete-dept-${d._id}`}
                     onClick={() => setDeleteId(d._id)}
-                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
                     title="Delete Department"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -311,20 +359,40 @@ export default function AdminDepartmentsPage() {
               </div>
 
               <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Department Name * <span className="text-[11px] font-normal text-gray-400">(50 CH LIM)</span>
-                  </label>
-                  <input
-                    id="dept-name"
-                    type="text"
-                    required
-                    maxLength={50}
-                    placeholder="e.g. Computer Science & Technology"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: sanitizeText(e.target.value) })}
-                    className="input"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Department Name * <span className="text-[11px] font-normal text-gray-400">(50 CH LIM)</span>
+                    </label>
+                    <input
+                      id="dept-name"
+                      type="text"
+                      required
+                      maxLength={50}
+                      placeholder="e.g. Computer Science & Technology"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: sanitizeText(e.target.value) })}
+                      className="input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      URL Slug / Code <span className="text-[11px] font-normal text-gray-400">(Auto-generated if empty)</span>
+                    </label>
+                    <input
+                      id="dept-slug"
+                      type="text"
+                      maxLength={50}
+                      placeholder="e.g. cst or computer-science"
+                      value={form.slug}
+                      onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') })}
+                      className="input font-mono text-xs"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      URL Path: /browse/{(form.slug || form.name).toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') || 'slug'}
+                    </p>
+                  </div>
                 </div>
 
                 <div>
@@ -349,30 +417,46 @@ export default function AdminDepartmentsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Department Icon Image URL <span className="text-[11px] font-normal text-gray-400">(250 CH LIM)</span>
+                    Department Icon Image URL <span className="text-[11px] font-normal text-gray-400">(Optional - 250 CH LIM)</span>
                   </label>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-primary-50/60 border border-primary-100/90 flex items-center justify-center overflow-hidden flex-shrink-0 text-2xl aspect-square shadow-2xs">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 aspect-square">
                       {isImageUrl(form.icon) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={formatImageUrl(form.icon)}
                           alt="Preview"
-                          className="w-full h-full object-cover rounded-2xl"
+                          className="w-full h-full object-cover rounded-2xl shadow-sm"
                         />
                       ) : (
-                        <span>{form.icon || '📚'}</span>
+                        <div className="w-full h-full rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white shadow-md shadow-primary-500/25">
+                          <GraduationCap className="w-6 h-6 text-white" />
+                        </div>
                       )}
                     </div>
                     <input
                       type="url"
                       maxLength={250}
-                      placeholder="Paste image link (e.g. https://example.com/computer-icon.png)..."
+                      placeholder="Paste image link (leave blank for theme gradient icon)..."
                       value={form.icon}
                       onChange={(e) => setForm({ ...form, icon: e.target.value.trim() })}
                       className="input flex-1"
                     />
                   </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 pt-1">
+                  <input
+                    type="checkbox"
+                    id="active-dept"
+                    checked={form.isActive}
+                    onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                    className="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600"
+                  />
+                  <label htmlFor="active-dept" className="text-xs font-semibold text-gray-700 cursor-pointer select-none flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${form.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
+                    Active (Visible to Students on Browse Page)
+                  </label>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-100 mt-6">

@@ -134,6 +134,7 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name || token.name;
         token.role = (user as any).role || 'student';
         token.isProfileComplete = (user as any).isProfileComplete ?? true;
+        token.isBanned = (user as any).isBanned ?? false;
       }
 
       if (trigger === 'update') {

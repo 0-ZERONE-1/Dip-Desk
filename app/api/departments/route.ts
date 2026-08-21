@@ -5,9 +5,10 @@ import { requireAdmin } from '@/lib/requireAdmin';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const departments = await getDepartmentsStore();
+    const includeInactive = req.nextUrl.searchParams.get('all') === 'true';
+    const departments = await getDepartmentsStore(includeInactive);
     return NextResponse.json({ departments }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

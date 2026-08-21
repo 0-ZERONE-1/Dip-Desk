@@ -4,7 +4,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
   BookOpen, Mail, Lock, ArrowRight, Loader2,
-  GraduationCap, ShieldCheck, Eye, EyeOff, UserPlus, LogIn
+  GraduationCap, ShieldCheck, Eye, EyeOff, UserPlus, LogIn, User
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -210,8 +210,8 @@ export default function LoginPage() {
                     transition={{ type: 'spring', stiffness: 400, damping: 35 }}
                   />
                 )}
-                <GraduationCap className="relative z-10 w-4 h-4" />
-                <span className="relative z-10">Student</span>
+                <User className="relative z-10 w-4 h-4" />
+                <span className="relative z-10">User</span>
               </button>
               <button
                 id="tab-admin"
@@ -256,7 +256,7 @@ export default function LoginPage() {
                         <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
                           type="email"
-                          placeholder="student@example.com"
+                          placeholder="user@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="input pl-10 focus:ring-blue-500 focus:border-blue-500"

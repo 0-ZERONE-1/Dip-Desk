@@ -9,11 +9,13 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const semesterNumber = searchParams.get('semester');
   const departmentSlug = searchParams.get('departmentSlug');
+  const includeInactive = searchParams.get('all') === 'true';
 
   try {
     const subjects = await getSubjectsStore(
       departmentSlug || undefined,
-      semesterNumber ? parseInt(semesterNumber) : undefined
+      semesterNumber ? parseInt(semesterNumber) : undefined,
+      includeInactive
     );
     return NextResponse.json({ subjects }, {
       headers: {

@@ -539,28 +539,6 @@ export default function AdminNoticesPage() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <button
-                    onClick={() => togglePin(n)}
-                    title={n.isPinned ? 'Unpin Notice' : 'Pin Notice to top'}
-                    className={`p-1 rounded-lg transition-colors ${
-                      n.isPinned
-                        ? 'bg-amber-100 text-amber-700 shadow-2xs'
-                        : 'bg-surface-100 text-gray-400 hover:text-gray-700'
-                    }`}
-                  >
-                    <Pin className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => toggleActive(n)}
-                    title={n.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
-                    className={`p-1 rounded-lg transition-colors ${
-                      n.isActive !== false
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {n.isActive !== false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                  </button>
                   <span
                     className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${getBadgeStyle(
                       n.badge
@@ -587,8 +565,8 @@ export default function AdminNoticesPage() {
                     </span>
                   )}
                   {n.isPinned && (
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">
-                      Pinned
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 flex items-center gap-1">
+                      <Pin className="w-3 h-3 fill-amber-700 text-amber-800" /> Pinned
                     </span>
                   )}
                 </div>
@@ -608,18 +586,40 @@ export default function AdminNoticesPage() {
                 )}
               </div>
 
-              {/* Actions */}
+              {/* Actions on the right */}
               <div className="flex items-center gap-2 flex-shrink-0 self-end md:self-center">
                 <button
+                  onClick={() => togglePin(n)}
+                  title={n.isPinned ? 'Unpin Notice' : 'Pin Notice to top'}
+                  className={`p-2 rounded-xl transition-all border ${
+                    n.isPinned
+                      ? 'bg-amber-500 text-white border-amber-600 shadow-xs hover:bg-amber-600'
+                      : 'bg-amber-50/80 text-amber-600 border-amber-200/80 hover:bg-amber-100'
+                  }`}
+                >
+                  <Pin className={`w-4 h-4 ${n.isPinned ? 'fill-white' : ''}`} />
+                </button>
+                <button
+                  onClick={() => toggleActive(n)}
+                  title={n.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                  className={`p-2 rounded-xl transition-all border ${
+                    n.isActive !== false
+                      ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                      : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                  }`}
+                >
+                  {n.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                </button>
+                <button
                   onClick={() => handleEdit(n)}
-                  className="btn-ghost p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl"
+                  className="p-2 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
                   title="Edit Notice"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setDeleteId(n._id)}
-                  className="btn-ghost p-2 text-red-500 hover:bg-red-50 rounded-xl"
+                  className="p-2 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
                   title="Delete Notice"
                 >
                   <Trash2 className="w-4 h-4" />

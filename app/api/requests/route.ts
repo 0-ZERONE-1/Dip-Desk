@@ -3,12 +3,23 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import ResourceRequest from '@/lib/models/ResourceRequest';
-import { createRequestStore, getRequestsStore } from '@/lib/store';
+import { createRequestStore, getRequestsStore, findUserByEmailStore, deleteRequestStore } from '@/lib/store';
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const userEmail = session.user?.email;
+    if (userEmail) {
+      const dbUser = await findUserByEmailStore(userEmail);
+      if (dbUser && dbUser.isBanned) {
+        return NextResponse.json(
+          { error: 'Your account has been suspended/banned. You cannot submit new requests.' },
+          { status: 403 }
+        );
+      }
+    }
 
     const userId = (session.user as any).id || 'demo_student_id';
     const { subjectTitle, category, description, department, semester, url } = await req.json();
@@ -21,6 +32,7 @@ export async function POST(req: NextRequest) {
       await dbConnect();
       await ResourceRequest.create({
         studentId: userId,
+        studentEmail: userEmail || '',
         category,
         description,
         subjectTitle,
@@ -32,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     const newReq = await createRequestStore({
       studentId: userId,
-      studentEmail: session.user?.email,
+      studentEmail: userEmail || '',
       subjectTitle: subjectTitle || 'General',
       category,
       description,
@@ -55,5 +67,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ requests });
   } catch {
     return NextResponse.json({ requests: [] });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'Request ID is required' }, { status: 400 });
+
+    await deleteRequestStore(id);
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete request' }, { status: 500 });
   }
 }

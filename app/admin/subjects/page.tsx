@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Edit2, Save, X, Loader2, RotateCcw, BookMarked } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, Loader2, RotateCcw, BookMarked, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SEMESTERS } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
@@ -21,13 +21,16 @@ interface Subject {
   semesterNumber: number;
   description: string;
   departmentId: Department;
+  isActive?: boolean;
 }
 
 const emptyForm = {
   name: '',
+  slug: '',
   semesterNumber: 1,
   departmentId: 'all',
   description: '',
+  isActive: true,
 };
 
 // Sanitizer for text inputs: Allows letters, numbers, spaces, and basic symbols (., -&/()')
@@ -84,8 +87,8 @@ export default function AdminSubjectsPage() {
     setLoading(true);
     const t = Date.now();
     const [subData, deptData] = await Promise.all([
-      fetch(`/api/subjects?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
-      fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/subjects?all=true&t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/departments?all=true&t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
     setSubjects(syncAndFilterItems<Subject>('subjects', subData.subjects || []));
     setDepartments(syncAndFilterItems<Department>('departments', deptData.departments || []));
@@ -101,9 +104,16 @@ export default function AdminSubjectsPage() {
 
     setSaving(true);
     try {
+      const cleanSlug = (form.slug || form.name)
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-');
+
       const normalizedPayload = {
         ...form,
         name: sanitizeText(form.name).trim(),
+        slug: cleanSlug,
         description: sanitizeText(form.description).trim(),
       };
 
@@ -164,9 +174,11 @@ export default function AdminSubjectsPage() {
     const deptStr = getDeptIdStr(s.departmentId);
     setForm({
       name: s.name,
+      slug: s.slug || '',
       semesterNumber: s.semesterNumber,
       departmentId: deptStr === 'all' || !deptStr ? 'all' : deptStr,
       description: s.description || '',
+      isActive: s.isActive !== false,
     });
     setShowForm(true);
   };
@@ -185,6 +197,24 @@ export default function AdminSubjectsPage() {
     } finally {
       setDeleteLoading(false);
       setDeleteId(null);
+    }
+  };
+
+  const toggleActive = async (s: Subject) => {
+    const updatedActive = s.isActive === false ? true : false;
+    setSubjects((prev) =>
+      prev.map((item) => (item._id === s._id ? { ...item, isActive: updatedActive } : item))
+    );
+    try {
+      await fetch(`/api/subjects/${s._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: updatedActive }),
+      });
+      toast.success(updatedActive ? 'Subject activated (visible to students)' : 'Subject deactivated (hidden from students)');
+    } catch {
+      toast.error('Failed to update active status');
+      load();
     }
   };
 
@@ -281,11 +311,12 @@ export default function AdminSubjectsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-surface-200 bg-surface-50 text-left">
-                  <th className="px-4 py-3 font-semibold text-gray-600">Subject</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Department</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600">Semester</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 text-right">Actions</th>
+                <tr className="border-b border-surface-200/80 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-surface-50/50">
+                  <th className="px-4 py-3">Subject</th>
+                  <th className="px-4 py-3 hidden md:table-cell">Department</th>
+                  <th className="px-4 py-3">Semester</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -309,21 +340,43 @@ export default function AdminSubjectsPage() {
                       <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                         Sem {s.semesterNumber}
                       </td>
+                      <td className="px-4 py-3 text-sm whitespace-nowrap">
+                        <span
+                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                            s.isActive !== false
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-red-50 text-red-700 border border-red-200'
+                          }`}
+                        >
+                          {s.isActive !== false ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => toggleActive(s)}
+                            className={`p-1.5 rounded-lg transition-all border ${
+                              s.isActive !== false
+                                ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                                : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                            }`}
+                            title={s.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                          >
+                            {s.isActive !== false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                          </button>
                           <button
                             id={`edit-subject-${s._id}`}
                             onClick={() => handleEdit(s)}
-                            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                            title="Edit"
+                            className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-lg transition-all"
+                            title="Edit Subject"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             id={`delete-subject-${s._id}`}
                             onClick={() => setDeleteId(s._id)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete"
+                            className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-lg transition-all"
+                            title="Delete Subject"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -377,20 +430,40 @@ export default function AdminSubjectsPage() {
               </div>
 
               <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Subject Name <span className="text-[11px] font-normal text-gray-400">(100 CH LIM)</span>
-                  </label>
-                  <input
-                    id="subject-name"
-                    type="text"
-                    required
-                    maxLength={100}
-                    placeholder="e.g. Database Management Systems"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: sanitizeText(e.target.value) })}
-                    className="input"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Subject Name * <span className="text-[11px] font-normal text-gray-400">(100 CH LIM)</span>
+                    </label>
+                    <input
+                      id="subject-name"
+                      type="text"
+                      required
+                      maxLength={100}
+                      placeholder="e.g. Database Management Systems"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: sanitizeText(e.target.value) })}
+                      className="input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      URL Slug / Code <span className="text-[11px] font-normal text-gray-400">(Auto-generated if empty)</span>
+                    </label>
+                    <input
+                      id="subject-slug"
+                      type="text"
+                      maxLength={100}
+                      placeholder="e.g. dbms or database-management"
+                      value={form.slug}
+                      onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') })}
+                      className="input font-mono text-xs"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      URL Path: /[branch]/semester-{form.semesterNumber}/{(form.slug || form.name).toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') || 'slug'}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -443,6 +516,20 @@ export default function AdminSubjectsPage() {
                     }}
                     className="input py-2.5 resize-none min-h-[75px]"
                   />
+                </div>
+
+                <div className="flex items-center gap-2.5 pt-1">
+                  <input
+                    type="checkbox"
+                    id="active-subject"
+                    checked={form.isActive}
+                    onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                    className="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600"
+                  />
+                  <label htmlFor="active-subject" className="text-xs font-semibold text-gray-700 cursor-pointer select-none flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${form.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
+                    Active (Visible to Students on Semester Page)
+                  </label>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-100 mt-6">

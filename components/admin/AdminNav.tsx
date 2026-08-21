@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -36,6 +37,22 @@ export default function AdminNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
+  const [pendingCount, setPendingCount] = useState<number>(0);
+
+  useEffect(() => {
+    fetchPendingCount();
+  }, [pathname]);
+
+  const fetchPendingCount = async () => {
+    try {
+      const res = await fetch(`/api/admin/requests?t=${Date.now()}`);
+      const data = await res.json();
+      if (data.requests) {
+        const pending = data.requests.filter((r: any) => r.status?.toLowerCase() === 'pending').length;
+        setPendingCount(pending);
+      }
+    } catch {}
+  };
 
   const isActive = (href: string, exact?: boolean) =>
     exact
@@ -70,6 +87,16 @@ export default function AdminNav() {
               )}
               <Icon className="relative z-10 w-3.5 h-3.5 flex-shrink-0" />
               <span className="relative z-10">{label}</span>
+              {label === 'Requests' && pendingCount > 0 && (
+                <span
+                  className={cn(
+                    'relative z-10 ml-0.5 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full',
+                    active ? 'bg-white text-primary-700' : 'bg-amber-500 text-white'
+                  )}
+                >
+                  {pendingCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -130,6 +157,18 @@ export default function AdminNav() {
                     )}
                   />
                   <span className="relative z-10">{label}</span>
+                  {label === 'Requests' && pendingCount > 0 && (
+                    <span
+                      className={cn(
+                        'relative z-10 ml-auto text-[10px] font-black px-2 py-0.5 rounded-full shadow-2xs transition-all',
+                        active
+                          ? 'bg-white text-primary-700 font-extrabold'
+                          : 'bg-amber-100 text-amber-800 border border-amber-200 animate-pulse'
+                      )}
+                    >
+                      {pendingCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}

@@ -46,9 +46,14 @@ export async function POST(req: NextRequest) {
   try {
     const { name, email, password } = await req.json();
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: 'Name, email, and password are required' }, { status: 400 });
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
+
+    // Generate random 5 digit user name format e.g. User #48291
+    const random5Digits = Math.floor(10000 + Math.random() * 90000);
+    const defaultUserName = `User #${random5Digits}`;
+    const finalName = (name && !name.includes('@') && name.trim() !== '') ? name : defaultUserName;
 
     if (password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
@@ -75,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     // Save to local store
     const localUser = await createUserStore({
-      name,
+      name: finalName,
       email: lowerEmail,
       password,
       hashedPassword,
@@ -87,7 +92,7 @@ export async function POST(req: NextRequest) {
     try {
       await dbConnect();
       await User.create({
-        name,
+        name: finalName,
         email: lowerEmail,
         hashedPassword,
         role: 'student',

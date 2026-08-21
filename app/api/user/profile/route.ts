@@ -108,6 +108,7 @@ export async function GET() {
               image: dbUser.image || session.user?.image || '',
               role: dbUser.role || 'student',
               isProfileComplete: dbUser.isProfileComplete ?? true,
+              isBanned: dbUser.isBanned ?? false,
               bookmarks: dbUser.bookmarks || [],
             },
           }, {
@@ -126,7 +127,7 @@ export async function GET() {
     if (!storeUser) {
       storeUser = {
         _id: userId,
-        name: session.user?.name || 'Student',
+        name: session.user?.name || 'User',
         email: userEmail || '',
         title: 'Student',
         institute: '',

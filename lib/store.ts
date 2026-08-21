@@ -7,6 +7,8 @@ import Department from './models/Department';
 import Subject from './models/Subject';
 import Resource from './models/Resource';
 import Notice from './models/Notice';
+import User from './models/User';
+import ResourceRequest from './models/ResourceRequest';
 import {
   defaultDevelopers,
   defaultDepartments,
@@ -105,25 +107,28 @@ export async function isDbConnected(): Promise<boolean> {
 }
 
 // --- DEVELOPERS ---
-export async function getDevelopersStore() {
+export async function getDevelopersStore(includeInactive = false) {
   try {
     await dbConnect();
-    const devs = await Developer.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
+    const query = includeInactive ? {} : { isActive: { $ne: false } };
+    const devs = await Developer.find(query).sort({ order: 1, createdAt: 1 });
     return devs;
   } catch (err) {
     console.error('Failed to fetch developers from DB:', err);
   }
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
-  return (store.developers || [])
-    .filter((dev) => !deleted.includes(dev._id))
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
+  let list = (store.developers || []).filter((dev) => !deleted.includes(dev._id));
+  if (!includeInactive) {
+    list = list.filter((dev: any) => dev.isActive !== false);
+  }
+  return list.sort((a, b) => (a.order || 0) - (b.order || 0));
 }
 
 export async function createDeveloperStore(data: any) {
   try {
     await dbConnect();
-    const created = await Developer.create({ ...data, isActive: true });
+    const created = await Developer.create({ ...data, isActive: data.isActive !== undefined ? data.isActive : true });
     return created;
   } catch (err) {
     console.error('Failed to create developer in DB:', err);
@@ -134,7 +139,7 @@ export async function createDeveloperStore(data: any) {
     _id: `dev_${Date.now()}`,
     ...data,
     order: data.order || store.developers.length + 1,
-    isActive: true,
+    isActive: data.isActive !== undefined ? data.isActive : true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -196,22 +201,31 @@ export async function deleteDeveloperStore(id: string) {
 }
 
 // --- DEPARTMENTS ---
-export async function getDepartmentsStore() {
+export async function getDepartmentsStore(includeInactive = false) {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
   try {
     await dbConnect();
-    const depts = await Department.find({ isActive: true }).sort({ name: 1 });
+    const query = includeInactive ? {} : { isActive: { $ne: false } };
+    const depts = await Department.find(query).sort({ name: 1 });
     return depts.filter((d: any) => !deleted.includes(d._id.toString()) && !deleted.includes(d.slug));
   } catch (err) {
     console.error('Failed to fetch departments from DB:', err);
   }
-  return (store.departments || []).filter((d) => !deleted.includes(d._id) && !deleted.includes(d.slug));
+  let list = (store.departments || []).filter((d) => !deleted.includes(d._id) && !deleted.includes(d.slug));
+  if (!includeInactive) {
+    list = list.filter((d: any) => d.isActive !== false);
+  }
+  return list;
 }
 
 export async function createDepartmentStore(data: any) {
   const slug = data.slug || data.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
-  const cleanData = { ...data, slug, isActive: true };
+  const cleanData = {
+    ...data,
+    slug,
+    isActive: data.isActive !== undefined ? data.isActive : true,
+  };
 
   try {
     await dbConnect();
@@ -234,12 +248,16 @@ export async function createDepartmentStore(data: any) {
 export async function updateDepartmentStore(id: string, data: any) {
   try {
     await dbConnect();
+    const updateData = { ...data };
+    if (data.slug || data.name) {
+      updateData.slug = (data.slug || data.name).toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
+    }
     let updated = null;
     if (mongoose.Types.ObjectId.isValid(id)) {
-      updated = await Department.findByIdAndUpdate(id, data, { new: true });
+      updated = await Department.findByIdAndUpdate(id, updateData, { new: true });
     }
     if (!updated) {
-      updated = await Department.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, data, { new: true });
+      updated = await Department.findOneAndUpdate({ $or: [{ _id: id }, { slug: id }] }, updateData, { new: true });
     }
     if (updated) return updated;
   } catch (err) {
@@ -283,12 +301,13 @@ export async function deleteDepartmentStore(id: string) {
 }
 
 // --- SUBJECTS ---
-export async function getSubjectsStore(departmentSlug?: string, semesterNumber?: number) {
+export async function getSubjectsStore(departmentSlug?: string, semesterNumber?: number, includeInactive = false) {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
   try {
     await dbConnect();
-    const filter: any = { isActive: true };
+    const filter: any = {};
+    if (!includeInactive) filter.isActive = { $ne: false };
     if (semesterNumber) filter.semesterNumber = semesterNumber;
     if (departmentSlug) {
       const dept = await Department.findOne({ $or: [{ slug: departmentSlug }, { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined }] });
@@ -303,6 +322,9 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
   }
 
   let list = (store.subjects || []).filter((s) => !deleted.includes(s._id) && !deleted.includes(s.slug));
+  if (!includeInactive) {
+    list = list.filter((s: any) => s.isActive !== false);
+  }
   if (departmentSlug) {
     list = list.filter((s) => {
       const deptSlug = s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId.replace(/^dept_/, '') : '');
@@ -332,7 +354,7 @@ export async function createSubjectStore(data: any) {
       ...data,
       slug,
       departmentId: deptId,
-      isActive: true,
+      isActive: data.isActive !== undefined ? data.isActive : true,
     });
     return created;
   } catch (err) {
@@ -363,6 +385,9 @@ export async function updateSubjectStore(id: string, data: any) {
       if (foundDept) deptId = foundDept._id;
     }
     const updateData = { ...data };
+    if (data.slug || data.name) {
+      updateData.slug = (data.slug || data.name).toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').trim();
+    }
     if (deptId) updateData.departmentId = deptId;
 
     let updated = null;
@@ -556,12 +581,24 @@ export async function deleteResourceStore(id: string) {
 
 // --- USERS ---
 export async function getUsersStore() {
+  try {
+    await dbConnect();
+    const users = await User.find({}).sort({ createdAt: -1 });
+    if (users && users.length > 0) return users;
+  } catch (err) {
+    console.error('Failed to fetch users from DB:', err);
+  }
   const store = readLocalStore();
   return store.users || [];
 }
 
 export async function findUserByEmailStore(email: string) {
   if (!email) return null;
+  try {
+    await dbConnect();
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (user) return user;
+  } catch {}
   const store = readLocalStore();
   const lower = email.toLowerCase();
   const found = (store.users || []).find((u: any) => u && u.email && typeof u.email === 'string' && u.email.toLowerCase() === lower);
@@ -572,6 +609,13 @@ export async function findUserByEmailStore(email: string) {
 
 export async function findUserByIdStore(id: string) {
   if (!id) return null;
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      const user = await User.findById(id);
+      if (user) return user;
+    }
+  } catch {}
   const store = readLocalStore();
   const lower = id.toLowerCase();
   const found = (store.users || []).find(
@@ -583,12 +627,33 @@ export async function findUserByIdStore(id: string) {
 }
 
 export async function createUserStore(data: any) {
+  try {
+    await dbConnect();
+    const created = await User.create({
+      designation: data.designation || data.title || 'Student',
+      bookmarks: [],
+      resourceRequests: [],
+      upvotedResources: [],
+      downvotedResources: [],
+      isBanned: false,
+      isProfileComplete: true,
+      ...data,
+    });
+    return created;
+  } catch (err) {
+    console.error('Failed to create user in DB:', err);
+  }
   const store = readLocalStore();
   if (!store.users) store.users = [];
   const newUser = {
     _id: `user_${Date.now()}`,
-    role: 'student',
+    designation: data.designation || data.title || 'Student',
+    isBanned: false,
     isProfileComplete: true,
+    bookmarks: [],
+    resourceRequests: [],
+    upvotedResources: [],
+    downvotedResources: [],
     createdAt: new Date().toISOString(),
     ...data,
   };
@@ -599,6 +664,20 @@ export async function createUserStore(data: any) {
 
 export async function updateUserStore(id: string, data: any) {
   if (!id) return null;
+  try {
+    await dbConnect();
+    let updated = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      updated = await User.findByIdAndUpdate(id, data, { new: true });
+    }
+    if (!updated) {
+      updated = await User.findOneAndUpdate({ email: id.toLowerCase() }, data, { new: true });
+    }
+    if (updated) return updated;
+  } catch (err) {
+    console.error('Failed to update user in DB:', err);
+  }
+
   const store = readLocalStore();
   if (!store.users) store.users = [];
   const lower = id.toLowerCase();
@@ -713,22 +792,90 @@ export async function deleteNoticeStore(id: string) {
 
 // --- REQUESTS ---
 export async function getRequestsStore() {
+  let mongoRequests: any[] = [];
+  try {
+    await dbConnect();
+    mongoRequests = await ResourceRequest.find().sort({ createdAt: -1 });
+  } catch (err) {
+    console.error('Failed to fetch requests from DB:', err);
+  }
   const store = readLocalStore();
-  return (store as any).requests || [];
+  const localRequests = (store as any).requests || [];
+
+  const combined = [...mongoRequests];
+  for (const r of localRequests) {
+    if (r._id && !combined.some((m: any) => m._id?.toString() === r._id || m.id === r._id)) {
+      combined.push(r);
+    }
+  }
+
+  return combined;
 }
 
 export async function createRequestStore(data: any) {
+  let createdDb = null;
+  try {
+    await dbConnect();
+    createdDb = await ResourceRequest.create({
+      status: 'Pending',
+      ...data,
+    });
+  } catch (err) {
+    console.error('Failed to create request in DB:', err);
+  }
+
   const store = readLocalStore();
   if (!(store as any).requests) (store as any).requests = [];
   const newReq = {
-    _id: `req_${Date.now()}`,
-    status: 'pending',
+    _id: createdDb?._id?.toString() || `req_${Date.now()}`,
+    status: 'Pending',
     createdAt: new Date().toISOString(),
     ...data,
   };
   (store as any).requests.unshift(newReq);
   saveLocalStore(store);
-  return newReq;
+  return createdDb || newReq;
+}
+
+export async function updateRequestStore(id: string, data: any) {
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      await ResourceRequest.findByIdAndUpdate(id, data, { new: true });
+    }
+    await ResourceRequest.findOneAndUpdate({ _id: id }, data, { new: true });
+  } catch (err) {
+    console.error('Failed to update request in DB:', err);
+  }
+
+  const store = readLocalStore();
+  if (!(store as any).requests) (store as any).requests = [];
+  const index = (store as any).requests.findIndex((r: any) => r._id === id);
+  if (index !== -1) {
+    (store as any).requests[index] = { ...(store as any).requests[index], ...data };
+    saveLocalStore(store);
+    return (store as any).requests[index];
+  }
+  return { _id: id, ...data };
+}
+
+export async function deleteRequestStore(id: string) {
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      await ResourceRequest.findByIdAndDelete(id);
+    }
+    await ResourceRequest.deleteOne({ _id: id });
+  } catch (err) {
+    console.error('Failed to delete request in DB:', err);
+  }
+
+  const store = readLocalStore();
+  if ((store as any).requests) {
+    (store as any).requests = (store as any).requests.filter((r: any) => r._id !== id);
+    saveLocalStore(store);
+  }
+  return true;
 }
 
 // --- BOOKMARKS & VOTES ---

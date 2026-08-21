@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
-import { BookOpen, ArrowRight, Loader2, Sparkles } from 'lucide-react';
-import { formatImageUrl, isImageUrl } from '@/lib/utils';
+import { BookOpen, ArrowRight, Loader2, Sparkles, GraduationCap } from 'lucide-react';
+import { formatImageUrl, isImageUrl, getDepartmentNameBySlug } from '@/lib/utils';
 
 import { syncAndFilterItems } from '@/lib/clientStore';
 
@@ -68,47 +68,45 @@ export default function BranchPage({ branchSlug }: Props) {
   const [dept, setDept] = useState<Department | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Immediate display name — updates once API responds
-  const displayName = dept?.name || slugToName(branchSlug);
+  // Immediate display name — uses known mapping instantly, updates if custom name from API
+  const displayName = dept?.name || getDepartmentNameBySlug(branchSlug);
 
   useEffect(() => {
-    fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' })
+    const minDelay = new Promise((res) => setTimeout(res, 2500));
+    const apiFetch = fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         const rawList = data.departments || [];
         const filteredList = syncAndFilterItems<Department>('departments', rawList);
         const found = filteredList.find((d: Department) => d.slug === branchSlug);
-        setDept(found || null);
-        setLoading(false);
+        setDept(found || null); // update name immediately, don't wait for delay
       })
-      .catch(() => setLoading(false));
+      .catch(() => {});
+    Promise.all([apiFetch, minDelay])
+      .finally(() => setLoading(false));
   }, [branchSlug]);
 
   return (
     <div className="w-full">
       {/* Breadcrumb & Header are always visible immediately */}
-      <Breadcrumb crumbs={[{ label: displayName }]} />
+      <Breadcrumb crumbs={[{ label: loading ? 'Loading...' : displayName }]} />
 
       {/* Header Banner */}
       <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
         <div className="flex items-center gap-4 relative z-10">
-          <div
-            className={`w-12 h-12 sm:w-14 sm:h-14 ${
-              dept && isImageUrl(dept.icon)
-                ? 'bg-transparent'
-                : 'bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md'
-            } rounded-xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0 overflow-hidden aspect-square`}
-          >
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden aspect-square">
             {dept && isImageUrl(dept.icon) ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={formatImageUrl(dept.icon)} alt={dept.name} className="w-full h-full object-cover rounded-xl" />
+              <img src={formatImageUrl(dept.icon)} alt={dept.name} className="w-full h-full object-cover rounded-2xl shadow-sm" />
             ) : (
-              <span>{dept?.icon || '📁'}</span>
+              <div className="w-full h-full rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white shadow-md shadow-primary-500/25">
+                <GraduationCap className="w-7 h-7 text-white" />
+              </div>
             )}
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-              {displayName}
+              {loading ? 'Loading Department...' : displayName}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
               {dept?.description || 'Select a semester to access syllabus, notes, model papers, and lab manuals.'}
@@ -130,7 +128,7 @@ export default function BranchPage({ branchSlug }: Props) {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 w-full"
       >
         {[1, 2, 3, 4, 5, 6].map((sem) => (
           <motion.div
@@ -142,7 +140,7 @@ export default function BranchPage({ branchSlug }: Props) {
             <Link
               href={`/${branchSlug}/semester-${sem}`}
               id={`semester-${sem}-card`}
-              className="group bg-white rounded-3xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out p-6 sm:p-7 flex flex-col justify-between h-full relative overflow-hidden"
+              className="group bg-white rounded-3xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out p-5 sm:p-6 flex flex-col justify-between h-full relative overflow-hidden"
             >
               {/* Smooth Rounded Top Accent Gradient Bar blended with card */}
               <div className="absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
@@ -150,28 +148,23 @@ export default function BranchPage({ branchSlug }: Props) {
               {/* Ambient Soft Glow in corner on Hover */}
               <div className="absolute -top-10 -right-10 w-28 h-28 bg-primary-500/10 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              {/* Top Accent Pill */}
-              <div className="flex items-start justify-between mb-4 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-white font-black text-lg shadow-md group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/25 transition-all duration-300">
+              {/* Main Content Header (Icon on left, text beside it) */}
+              <div className="flex items-center gap-3.5 sm:gap-4 relative z-10 mb-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white font-black text-2xl sm:text-3xl shadow-md shadow-primary-500/25 group-hover:scale-105 transition-all duration-300 flex-shrink-0 aspect-square">
                   {sem}
                 </div>
-                <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-surface-100/90 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-700 group-hover:border-primary-200/80 border border-transparent transition-all duration-300">
-                  Semester {sem}
-                </span>
-              </div>
-
-              {/* Main Content */}
-              <div className="mb-5 relative z-10">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1.5 leading-snug">
-                  Semester {sem} Resources
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  {sem <= 2
-                    ? 'Foundation & general engineering core subjects for early semesters.'
-                    : sem <= 4
-                    ? 'Core departmental engineering subjects and practical lab modules.'
-                    : 'Advanced specialized subjects, project work & elective modules.'}
-                </p>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug break-words">
+                    Semester {sem} Resources
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                    {sem <= 2
+                      ? 'Foundation & general engineering core subjects for early semesters.'
+                      : sem <= 4
+                      ? 'Core departmental engineering subjects and practical lab modules.'
+                      : 'Advanced specialized subjects, project work & elective modules.'}
+                  </p>
+                </div>
               </div>
 
               {/* Action Footer */}

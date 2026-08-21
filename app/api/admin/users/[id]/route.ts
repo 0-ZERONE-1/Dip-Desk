@@ -1,27 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/lib/models/User';
+import { requireAdmin } from '@/lib/requireAdmin';
+import { updateUserStore } from '@/lib/store';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any)?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    await dbConnect();
     const body = await req.json();
-    // Only allow toggling isBanned
-    const user = await User.findByIdAndUpdate(
-      id,
-      { isBanned: body.isBanned },
-      { new: true }
-    );
-    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    return NextResponse.json({ user });
-  } catch {
-    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
+
+    const updatedUser = await updateUserStore(id, { isBanned: body.isBanned });
+    if (!updatedUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+    return NextResponse.json({ user: updatedUser });
+  } catch (err: any) {
+    console.error('Failed to update user ban status:', err);
+    return NextResponse.json({ error: 'Failed to update user ban status' }, { status: 500 });
   }
 }

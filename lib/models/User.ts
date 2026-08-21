@@ -6,14 +6,17 @@ export interface IUser extends Document {
   name: string;
   hashedPassword?: string;
   image?: string;
-  title: 'Student' | 'Alumni';
+  designation: string;
+  title?: string;
+  role?: string;
   institute: string;
   regNumber: string;
-  role: 'student' | 'admin';
   isBanned: boolean;
   isProfileComplete: boolean;
   bookmarks: mongoose.Types.ObjectId[];
   resourceRequests: mongoose.Types.ObjectId[];
+  upvotedResources: mongoose.Types.ObjectId[];
+  downvotedResources: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,14 +28,15 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true },
     hashedPassword: { type: String },
     image: { type: String },
-    title: { type: String, enum: ['Student', 'Alumni'], default: 'Student' },
+    designation: { type: String, default: 'Student' },
     institute: { type: String, default: '' },
     regNumber: { type: String, default: '' },
-    role: { type: String, enum: ['student', 'admin'], default: 'student' },
     isBanned: { type: Boolean, default: false },
     isProfileComplete: { type: Boolean, default: false },
     bookmarks: [{ type: Schema.Types.ObjectId, ref: 'Resource' }],
     resourceRequests: [{ type: Schema.Types.ObjectId, ref: 'ResourceRequest' }],
+    upvotedResources: [{ type: Schema.Types.ObjectId, ref: 'Resource' }],
+    downvotedResources: [{ type: Schema.Types.ObjectId, ref: 'Resource' }],
   },
   { timestamps: true }
 );

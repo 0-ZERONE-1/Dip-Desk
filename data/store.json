@@ -69,7 +69,8 @@
         "color": "#6366f1",
         "isActive": true
       },
-      "description": "Professional grammar and communication"
+      "description": "Professional grammar and communication",
+      "isActive": true
     },
     {
       "_id": "sub_cst_1_4",
@@ -464,7 +465,7 @@
     },
     {
       "_id": "res_1786897108626",
-      "upvotes": 0,
+      "upvotes": 1,
       "downvotes": 0,
       "isActive": true,
       "createdAt": "2026-08-16T16:18:28.626Z",
@@ -474,7 +475,13 @@
       "category": "Notes",
       "subjectId": "sub_cst_3_1",
       "tags": [],
-      "coverImage": "https://github.com/0-ZERONE-1/Image-Asset/blob/7c586c195a2abef604cd847236a7cf81d4f66e17/Dip-Desk/Nikhil%20Mandal.jpg"
+      "coverImage": "https://github.com/0-ZERONE-1/Image-Asset/blob/7c586c195a2abef604cd847236a7cf81d4f66e17/Dip-Desk/Nikhil%20Mandal.jpg",
+      "ratings": [
+        {
+          "userId": "user_1787169236156",
+          "vote": "up"
+        }
+      ]
     },
     {
       "_id": "res_1786897094450",
@@ -497,11 +504,17 @@
       "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
       "category": "Notes",
       "upvotes": 500,
-      "downvotes": 1,
+      "downvotes": 2,
       "isActive": true,
       "createdAt": "2026-08-08T23:02:12.267Z",
       "subjectId": "sub_cst_3_1",
-      "tags": []
+      "tags": [],
+      "ratings": [
+        {
+          "userId": "user_1787169236156",
+          "vote": "down"
+        }
+      ]
     },
     {
       "_id": "res_2",
@@ -565,9 +578,9 @@
       "isPinned": false,
       "isActive": true,
       "createdAt": "2026-08-16T18:08:22.590Z",
-      "title": "SDVDSV",
-      "content": "DVdSV",
-      "link": "DSVdsv"
+      "title": "SDVDSVdfvdvb",
+      "content": "DVdSVsydegfh iersdgufyewsgfywrv7westf8oviwesdf9wesfewsf ywesrf ywesirf wesfeify esfyviusdrhgfviusrfhygikndsfgufvydsgfvuydgrvtyiutgnhdzsukvygdstuyvgfbdfvgdfvhb issdfviudsfy ivdsfviusry grgvirsg s\nsdv dsyds89fusd vudstgviyusd vi\nsd vsdiuv hsiuvysidyv 8sivg uystvgysdvhgsuyztv gsdyg dsg vtvusdvsd gb\ndsgfdgdf\nsdsfgdfgdfg\nsgfgdgdfg\ndfgdfgdfgrdb ghdrhy grd",
+      "link": "https://dip-desk.vercel.app/admin/resources"
     },
     {
       "_id": "notice_1786903684450",
@@ -617,7 +630,8 @@
       "title": "Student",
       "institute": "Itahar Gov Poly",
       "regNumber": "D242535681",
-      "isProfileComplete": true
+      "isProfileComplete": true,
+      "isBanned": false
     },
     {
       "_id": "user_1787163752303",
@@ -641,7 +655,12 @@
       "title": "Student",
       "institute": "sadcds",
       "regNumber": "DSACdsc",
-      "image": ""
+      "image": "",
+      "isBanned": true,
+      "bookmarks": [
+        "res_1786897108626",
+        "res_1"
+      ]
     }
   ]
 }

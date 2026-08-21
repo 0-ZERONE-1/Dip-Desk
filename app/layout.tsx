@@ -5,18 +5,18 @@ import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Dip-Desk — Student Resource Platform',
+    default: 'Dip-Desk — User Resource Platform',
     template: '%s | Dip-Desk',
   },
   description:
-    'A centralized platform for Diploma students to access notes, books, model question papers, and lab manuals for every subject and semester.',
+    'A centralized platform for Diploma users to access notes, books, model question papers, and lab manuals for every subject and semester.',
   keywords: ['diploma', 'study materials', 'notes', 'question papers', 'lab manuals', 'CST', 'EE', 'ETC'],
   authors: [{ name: 'Dip-Desk' }],
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    title: 'Dip-Desk — Student Resource Platform',
-    description: 'Access free study materials for Diploma students across all branches and semesters.',
+    title: 'Dip-Desk — User Resource Platform',
+    description: 'Access free study materials for Diploma users across all branches and semesters.',
   },
 };
 

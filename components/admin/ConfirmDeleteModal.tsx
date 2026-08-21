@@ -8,6 +8,7 @@ interface Props {
   title?: string;
   description?: string;
   itemName?: string;
+  confirmText?: string;
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
@@ -18,6 +19,7 @@ export default function ConfirmDeleteModal({
   title = 'Delete this item?',
   description = 'This action cannot be undone. The item will be permanently removed.',
   itemName,
+  confirmText = 'Yes, Delete',
   onConfirm,
   onCancel,
   loading = false,
@@ -123,9 +125,9 @@ export default function ConfirmDeleteModal({
                   {loading ? (
                     <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                   ) : (
-                    <Trash2 className="w-4 h-4" />
+                    <AlertTriangle className="w-4 h-4" />
                   )}
-                  {loading ? 'Deleting…' : 'Yes, Delete'}
+                  {loading ? 'Processing…' : confirmText}
                 </button>
               </div>
             </div>

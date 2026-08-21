@@ -10,7 +10,6 @@ export interface IDeveloper extends Document {
   instagramUrl?: string;
   emailUrl?: string;
   portfolioUrl?: string;
-  twitterUrl?: string;
   order: number;
   isActive: boolean;
   createdAt: Date;
@@ -28,7 +27,6 @@ const DeveloperSchema: Schema = new Schema(
     instagramUrl: { type: String, default: '' },
     emailUrl: { type: String, default: '' },
     portfolioUrl: { type: String, default: '' },
-    twitterUrl: { type: String, default: '' },
     order: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },

@@ -13,6 +13,45 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+const KNOWN_DEPARTMENTS: Record<string, string> = {
+  cst: 'Computer Science & Technology',
+  cse: 'Computer Science & Engineering',
+  ce: 'Civil Engineering',
+  civil: 'Civil Engineering',
+  me: 'Mechanical Engineering',
+  mechanical: 'Mechanical Engineering',
+  ee: 'Electrical Engineering',
+  electrical: 'Electrical Engineering',
+  etce: 'Electronics & Telecommunication Engineering',
+  ece: 'Electronics & Communication Engineering',
+  se: 'Survey Engineering',
+  survey: 'Survey Engineering',
+  architecture: 'Architecture Engineering',
+  automobile: 'Automobile Engineering',
+  chemical: 'Chemical Engineering',
+  mining: 'Mining Engineering',
+  it: 'Information Technology',
+};
+
+export function getDepartmentNameBySlug(slug: string): string {
+  if (!slug) return '';
+  const normalized = slug.toLowerCase().trim();
+  if (KNOWN_DEPARTMENTS[normalized]) {
+    return KNOWN_DEPARTMENTS[normalized];
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const customDepts = JSON.parse(localStorage.getItem('dipdesk_custom_departments') || '[]');
+      const found = customDepts.find((d: any) => d.slug === slug || d.slug === normalized);
+      if (found && found.name) return found.name;
+    } catch {}
+  }
+  return slug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 export function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString('en-IN', {
     day: 'numeric',

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Link from 'next/link';
-import { BookOpen, ArrowRight, Loader2 } from 'lucide-react';
+import { BookOpen, ArrowRight, Loader2, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
@@ -79,7 +79,7 @@ export default function BrowsePage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3"
           >
-            Browse <span className="gradient-text">Resources</span>
+            Browse <span className="gradient-text">Departments</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 15 }}
@@ -124,12 +124,14 @@ export default function BrowsePage() {
                   <div className="absolute -top-10 -right-10 w-28 h-28 bg-primary-500/10 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   <div className="flex items-center gap-3.5 sm:gap-4 relative z-10">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-surface-100/90 border border-surface-200/80 group-hover:bg-primary-50 group-hover:border-primary-200 group-hover:scale-105 group-hover:shadow-md group-hover:shadow-primary-500/15 transition-all duration-300 overflow-hidden flex-shrink-0 aspect-square shadow-sm">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden aspect-square">
                       {isImageUrl(dept.icon) ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={formatImageUrl(dept.icon)} alt={dept.name} className="w-full h-full object-cover rounded-2xl" />
+                        <img src={formatImageUrl(dept.icon)} alt={dept.name} className="w-full h-full object-cover rounded-2xl shadow-sm" />
                       ) : (
-                        dept.icon || '📚'
+                        <div className="w-full h-full rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white shadow-md shadow-primary-500/25">
+                          <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-xs" />
+                        </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

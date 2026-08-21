@@ -6,9 +6,9 @@ import Breadcrumb from '@/components/layout/Breadcrumb';
 import ResourceCard from '@/components/ResourceCard';
 import RequestForm from '@/components/RequestForm';
 import { syncAndFilterItems } from '@/lib/clientStore';
-import { BookOpen, Loader2, PlusCircle, FileText, Sparkles } from 'lucide-react';
+import { BookOpen, Loader2, PlusCircle, FileText, Sparkles, AlertTriangle } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { cn, CATEGORIES, categoryIcon } from '@/lib/utils';
+import { cn, CATEGORIES, categoryIcon, getDepartmentNameBySlug } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 const ResourceLottieLoader = dynamic(
@@ -48,6 +48,22 @@ interface Props {
 
 export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }: Props) {
   const { data: session } = useSession();
+  const [isBanned, setIsBanned] = useState(false);
+
+  useEffect(() => {
+    if (session?.user) {
+      if ((session.user as any).isBanned) {
+        setIsBanned(true);
+      } else {
+        fetch('/api/user/profile')
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.user?.isBanned) setIsBanned(true);
+          })
+          .catch(() => {});
+      }
+    }
+  }, [session]);
   const [subject, setSubject] = useState<Subject | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>(CATEGORIES[0]);
@@ -57,16 +73,18 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
 
   // Load subject info
   useEffect(() => {
-    fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${Date.now()}`, { cache: 'no-store' })
+    const minDelay = new Promise((res) => setTimeout(res, 2500));
+    const apiFetch = fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         const rawList = data.subjects || [];
         const filteredList = syncAndFilterItems<Subject>('subjects', rawList, { departmentSlug: branchSlug, semesterNumber: semesterNumber });
         const found = filteredList.find((s: Subject) => s.slug === subjectSlug);
-        setSubject(found || null);
-        setLoading(false);
+        setSubject(found || null); // update immediately
       })
-      .catch(() => setLoading(false));
+      .catch(() => {});
+    Promise.all([apiFetch, minDelay])
+      .finally(() => setLoading(false));
   }, [branchSlug, semesterNumber, subjectSlug]);
 
   // Load resources when subject and category change
@@ -94,7 +112,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
     );
   }
 
-  const deptName = subject?.departmentId?.name || branchSlug.toUpperCase();
+  const deptName = subject?.departmentId?.name || getDepartmentNameBySlug(branchSlug);
   const deptSlug = subject?.departmentId?.slug || branchSlug;
 
   return (
@@ -103,30 +121,44 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         crumbs={[
           { label: deptName, href: `/${deptSlug}` },
           { label: `Semester ${semesterNumber}`, href: `/${deptSlug}/semester-${semesterNumber}` },
-          { label: subject ? subject.name : 'Loading...' },
+          { label: loading || !subject ? 'Loading...' : subject.name },
         ]}
       />
 
       {/* Subject Header Banner */}
-      <div className="mt-6 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-white via-surface-50 to-primary-50/30 border border-surface-200/80 shadow-sm">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            <span className="gradient-text">{subject ? subject.name : 'Loading Resources...'}</span>
-          </h1>
-          {subject?.description && (
-            <p className="text-sm sm:text-base text-gray-500 mt-2 max-w-2xl leading-relaxed">
-              {subject.description}
+      <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-600 to-accent-600 text-white shadow-md rounded-xl flex items-center justify-center flex-shrink-0 aspect-square">
+            <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+              {loading || !subject ? 'Loading Subject...' : subject.name}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
+              {subject?.description || 'Access syllabus, notes, books, model question papers, and lab manuals.'}
             </p>
-          )}
+          </div>
         </div>
-        <button
-          id="request-resource-btn"
-          onClick={() => setShowRequestForm(true)}
-          className="btn-primary px-5 py-3 rounded-2xl font-bold text-sm shadow-sm flex items-center gap-2 flex-shrink-0 self-start md:self-center hover:scale-105 transition-all"
-        >
-          <PlusCircle className="w-4 h-4" />
-          Request Resource
-        </button>
+        {isBanned ? (
+          <button
+            onClick={() => toast.error('Your account has been suspended. You cannot submit new requests.', { icon: '🚫' })}
+            className="bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-200/90 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm shadow-xs flex items-center gap-2 flex-shrink-0 self-start sm:self-center transition-all relative z-10"
+            title="Account Restricted - Feature Unavailable"
+          >
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+            Feature Restricted
+          </button>
+        ) : (
+          <button
+            id="request-resource-btn"
+            onClick={() => setShowRequestForm(true)}
+            className="btn-primary px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm shadow-sm flex items-center gap-2 flex-shrink-0 self-start sm:self-center hover:scale-105 transition-all relative z-10"
+          >
+            <PlusCircle className="w-4 h-4" />
+            Request Resource
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -173,12 +205,23 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
           <p className="text-sm sm:text-base text-gray-500 max-w-md mx-auto mb-6 leading-relaxed">
             Be the first student to request materials for <span className="font-semibold text-gray-700">{subject?.name || ''}</span>. Our team will verify and upload it!
           </p>
-          <button
-            onClick={() => setShowRequestForm(true)}
-            className="btn-primary px-6 py-3 rounded-2xl font-bold text-sm sm:text-base shadow-md inline-flex items-center gap-2 hover:scale-105 transition-all"
-          >
-            <Sparkles className="w-4 h-4" /> Request {activeCategory}
-          </button>
+          {isBanned ? (
+            <button
+              onClick={() => toast.error('Your account has been suspended. You cannot submit new requests.', { icon: '🚫' })}
+              className="bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-200/90 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm shadow-xs inline-flex items-center gap-2 transition-all cursor-not-allowed"
+              title="Account Restricted - Feature Unavailable"
+            >
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              Feature Restricted
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowRequestForm(true)}
+              className="btn-primary px-6 py-3 rounded-2xl font-bold text-sm sm:text-base shadow-md inline-flex items-center gap-2 hover:scale-105 transition-all"
+            >
+              <Sparkles className="w-4 h-4" /> Request {activeCategory}
+            </button>
+          )}
         </motion.div>
       ) : (
         <AnimatePresence mode="wait">
@@ -208,6 +251,8 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         <RequestForm
           subjectId={subject._id}
           subjectName={subject.name}
+          departmentName={deptName}
+          semesterNumber={semesterNumber}
           defaultCategory={activeCategory}
           onClose={() => setShowRequestForm(false)}
         />

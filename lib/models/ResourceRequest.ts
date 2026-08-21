@@ -1,8 +1,12 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IResourceRequest extends Document {
-  studentId: mongoose.Types.ObjectId;
-  subjectId: mongoose.Types.ObjectId;
+  studentId?: any;
+  studentEmail?: string;
+  subjectTitle?: string;
+  department?: string;
+  semester?: string;
+  url?: string;
   category: string;
   description: string;
   status: 'Pending' | 'Fulfilled' | 'Rejected';
@@ -13,13 +17,13 @@ export interface IResourceRequest extends Document {
 
 const ResourceRequestSchema = new Schema<IResourceRequest>(
   {
-    studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: true },
-    category: {
-      type: String,
-      enum: ['Syllabus', 'Notes', 'Books', 'Model Question Papers', 'Lab Manuals', 'Other'],
-      required: true,
-    },
+    studentId: { type: Schema.Types.Mixed },
+    studentEmail: { type: String, default: '' },
+    subjectTitle: { type: String, default: '' },
+    department: { type: String, default: '' },
+    semester: { type: String, default: '' },
+    url: { type: String, default: '' },
+    category: { type: String, default: 'Notes' },
     description: { type: String, required: true },
     status: {
       type: String,

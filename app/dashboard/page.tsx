@@ -6,8 +6,9 @@ import ResourceCard from '@/components/ResourceCard';
 import GenericLottieLoader from '@/components/GenericLottieLoader';
 import AnimatedSelect from '@/components/AnimatedSelect';
 import {
-  Bookmark, BookOpen, ThumbsUp, ThumbsDown, MessageSquarePlus, User, Edit3, Save, Loader2, CheckCircle, Clock, ShieldCheck, GraduationCap, X, Camera, LogOut, ExternalLink, Building2, Link as LinkIcon, LayoutDashboard, Bell, ArrowRight, ShieldAlert
+  Bookmark, BookOpen, ThumbsUp, ThumbsDown, MessageSquarePlus, User, Edit3, Save, Loader2, CheckCircle, Clock, ShieldCheck, GraduationCap, X, Camera, LogOut, ExternalLink, Building2, Link as LinkIcon, LayoutDashboard, Bell, ArrowRight, ShieldAlert, AlertTriangle, Trash2, XCircle
 } from 'lucide-react';
+import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -34,8 +35,10 @@ interface UserProfile {
   email: string;
   image?: string;
   title: string;
+  designation?: string;
   institute: string;
   regNumber: string;
+  isBanned?: boolean;
   bookmarks: ResourceItem[];
 }
 
@@ -61,17 +64,59 @@ export default function StudentPanelPage() {
   // Request Form State
   const [requestDept, setRequestDept] = useState('Computer Science & Technology');
   const [requestSemester, setRequestSemester] = useState('Semester 3');
-  const [requestSubject, setRequestSubject] = useState('');
+  const [requestSubjectSelect, setRequestSubjectSelect] = useState('Select Subject');
+  const [requestTopicTitle, setRequestTopicTitle] = useState('');
   const [requestCategory, setRequestCategory] = useState('Notes');
   const [requestUrl, setRequestUrl] = useState('');
   const [requestDesc, setRequestDesc] = useState('');
   const [submittingRequest, setSubmittingRequest] = useState(false);
 
+  // Deleting Pending Request State
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
+  const [deletingRequestTitle, setDeletingRequestTitle] = useState<string>('');
+  const [deletingLoading, setDeletingLoading] = useState<boolean>(false);
+
+  const handleDeleteRequest = async () => {
+    if (!deletingRequestId) return;
+    setDeletingLoading(true);
+    try {
+      const res = await fetch(`/api/requests?id=${deletingRequestId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setRequests((prev) => prev.filter((r) => r._id !== deletingRequestId));
+        toast.success('Pending request deleted successfully');
+      } else {
+        toast.error('Failed to delete request');
+      }
+    } catch {
+      toast.error('Error deleting request');
+    } finally {
+      setDeletingLoading(false);
+      setDeletingRequestId(null);
+    }
+  };
+
+  const [availableDepartments, setAvailableDepartments] = useState<any[]>([]);
+  const [availableSubjects, setAvailableSubjects] = useState<any[]>([]);
+
   useEffect(() => {
     fetchProfile();
     fetchAllResources();
     fetchRequests();
+    fetchDeptAndSubjects();
   }, []);
+
+  const fetchDeptAndSubjects = async () => {
+    try {
+      const [deptRes, subRes] = await Promise.all([
+        fetch('/api/departments'),
+        fetch('/api/subjects'),
+      ]);
+      const deptData = await deptRes.json();
+      const subData = await subRes.json();
+      setAvailableDepartments(deptData.departments || []);
+      setAvailableSubjects(subData.subjects || []);
+    } catch { }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -87,7 +132,7 @@ export default function StudentPanelPage() {
           regNumber: data.user.regNumber || '',
         });
       }
-    } catch {}
+    } catch { }
     setLoading(false);
   };
 
@@ -96,7 +141,7 @@ export default function StudentPanelPage() {
       const res = await fetch('/api/resources');
       const data = await res.json();
       setAllResources(data.resources || []);
-    } catch {}
+    } catch { }
   };
 
   const fetchRequests = async () => {
@@ -104,7 +149,7 @@ export default function StudentPanelPage() {
       const res = await fetch('/api/requests');
       const data = await res.json();
       setRequests(data.requests || []);
-    } catch {}
+    } catch { }
   };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -133,6 +178,14 @@ export default function StudentPanelPage() {
     e.preventDefault();
     if (!requestDesc) { toast.error('Please describe what resource you need'); return; }
     setSubmittingRequest(true);
+
+    const fullSubjectTitle =
+      requestSubjectSelect && requestSubjectSelect !== 'Select Subject' && requestSubjectSelect !== 'Other / Custom Subject'
+        ? requestTopicTitle.trim()
+          ? `${requestSubjectSelect} - ${requestTopicTitle.trim()}`
+          : requestSubjectSelect
+        : requestTopicTitle.trim() || 'General Topic';
+
     try {
       const res = await fetch('/api/requests', {
         method: 'POST',
@@ -140,7 +193,7 @@ export default function StudentPanelPage() {
         body: JSON.stringify({
           department: requestDept,
           semester: requestSemester,
-          subjectTitle: requestSubject || 'General',
+          subjectTitle: fullSubjectTitle,
           category: requestCategory,
           url: requestUrl,
           description: requestDesc,
@@ -148,7 +201,8 @@ export default function StudentPanelPage() {
       });
       if (!res.ok) throw new Error();
       toast.success('Resource request submitted! Admins will review it soon.');
-      setRequestSubject('');
+      setRequestSubjectSelect('Select Subject');
+      setRequestTopicTitle('');
       setRequestUrl('');
       setRequestDesc('');
       await fetchRequests();
@@ -170,8 +224,16 @@ export default function StudentPanelPage() {
     r.ratings?.some((rt) => (rt.userId === currentUserId || (userEmail && rt.userId === userEmail)) && rt.vote === 'down')
   );
   const myRequests = requests.filter(
-    (rq) => rq.studentId === currentUserId || (userEmail && rq.studentEmail === userEmail)
+    (rq) =>
+      rq.studentId === currentUserId ||
+      rq.studentId?._id === currentUserId ||
+      (userEmail &&
+        (rq.studentEmail?.toLowerCase() === userEmail.toLowerCase() ||
+          rq.studentId?.email?.toLowerCase() === userEmail.toLowerCase())) ||
+      !rq.studentEmail
   );
+
+  const pendingMyRequests = myRequests.filter((rq) => rq.status?.toLowerCase() === 'pending').length;
 
   const displayAvatar = profile?.image || session?.user?.image;
 
@@ -217,12 +279,26 @@ export default function StudentPanelPage() {
       </div>
 
       <main className="flex-1 w-full max-w-[1700px] mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7">
+        {/* Prominent Banned Warning Banner */}
+        {profile?.isBanned && (
+          <div className="w-full mb-6 p-4 rounded-3xl bg-red-50/90 border-2 border-red-200/90 text-red-800 flex items-start gap-3.5 shadow-md animate-fade-in">
+            <div className="p-2.5 rounded-2xl bg-red-100 text-red-600 flex-shrink-0">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-sm text-red-900 tracking-tight">🚫 Account Restricted / Banned</h3>
+              <p className="text-xs text-red-700 mt-1 leading-relaxed">
+                Your account has been restricted by system administrators. You are currently barred from submitting new resource requests or modifying profile data.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Outer Layout: Sticky Left Sidebar + Main Content Area */}
         <div className="w-full flex flex-col md:flex-row gap-5 lg:gap-7 items-start">
 
           {/* ===== LEFT SIDEBAR ===== */}
-          <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 sticky top-20 self-start space-y-4">
+          <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 sticky top-[92px] self-start space-y-4">
 
             {/* 1. Profile Avatar Card */}
             <div className="card p-5 text-center">
@@ -230,28 +306,35 @@ export default function StudentPanelPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={displayAvatar}
-                  alt={profile?.name || 'Student'}
+                  alt={profile?.name || 'User'}
                   className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 shadow-md border-2 border-primary-200"
                 />
               ) : (
                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-3 shadow-md shadow-primary-500/20">
-                  {profile?.name?.[0]?.toUpperCase() || session?.user?.name?.[0]?.toUpperCase() || 'S'}
+                  {profile?.name?.[0]?.toUpperCase() || session?.user?.name?.[0]?.toUpperCase() || 'U'}
                 </div>
               )}
-              <h2 className="font-bold text-gray-900 text-base">{profile?.name || session?.user?.name || 'Student User'}</h2>
+              <h2 className="font-bold text-gray-900 text-base">{profile?.name || session?.user?.name || 'User'}</h2>
               <p className="text-xs text-gray-500 truncate mt-0.5">{profile?.email || session?.user?.email}</p>
-              <p className="text-xs font-semibold text-primary-700 bg-primary-50 px-3 py-1 rounded-full inline-block mt-2 border border-primary-100">
-                {profile?.title || 'Student'}
-              </p>
+              <div className="flex items-center justify-center gap-1.5 flex-wrap mt-2">
+                <span className="text-xs font-semibold text-primary-700 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">
+                  {profile?.designation || profile?.title || 'Student'}
+                </span>
+                {profile?.isBanned && (
+                  <span className="text-[10px] font-extrabold text-red-700 bg-red-100 border border-red-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                    🚫 Banned
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* 2. Student Controls Navigation Card */}
             <div className="card p-4 border border-surface-200/90 shadow-card rounded-3xl bg-white space-y-1.5">
-              
+
               {/* Header Title */}
               <div className="px-3.5 py-3 mb-2 border-b border-surface-100 flex items-center justify-between gap-2">
                 <span className="font-extrabold text-xs uppercase tracking-wider text-gray-700 whitespace-nowrap">
-                  Student Controls
+                  User Controls
                 </span>
                 <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">
                   <span className="relative flex h-1.5 w-1.5">
@@ -266,10 +349,10 @@ export default function StudentPanelPage() {
               <nav className="space-y-1">
                 {[
                   { id: 'profile', label: 'Dashboard', icon: LayoutDashboard, badge: null },
-                  { id: 'saved', label: 'Saved Resources', icon: Bookmark, badge: profile?.bookmarks?.length || 0 },
-                  { id: 'liked', label: 'Liked Resources', icon: ThumbsUp, badge: likedResources.length },
-                  { id: 'disliked', label: 'Disliked Resources', icon: ThumbsDown, badge: dislikedResources.length },
-                  { id: 'requests', label: 'My Requests', icon: MessageSquarePlus, badge: myRequests.length },
+                  { id: 'saved', label: 'Saved Resources', icon: Bookmark, badge: null },
+                  { id: 'liked', label: 'Liked Resources', icon: ThumbsUp, badge: null },
+                  { id: 'disliked', label: 'Disliked Resources', icon: ThumbsDown, badge: null },
+                  { id: 'requests', label: 'My Requests', icon: MessageSquarePlus, badge: pendingMyRequests },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   const active = activeTab === tab.id;
@@ -320,7 +403,7 @@ export default function StudentPanelPage() {
                       </div>
                     )}
                     <div className="truncate min-w-0">
-                      <p className="text-xs font-bold text-gray-900 truncate">{profile?.name || session?.user?.name || 'Student User'}</p>
+                      <p className="text-xs font-bold text-gray-900 truncate">{profile?.name || session?.user?.name || 'User'}</p>
                       <p className="text-[11px] text-gray-400 truncate">{profile?.email || session?.user?.email}</p>
                     </div>
                   </div>
@@ -352,7 +435,7 @@ export default function StudentPanelPage() {
                   {activeTab === 'requests' && <MessageSquarePlus className="w-4 h-4" />}
                 </div>
                 <h1 className="text-xl sm:text-2xl font-extrabold gradient-text">
-                  {activeTab === 'profile' && 'Student Dashboard'}
+                  {activeTab === 'profile' && 'User Dashboard'}
                   {activeTab === 'saved' && 'Saved Resources'}
                   {activeTab === 'liked' && 'Liked Resources'}
                   {activeTab === 'disliked' && 'Disliked Resources'}
@@ -371,7 +454,7 @@ export default function StudentPanelPage() {
             {/* TAB: DASHBOARD / MY PROFILE */}
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                
+
                 {/* 1. TOP STAT CARDS ROW */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                   {[
@@ -405,7 +488,7 @@ export default function StudentPanelPage() {
                     <div>
                       <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
                         <User className="w-4.5 h-4.5 text-primary-600" />
-                        Student Information
+                        User Information
                       </h3>
                       <p className="text-xs text-gray-500 mt-0.5">You can update your personal details and profile picture</p>
                     </div>
@@ -437,7 +520,7 @@ export default function StudentPanelPage() {
                 {/* 3. QUICK ACTIONS & SHORTCUTS (Matching Admin Dashboard Quick Actions 1:1) */}
                 <div>
                   <h3 className="text-base font-extrabold text-gray-900 mb-1">Quick Actions & Shortcuts</h3>
-                  <p className="text-xs text-gray-500 mb-4">Direct shortcuts to key student modules</p>
+                  <p className="text-xs text-gray-500 mb-4">Direct shortcuts to key user modules</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
@@ -449,8 +532,8 @@ export default function StudentPanelPage() {
                         action: () => (window.location.href = '/browse'),
                       },
                       {
-                        title: 'Request a Resource',
-                        desc: 'Ask admins for missing notes or textbooks',
+                        title: 'View Your Requests',
+                        desc: 'Track status of your submitted requests',
                         icon: MessageSquarePlus,
                         color: 'text-purple-600 bg-purple-50',
                         action: () => setActiveTab('requests'),
@@ -567,121 +650,6 @@ export default function StudentPanelPage() {
             {activeTab === 'requests' && (
               <div className="space-y-6 min-h-[500px]">
 
-                {/* Submit New Request Form */}
-                <div className="card p-6">
-                  <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-                    <MessageSquarePlus className="w-4 h-4 text-purple-600" />
-                    Request a Resource
-                  </h3>
-                  <p className="text-xs text-gray-500 mb-4">Can&apos;t find notes or question papers? Request them from admins!</p>
-
-                  <form onSubmit={handleCreateRequest} className="space-y-4">
-                    {/* Department & Semester Selectors */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Department</label>
-                        <AnimatedSelect
-                          value={requestDept}
-                          onChange={(val) => setRequestDept(val)}
-                          options={[
-                            { value: 'Computer Science & Technology', label: 'Computer Science & Technology' },
-                            { value: 'Electrical Engineering', label: 'Electrical Engineering' },
-                            { value: 'Civil Engineering', label: 'Civil Engineering' },
-                            { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
-                            { value: 'Electronics & Telecommunication', label: 'Electronics & Telecommunication' },
-                            { value: 'General / Other', label: 'General / Other' },
-                          ]}
-                          className="w-full"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Semester</label>
-                        <AnimatedSelect
-                          value={requestSemester}
-                          onChange={(val) => setRequestSemester(val)}
-                          options={[
-                            { value: 'Semester 1', label: 'Semester 1' },
-                            { value: 'Semester 2', label: 'Semester 2' },
-                            { value: 'Semester 3', label: 'Semester 3' },
-                            { value: 'Semester 4', label: 'Semester 4' },
-                            { value: 'Semester 5', label: 'Semester 5' },
-                            { value: 'Semester 6', label: 'Semester 6' },
-                            { value: 'All Semesters', label: 'All Semesters' },
-                          ]}
-                          className="w-full"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Subject Title & Category */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Subject / Topic Title</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Data Structures & Algorithms"
-                          value={requestSubject}
-                          onChange={(e) => setRequestSubject(e.target.value)}
-                          className="input"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Category</label>
-                        <AnimatedSelect
-                          value={requestCategory}
-                          onChange={(val) => setRequestCategory(val)}
-                          options={[
-                            { value: 'Notes', label: 'Notes' },
-                            { value: 'Textbooks', label: 'Textbooks' },
-                            { value: 'Model Question Papers', label: 'Model Question Papers' },
-                            { value: 'Lab Manuals', label: 'Lab Manuals' },
-                            { value: 'Syllabus', label: 'Syllabus' },
-                            { value: 'Routines', label: 'Routines' },
-                            { value: 'Other', label: 'Other' },
-                          ]}
-                          className="w-full"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Optional Source Link URL */}
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">
-                        Source Link / Reference URL <span className="text-gray-400 font-normal">(Optional)</span>
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://drive.google.com/... or textbook link"
-                        value={requestUrl}
-                        onChange={(e) => setRequestUrl(e.target.value)}
-                        className="input text-xs"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">Description / Details</label>
-                      <textarea
-                        rows={3}
-                        placeholder="Specify semester, year, or chapter details..."
-                        value={requestDesc}
-                        onChange={(e) => setRequestDesc(e.target.value)}
-                        className="input"
-                        required
-                      />
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={submittingRequest}
-                        className="btn-primary py-2.5 px-6 text-xs"
-                      >
-                        {submittingRequest ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Submit Request</span>}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
                 {/* Submitted Requests List */}
                 <div>
                   <h4 className="text-sm font-bold text-gray-900 mb-3">Submitted Requests ({myRequests.length})</h4>
@@ -691,39 +659,110 @@ export default function StudentPanelPage() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {myRequests.map((rq) => (
-                        <div key={rq._id} className="card p-4 flex items-center justify-between gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-bold text-sm text-gray-900">{rq.subjectTitle || 'Resource Request'}</span>
-                              <span className="badge-primary text-[10px]">{rq.category}</span>
-                              {rq.department && <span className="bg-surface-200/70 text-gray-700 text-[10px] font-semibold px-2 py-0.5 rounded-md">{rq.department}</span>}
-                              {rq.semester && <span className="bg-primary-50 text-primary-700 border border-primary-100 text-[10px] font-semibold px-2 py-0.5 rounded-md">{rq.semester}</span>}
+                      {myRequests.map((rq) => {
+                        const fullTitle = rq.subjectTitle || 'Resource Request';
+                        const parts = fullTitle.split(' - ');
+                        const subjectName = parts.length > 1 ? parts[0] : null;
+                        const mainTitle = parts.length > 1 ? parts.slice(1).join(' - ') : fullTitle;
+
+                        return (
+                          <div key={rq._id} className="card p-5 flex items-start justify-between gap-4 border border-surface-200/90 shadow-sm hover:shadow-card transition-all">
+                            <div className="flex-1 min-w-0">
+                              {/* Top Badges Row */}
+                              <div className="flex items-center gap-2 flex-wrap mb-2.5">
+                                <span className="bg-primary-50 text-primary-700 border border-primary-200 text-xs font-semibold px-2.5 py-0.5 rounded-lg">
+                                  {rq.category}
+                                </span>
+                                {rq.department && (
+                                  <span className="bg-surface-100 text-gray-700 border border-surface-200 text-xs font-semibold px-2.5 py-0.5 rounded-lg">
+                                    {rq.department}
+                                  </span>
+                                )}
+                                {rq.semester && (
+                                  <span className="bg-purple-50 text-purple-700 border border-purple-100 text-xs font-semibold px-2.5 py-0.5 rounded-lg">
+                                    {rq.semester}
+                                  </span>
+                                )}
+                                {subjectName && rq.category !== 'Subject Request' && !subjectName.toLowerCase().startsWith('semester') && (
+                                  <span className="bg-teal-50 text-teal-700 border border-teal-200 text-xs font-semibold px-2.5 py-0.5 rounded-lg">
+                                    {subjectName}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Title on Next Line */}
+                              <h3 className="font-extrabold text-base text-gray-900 mb-1.5 break-words">
+                                {mainTitle}
+                              </h3>
+
+                              {/* Description */}
+                              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-2.5">{rq.description}</p>
+
+                              {/* Source Link */}
+                              {rq.url && (
+                                <div className="mb-2">
+                                  <a
+                                    href={rq.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700 hover:underline"
+                                  >
+                                    <LinkIcon className="w-3.5 h-3.5" />
+                                    <span>Source Link</span>
+                                    <ExternalLink className="w-3 h-3 opacity-70" />
+                                  </a>
+                                </div>
+                              )}
+
+                              <p className="text-xs text-gray-400 pt-2 border-t border-surface-100">
+                                Submitted on {rq.createdAt ? new Date(rq.createdAt).toLocaleDateString() : 'N/A'}
+                              </p>
                             </div>
-                            <p className="text-xs text-gray-600 mt-1">{rq.description}</p>
-                            {rq.url && (
-                              <a
-                                href={rq.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700 hover:underline mt-1.5"
-                              >
-                                <LinkIcon className="w-3.5 h-3.5" />
-                                <span>Source Link</span>
-                                <ExternalLink className="w-3 h-3 opacity-70" />
-                              </a>
-                            )}
-                            <p className="text-[10px] text-gray-400 mt-1">Submitted on {new Date(rq.createdAt).toLocaleDateString()}</p>
+
+                            {/* Status Badge & Actions */}
+                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                              {(() => {
+                                const s = rq.status?.toLowerCase();
+                                if (s === 'fulfilled' || s === 'approved') {
+                                  return (
+                                    <span className="badge-success text-xs font-bold px-2.5 py-1 flex items-center gap-1">
+                                      <CheckCircle className="w-3.5 h-3.5" /> Fulfilled
+                                    </span>
+                                  );
+                                }
+                                if (s === 'rejected') {
+                                  return (
+                                    <span className="badge-danger text-xs font-bold px-2.5 py-1 flex items-center gap-1">
+                                      <XCircle className="w-3.5 h-3.5" /> Rejected
+                                    </span>
+                                  );
+                                }
+                                return (
+                                  <span className="badge-warning text-xs font-bold px-2.5 py-1 flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5 animate-pulse" /> Pending
+                                  </span>
+                                );
+                              })()}
+
+                              {/* Only Pending requests can be deleted by student user */}
+                              {rq.status?.toLowerCase() === 'pending' && (
+                                <button
+                                  id={`delete-pending-request-${rq._id}`}
+                                  onClick={() => {
+                                    setDeletingRequestId(rq._id);
+                                    setDeletingRequestTitle(mainTitle);
+                                  }}
+                                  className="p-1.5 px-2.5 rounded-xl bg-red-50 text-red-600 border border-red-200/90 hover:bg-red-100/80 transition-all font-semibold text-xs flex items-center gap-1.5 shadow-2xs"
+                                  title="Delete Pending Request"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Delete</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex-shrink-0">
-                            {rq.status === 'fulfilled' || rq.status === 'approved' ? (
-                              <span className="badge-success text-xs">Fulfilled ✓</span>
-                            ) : (
-                              <span className="badge-warning text-xs">Pending ⏳</span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -735,6 +774,18 @@ export default function StudentPanelPage() {
 
         </div>
       </main>
+
+      {/* Delete Confirmation Modal for Pending Requests */}
+      <ConfirmDeleteModal
+        open={!!deletingRequestId}
+        title="Delete Pending Request?"
+        description="Are you sure you want to delete this pending request? This action cannot be undone."
+        itemName={deletingRequestTitle}
+        confirmText="Yes, Delete Request"
+        onConfirm={handleDeleteRequest}
+        onCancel={() => setDeletingRequestId(null)}
+        loading={deletingLoading}
+      />
 
       {/* ===== EDIT PROFILE MODAL POPUP (Admin Modal Popup Style) ===== */}
       <AnimatePresence>
@@ -752,7 +803,7 @@ export default function StudentPanelPage() {
                 {/* Modal Header */}
                 <div className="px-6 pt-5 pb-3 border-b border-surface-100 flex items-center justify-between bg-gradient-to-b from-primary-50/40 to-transparent flex-shrink-0">
                   <div>
-                    <h2 className="text-xl font-extrabold gradient-text">Edit Student Profile</h2>
+                    <h2 className="text-xl font-extrabold gradient-text">Edit User Profile</h2>
                     <p className="text-xs text-gray-500 mt-0.5">Update your personal details and avatar image</p>
                   </div>
                   <button
@@ -767,98 +818,98 @@ export default function StudentPanelPage() {
                 {/* Modal Body */}
                 <form onSubmit={handleSaveProfile} className="p-6 space-y-4 overflow-y-auto">
 
-                {/* Profile Picture Link & Live Preview */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Profile Picture URL (Image Link)
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden flex items-center justify-center flex-shrink-0">
-                      {editForm.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={editForm.image} alt="Preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <Camera className="w-5 h-5 text-gray-400" />
-                      )}
+                  {/* Profile Picture Link & Live Preview */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Profile Picture URL (Image Link)
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {editForm.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={editForm.image} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Camera className="w-5 h-5 text-gray-400" />
+                        )}
+                      </div>
+                      <input
+                        type="url"
+                        placeholder="https://example.com/my-photo.jpg"
+                        value={editForm.image}
+                        onChange={(e) => setEditForm({ ...editForm, image: e.target.value })}
+                        className="input text-xs"
+                      />
                     </div>
-                    <input
-                      type="url"
-                      placeholder="https://example.com/my-photo.jpg"
-                      value={editForm.image}
-                      onChange={(e) => setEditForm({ ...editForm, image: e.target.value })}
-                      className="input text-xs"
-                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Paste a direct image URL (JPEG/PNG/WebP)</p>
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-1">Paste a direct image URL (JPEG/PNG/WebP)</p>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
-                    <input
-                      type="text"
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="input"
-                      required
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        className="input"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Designation</label>
+                      <select
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        className="select"
+                      >
+                        <option value="Student">Student</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Human">Human</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Institute Name</label>
+                      <input
+                        type="text"
+                        value={editForm.institute}
+                        onChange={(e) => setEditForm({ ...editForm, institute: e.target.value })}
+                        className="input"
+                        placeholder="e.g. Government Polytechnic"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Registration / Roll Number</label>
+                      <input
+                        type="text"
+                        value={editForm.regNumber}
+                        onChange={(e) => setEditForm({ ...editForm, regNumber: e.target.value })}
+                        className="input"
+                        placeholder="e.g. D2425000"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Designation</label>
-                    <select
-                      value={editForm.title}
-                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                      className="select"
+
+                  {/* Modal Actions */}
+                  <div className="pt-3 border-t border-surface-100 flex items-center justify-end gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="btn-secondary text-xs py-2.5 px-4"
                     >
-                      <option value="Student">Student</option>
-                      <option value="Teacher">Teacher</option>
-                      <option value="Human">Human</option>
-                    </select>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={savingProfile}
+                      className="btn-primary text-xs py-2.5 px-6 shadow-md shadow-primary-500/25"
+                    >
+                      {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /><span>Save Changes</span></>}
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Institute Name</label>
-                    <input
-                      type="text"
-                      value={editForm.institute}
-                      onChange={(e) => setEditForm({ ...editForm, institute: e.target.value })}
-                      className="input"
-                      placeholder="e.g. Government Polytechnic"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Registration / Roll Number</label>
-                    <input
-                      type="text"
-                      value={editForm.regNumber}
-                      onChange={(e) => setEditForm({ ...editForm, regNumber: e.target.value })}
-                      className="input"
-                      placeholder="e.g. D2425000"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Modal Actions */}
-                <div className="pt-3 border-t border-surface-100 flex items-center justify-end gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="btn-secondary text-xs py-2.5 px-4"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={savingProfile}
-                    className="btn-primary text-xs py-2.5 px-6 shadow-md shadow-primary-500/25"
-                  >
-                    {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /><span>Save Changes</span></>}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </motion.div>
+                </form>
+              </div>
+            </motion.div>
           </div>
         )}
       </AnimatePresence>

@@ -13,6 +13,8 @@ import {
   Loader2,
   Code2,
   X,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
@@ -31,7 +33,6 @@ interface Developer {
   instagramUrl?: string;
   emailUrl?: string;
   portfolioUrl?: string;
-  twitterUrl?: string;
   order?: number;
   isActive?: boolean;
 }
@@ -96,6 +97,7 @@ export default function AdminDevelopersPage() {
     emailUrl: '',
     portfolioUrl: '',
     order: 1,
+    isActive: true,
   });
 
   useEffect(() => {
@@ -104,7 +106,7 @@ export default function AdminDevelopersPage() {
 
   const fetchDevelopers = async () => {
     try {
-      const res = await fetch(`/api/developers?t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`/api/developers?all=true&t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       const rawList = Array.isArray(data) ? data : data.developers || [];
       const synced = syncAndFilterItems<Developer>('developers', rawList);
@@ -130,6 +132,7 @@ export default function AdminDevelopersPage() {
       emailUrl: '',
       portfolioUrl: '',
       order: developers.length + 1,
+      isActive: true,
     });
     setShowModal(true);
   };
@@ -147,8 +150,27 @@ export default function AdminDevelopersPage() {
       emailUrl: dev.emailUrl || '',
       portfolioUrl: dev.portfolioUrl || '',
       order: dev.order || 1,
+      isActive: dev.isActive !== false,
     });
     setShowModal(true);
+  };
+
+  const toggleActive = async (dev: Developer) => {
+    const updatedActive = dev.isActive === false ? true : false;
+    setDevelopers((prev) =>
+      prev.map((d) => (d._id === dev._id ? { ...d, isActive: updatedActive } : d))
+    );
+    try {
+      await fetch(`/api/developers/${dev._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: updatedActive }),
+      });
+      toast.success(updatedActive ? 'Developer activated (visible to students)' : 'Developer deactivated (hidden from students)');
+    } catch {
+      toast.error('Failed to update active status');
+      fetchDevelopers();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -308,6 +330,17 @@ export default function AdminDevelopersPage() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                      <span
+                        className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                          dev.isActive !== false
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-red-50 text-red-700 border border-red-200'
+                        }`}
+                      >
+                        {dev.isActive !== false ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
                     <h3 className="font-bold text-gray-900 text-base break-words [overflow-wrap:anywhere] leading-tight">
                       {dev.name}
                     </h3>
@@ -338,18 +371,29 @@ export default function AdminDevelopersPage() {
                   {dev.portfolioUrl && <Globe className="w-4 h-4" />}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => toggleActive(dev)}
+                    className={`p-1.5 rounded-xl transition-all border ${
+                      dev.isActive !== false
+                        ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                        : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                    }`}
+                    title={dev.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                  >
+                    {dev.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </button>
                   <button
                     onClick={() => openEditModal(dev)}
-                    className="p-1.5 rounded-lg text-gray-500 hover:bg-surface-100 hover:text-primary-600 transition-colors"
-                    title="Edit"
+                    className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
+                    title="Edit Developer Profile"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setDeleteId(dev._id)}
-                    className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                    title="Delete"
+                    className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
+                    title="Delete Developer Profile"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -532,6 +576,20 @@ export default function AdminDevelopersPage() {
                   onChange={(e) => setForm({ ...form, portfolioUrl: e.target.value })}
                   className="input"
                 />
+              </div>
+
+              <div className="flex items-center gap-2.5 pt-1">
+                <input
+                  type="checkbox"
+                  id="active-developer"
+                  checked={form.isActive}
+                  onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                  className="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600"
+                />
+                <label htmlFor="active-developer" className="text-xs font-semibold text-gray-700 cursor-pointer select-none flex items-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-full ${form.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
+                  Active (Visible to Students on Developers Page)
+                </label>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-100 mt-6">

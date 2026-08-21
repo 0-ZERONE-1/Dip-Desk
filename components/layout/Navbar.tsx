@@ -32,7 +32,7 @@ export default function Navbar() {
     { href: '/notices', label: 'Notice', exact: false },
     { href: '/developers', label: 'Developers', exact: true },
     { href: '/about', label: 'About', exact: true },
-    ...(status === 'authenticated' && !isAdmin ? [{ href: '/dashboard', label: 'Student Panel', exact: true }] : []),
+    ...(status === 'authenticated' && !isAdmin ? [{ href: '/dashboard', label: 'User Panel', exact: true }] : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin Panel', exact: false }] : []),
   ];
 
@@ -141,7 +141,7 @@ export default function Navbar() {
                               onClick={() => setProfileOpen(false)}
                             >
                               <User className="w-4 h-4 text-blue-600" />
-                              Student Panel
+                              User Panel
                             </Link>
                           )}
                           {isAdmin && (
