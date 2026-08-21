@@ -308,15 +308,54 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
     await dbConnect();
     const filter: any = {};
     if (!includeInactive) filter.isActive = { $ne: false };
-    if (semesterNumber) filter.semesterNumber = semesterNumber;
+    if (semesterNumber) filter.semesterNumber = Number(semesterNumber);
+
+    let matchedSlugs: string[] = [];
     if (departmentSlug) {
-      const dept = await Department.findOne({ $or: [{ slug: departmentSlug }, { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined }] });
-      if (dept) {
-        filter.$or = [{ departmentId: dept._id }, { departmentId: 'all' }, { departmentSlug: 'all' }];
-      }
+      const cleanSlug = departmentSlug.toLowerCase().trim();
+      const matchedDepts = await Department.find({
+        $or: [
+          { slug: cleanSlug },
+          { name: { $regex: new RegExp(cleanSlug, 'i') } },
+          { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined },
+        ].filter(Boolean),
+      });
+
+      const matchedIds = matchedDepts.map((d: any) => d._id);
+      matchedSlugs = matchedDepts.map((d: any) => d.slug);
+
+      filter.$or = [
+        { departmentId: { $in: matchedIds } },
+        { departmentId: { $in: matchedSlugs } },
+        { departmentSlug: { $in: matchedSlugs } },
+        { departmentId: cleanSlug },
+        { departmentSlug: cleanSlug },
+        { departmentId: 'all' },
+        { departmentSlug: 'all' },
+      ];
     }
+
     const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
-    return subjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
+    
+    // Fallback: If DB query returned 0 subjects but departmentSlug is provided, retry fetching all subjects for the semester and filter in JS
+    let finalSubjects = subjects;
+    if (subjects.length === 0 && departmentSlug && semesterNumber) {
+      const allSemSubjects = await Subject.find({
+        semesterNumber: Number(semesterNumber),
+        ...(includeInactive ? {} : { isActive: { $ne: false } }),
+      }).populate('departmentId', 'name slug');
+      
+      finalSubjects = allSemSubjects.filter((s: any) => {
+        const sDeptSlug = (s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId : '')).toLowerCase();
+        const sDeptName = (s.departmentId?.name || '').toLowerCase();
+        if (sDeptSlug === 'all' || s.departmentId === 'all') return true;
+        if (sDeptSlug === departmentSlug.toLowerCase() || sDeptSlug.includes(departmentSlug.toLowerCase())) return true;
+        if (sDeptName.includes(departmentSlug.toLowerCase()) || departmentSlug.toLowerCase().includes(sDeptSlug)) return true;
+        return false;
+      });
+    }
+
+    return finalSubjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
   } catch (err) {
     console.error('Failed to fetch subjects from DB:', err);
   }
@@ -333,7 +372,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
     });
   }
   if (semesterNumber) {
-    list = list.filter((s) => s.semesterNumber === semesterNumber);
+    list = list.filter((s) => Number(s.semesterNumber) === Number(semesterNumber));
   }
   return list;
 }
@@ -345,8 +384,9 @@ export async function createSubjectStore(data: any) {
 
   try {
     await dbConnect();
-    if (typeof deptId === 'string' && !mongoose.Types.ObjectId.isValid(deptId)) {
-      const foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }] });
+    let foundDept = null;
+    if (typeof deptId === 'string') {
+      foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }, { _id: mongoose.Types.ObjectId.isValid(deptId) ? deptId : undefined }].filter(Boolean) });
       if (foundDept) deptId = foundDept._id;
     }
 
@@ -354,6 +394,7 @@ export async function createSubjectStore(data: any) {
       ...data,
       slug,
       departmentId: deptId,
+      departmentSlug: foundDept?.slug || data.departmentSlug || (typeof data.departmentId === 'string' ? data.departmentId : undefined),
       isActive: data.isActive !== undefined ? data.isActive : true,
     });
     return created;
