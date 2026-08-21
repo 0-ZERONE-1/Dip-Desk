@@ -5,7 +5,6 @@ export interface IDepartment extends Document {
   slug: string;
   description: string;
   icon: string;
-  color: string;
   isActive: boolean;
   createdAt: Date;
 }
@@ -16,10 +15,9 @@ const DepartmentSchema = new Schema<IDepartment>(
     slug: { type: String, required: true, unique: true, lowercase: true },
     description: { type: String, default: '' },
     icon: { type: String, default: '📚' },
-    color: { type: String, default: '#6366f1' },
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 const Department: Model<IDepartment> =

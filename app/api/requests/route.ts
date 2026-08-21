@@ -28,20 +28,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Category and description are required' }, { status: 400 });
     }
 
-    try {
-      await dbConnect();
-      await ResourceRequest.create({
-        studentId: userId,
-        studentEmail: userEmail || '',
-        category,
-        description,
-        subjectTitle,
-        department,
-        semester,
-        url,
-      });
-    } catch {}
-
     const newReq = await createRequestStore({
       studentId: userId,
       studentEmail: userEmail || '',

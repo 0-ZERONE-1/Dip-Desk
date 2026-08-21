@@ -20,7 +20,6 @@ interface Department {
   slug: string;
   description: string;
   icon: string;
-  color: string;
 }
 
 const containerVariants = {

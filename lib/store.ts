@@ -809,7 +809,26 @@ export async function getRequestsStore() {
     }
   }
 
-  return combined;
+  const uniqueRequests: any[] = [];
+  const seenIds = new Set<string>();
+  const seenContent = new Set<string>();
+
+  for (const item of combined) {
+    const idKey = item._id?.toString() || item.id;
+    // Format timestamp rounded to nearest second for duplicate detection
+    const timeSec = item.createdAt ? Math.floor(new Date(item.createdAt).getTime() / 2000) : '';
+    const contentKey = `${item.studentEmail}_${item.description}_${item.subjectTitle}_${timeSec}`;
+
+    if (idKey && seenIds.has(idKey)) continue;
+    if (contentKey && seenContent.has(contentKey)) continue;
+
+    if (idKey) seenIds.add(idKey);
+    if (contentKey) seenContent.add(contentKey);
+
+    uniqueRequests.push(item);
+  }
+
+  return uniqueRequests;
 }
 
 export async function createRequestStore(data: any) {
@@ -820,6 +839,12 @@ export async function createRequestStore(data: any) {
       status: 'Pending',
       ...data,
     });
+    if (createdDb && data.studentEmail) {
+      await User.updateOne(
+        { email: data.studentEmail.toLowerCase() },
+        { $addToSet: { resourceRequests: createdDb._id } }
+      );
+    }
   } catch (err) {
     console.error('Failed to create request in DB:', err);
   }
@@ -864,6 +889,10 @@ export async function deleteRequestStore(id: string) {
     await dbConnect();
     if (mongoose.Types.ObjectId.isValid(id)) {
       await ResourceRequest.findByIdAndDelete(id);
+      await User.updateMany(
+        { resourceRequests: id },
+        { $pull: { resourceRequests: id } }
+      );
     }
     await ResourceRequest.deleteOne({ _id: id });
   } catch (err) {
