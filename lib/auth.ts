@@ -1,4 +1,12 @@
 import { NextAuthOptions } from 'next-auth';
+
+// Fail loudly at startup if the secret is missing — never use a hardcoded fallback
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error(
+    '[Auth] NEXTAUTH_SECRET environment variable is not set. ' +
+    'Set it in .env.local for development and in your hosting provider\'s env vars for production.'
+  );
+}
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/dbConnect';
@@ -26,16 +34,11 @@ export const authOptions: NextAuthOptions = {
           const storeUser = await findUserByEmailStore(inputEmail);
           if (storeUser) {
             let isValid = false;
+            // Only accept bcrypt-hashed passwords — never compare plaintext
             if (storeUser.hashedPassword) {
               try {
                 isValid = await bcrypt.compare(credentials.password, storeUser.hashedPassword);
               } catch {}
-            }
-            if (!isValid && storeUser.password) {
-              isValid = credentials.password === storeUser.password;
-            }
-            if (!isValid && storeUser.hashedPassword) {
-              isValid = credentials.password === storeUser.hashedPassword;
             }
             if (isValid) {
               return {
@@ -177,5 +180,5 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
-  secret: process.env.NEXTAUTH_SECRET || 'dip-desk-super-secret-production-key-2026-xyz-987654321',
+  secret: process.env.NEXTAUTH_SECRET,
 };

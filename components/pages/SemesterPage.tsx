@@ -92,7 +92,7 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
 
   useEffect(() => {
     const t = Date.now();
-    const minDelay = new Promise((res) => setTimeout(res, 2500));
+    const minDelay = new Promise((res) => setTimeout(res, 800));
     const apiFetch = Promise.all([
       fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/departments?t=${t}`, { cache: 'no-store' }).then((r) => r.json()),

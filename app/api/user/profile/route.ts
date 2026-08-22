@@ -6,6 +6,7 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import Admin from '@/lib/models/Admin';
 import { updateUserStore, findUserByIdStore, getResourcesStore } from '@/lib/store';
+import { sanitizeString, validateUrl } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -19,17 +20,36 @@ export async function POST(req: NextRequest) {
     const userEmail = session.user?.email ? session.user.email.toLowerCase().trim() : '';
     const { name, title, institute, regNumber, image } = await req.json();
 
-    if (!name || !title || !institute || !regNumber) {
+    // Sanitize and validate all profile fields
+    const cleanName      = sanitizeString(name, 80);
+    const cleanTitle     = sanitizeString(title, 60);
+    const cleanInstitute = sanitizeString(institute, 120);
+    const cleanRegNumber = sanitizeString(regNumber, 30);
+
+    if (!cleanName || !cleanTitle || !cleanInstitute || !cleanRegNumber) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
+    // Validate the image URL — must be https and not a private/local address
+    let cleanImage = '';
+    if (image) {
+      const validatedUrl = validateUrl(image);
+      if (validatedUrl === null) {
+        return NextResponse.json(
+          { error: 'Invalid image URL. Only public http/https URLs are allowed.' },
+          { status: 400 }
+        );
+      }
+      cleanImage = validatedUrl;
+    }
+
     const updatedData = {
-      name,
+      name: cleanName,
       email: userEmail,
-      title,
-      institute,
-      regNumber,
-      image: image || '',
+      title: cleanTitle,
+      institute: cleanInstitute,
+      regNumber: cleanRegNumber,
+      image: cleanImage,
       isProfileComplete: true,
     };
 

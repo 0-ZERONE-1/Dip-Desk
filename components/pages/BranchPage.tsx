@@ -72,7 +72,7 @@ export default function BranchPage({ branchSlug }: Props) {
   const displayName = dept?.name || getDepartmentNameBySlug(branchSlug);
 
   useEffect(() => {
-    const minDelay = new Promise((res) => setTimeout(res, 2500));
+    const minDelay = new Promise((res) => setTimeout(res, 800));
     const apiFetch = fetch(`/api/departments?t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {

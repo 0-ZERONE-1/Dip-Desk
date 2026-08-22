@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import ResourceRequest from '@/lib/models/ResourceRequest';
 import { createRequestStore, getRequestsStore, findUserByEmailStore, deleteRequestStore } from '@/lib/store';
+import { sanitizeString, validateUrl } from '@/lib/sanitize';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,21 +23,34 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = (session.user as any).id || 'demo_student_id';
-    const { subjectTitle, category, description, department, semester, url } = await req.json();
+    const rawBody = await req.json();
+    const { subjectTitle, category, description, department, semester, url } = rawBody;
 
-    if (!category || !description) {
+    // Sanitize all text fields to prevent NoSQL injection and oversized payloads
+    const cleanCategory    = sanitizeString(category, 100);
+    const cleanDescription = sanitizeString(description, 1000);
+    const cleanSubject     = sanitizeString(subjectTitle, 200);
+    const cleanDepartment  = sanitizeString(department, 100);
+    const cleanSemester    = sanitizeString(semester, 20);
+    const cleanUrl         = url ? validateUrl(url) : '';
+
+    if (!cleanCategory || !cleanDescription) {
       return NextResponse.json({ error: 'Category and description are required' }, { status: 400 });
+    }
+
+    if (url && cleanUrl === null) {
+      return NextResponse.json({ error: 'Invalid URL provided' }, { status: 400 });
     }
 
     const newReq = await createRequestStore({
       studentId: userId,
       studentEmail: userEmail || '',
-      subjectTitle: subjectTitle || 'General',
-      category,
-      description,
-      department: department || '',
-      semester: semester || '',
-      url: url || '',
+      subjectTitle: cleanSubject || 'General',
+      category: cleanCategory,
+      description: cleanDescription,
+      department: cleanDepartment || '',
+      semester: cleanSemester || '',
+      url: cleanUrl || '',
     });
 
     return NextResponse.json({ request: newReq }, { status: 201 });
@@ -64,6 +78,28 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'Request ID is required' }, { status: 400 });
+
+    const userEmail = session.user?.email || '';
+    const userRole  = (session.user as any).role || 'student';
+
+    // Non-admins can only delete their own requests
+    if (userRole !== 'admin') {
+      try {
+        await dbConnect();
+        const existing = await ResourceRequest.findById(id);
+        if (!existing) {
+          return NextResponse.json({ error: 'Request not found' }, { status: 404 });
+        }
+        if (existing.studentEmail?.toLowerCase() !== userEmail.toLowerCase()) {
+          return NextResponse.json(
+            { error: 'Forbidden: You can only delete your own requests' },
+            { status: 403 }
+          );
+        }
+      } catch {
+        // If DB check fails, fall through to deletion (local-store mode)
+      }
+    }
 
     await deleteRequestStore(id);
     return NextResponse.json({ success: true });

@@ -73,7 +73,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
 
   // Load subject info
   useEffect(() => {
-    const minDelay = new Promise((res) => setTimeout(res, 2500));
+    const minDelay = new Promise((res) => setTimeout(res, 800));
     const apiFetch = fetch(`/api/subjects?departmentSlug=${branchSlug}&semester=${semesterNumber}&t=${Date.now()}`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {

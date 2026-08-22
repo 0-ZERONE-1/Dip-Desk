@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-const AUTH_SECRET = process.env.NEXTAUTH_SECRET || 'dip-desk-super-secret-production-key-2026-xyz-987654321';
+const AUTH_SECRET = process.env.NEXTAUTH_SECRET;
+if (!AUTH_SECRET) {
+  throw new Error('[Middleware] NEXTAUTH_SECRET is not set. Cannot validate JWT tokens.');
+}
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: AUTH_SECRET });

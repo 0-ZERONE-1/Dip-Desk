@@ -3,40 +3,18 @@ import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import { findUserByEmailStore, createUserStore } from '@/lib/store';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { sanitizeString, validateEmail } from '@/lib/sanitize';
 
 // ─── Simple in-memory rate limiter ──────────────────────────────────────────
-// Max 5 registration attempts per IP per 15 minutes
-const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true; // allowed
-  }
-
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return false; // blocked
-  }
-
-  entry.count += 1;
-  return true; // allowed
-}
+// Max 5 registration attempts per IP per 15 minutes (handled by shared rateLimit.ts)
 // ────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   // Rate limit check
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
+  const ip = getClientIp(req);
 
-  if (!checkRateLimit(ip)) {
+  if (!checkRateLimit(ip, { name: 'register', max: 5, windowMs: 15 * 60 * 1000 })) {
     return NextResponse.json(
       { error: 'Too many registration attempts. Please try again after 15 minutes.' },
       { status: 429 }
@@ -44,22 +22,34 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, email, password } = await req.json();
+    const body = await req.json();
+    const { name, email, password } = body;
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    // Validate email format
+    const lowerEmail = validateEmail(email);
+    if (!lowerEmail) {
+      return NextResponse.json({ error: 'A valid email address is required' }, { status: 400 });
+    }
+
+    if (!password || typeof password !== 'string') {
+      return NextResponse.json({ error: 'Password is required' }, { status: 400 });
+    }
+
+    // Minimum password length of 8 characters
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    }
+
+    // Maximum password length to prevent bcrypt DoS (bcrypt silently truncates at 72 bytes)
+    if (password.length > 128) {
+      return NextResponse.json({ error: 'Password must be at most 128 characters' }, { status: 400 });
     }
 
     // Generate random 5 digit user name format e.g. User #48291
     const random5Digits = Math.floor(10000 + Math.random() * 90000);
     const defaultUserName = `User #${random5Digits}`;
-    const finalName = (name && !name.includes('@') && name.trim() !== '') ? name : defaultUserName;
-
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
-    }
-
-    const lowerEmail = email.toLowerCase().trim();
+    const rawName = sanitizeString(name, 80);
+    const finalName = (rawName && !rawName.includes('@')) ? rawName : defaultUserName;
 
     // Check if user exists in local store
     const existingStoreUser = await findUserByEmailStore(lowerEmail);
@@ -76,15 +66,14 @@ export async function POST(req: NextRequest) {
       }
     } catch {}
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Save to local store
+    // Save to local store — NEVER include the raw password
     const localUser = await createUserStore({
       name: finalName,
       email: lowerEmail,
-      password,
       hashedPassword,
-      role: 'student',
+      role: 'student',          // role is always set server-side, never from body
       isProfileComplete: true,
     });
 

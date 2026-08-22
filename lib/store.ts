@@ -624,13 +624,18 @@ export async function deleteResourceStore(id: string) {
 export async function getUsersStore() {
   try {
     await dbConnect();
-    const users = await User.find({}).sort({ createdAt: -1 });
+    // Exclude hashedPassword — it should never leave the server
+    const users = await User.find({}).select('-hashedPassword').sort({ createdAt: -1 });
     if (users && users.length > 0) return users;
   } catch (err) {
     console.error('Failed to fetch users from DB:', err);
   }
   const store = readLocalStore();
-  return store.users || [];
+  // Strip password fields from local store too
+  return (store.users || []).map((u: any) => {
+    const { hashedPassword, password, ...safe } = u;
+    return safe;
+  });
 }
 
 export async function findUserByEmailStore(email: string) {
@@ -668,17 +673,26 @@ export async function findUserByIdStore(id: string) {
 }
 
 export async function createUserStore(data: any) {
+  // Strip fields that must never come from user-supplied input
+  // (role, isBanned, isAdmin can only be set by server-side logic)
+  const { password: _pw, role: _role, isBanned: _banned, isAdmin: _isAdmin, ...safeData } = data;
+
+  // Use server-enforced values, not whatever came from the body
+  const role    = data.role    === 'admin' ? 'admin' : 'student'; // only allow admin if explicitly passed by trusted server code
+  const isBanned = false;  // always start unbanned
+
   try {
     await dbConnect();
     const created = await User.create({
-      designation: data.designation || data.title || 'Student',
+      designation: safeData.designation || safeData.title || 'Student',
       bookmarks: [],
       resourceRequests: [],
       upvotedResources: [],
       downvotedResources: [],
-      isBanned: false,
+      isBanned,
       isProfileComplete: true,
-      ...data,
+      ...safeData,
+      role, // enforce role AFTER spread so body cannot override it
     });
     return created;
   } catch (err) {
@@ -688,15 +702,16 @@ export async function createUserStore(data: any) {
   if (!store.users) store.users = [];
   const newUser = {
     _id: `user_${Date.now()}`,
-    designation: data.designation || data.title || 'Student',
-    isBanned: false,
+    designation: safeData.designation || safeData.title || 'Student',
+    isBanned,
     isProfileComplete: true,
     bookmarks: [],
     resourceRequests: [],
     upvotedResources: [],
     downvotedResources: [],
     createdAt: new Date().toISOString(),
-    ...data,
+    ...safeData,
+    role, // enforce role AFTER spread
   };
   store.users.push(newUser);
   saveLocalStore(store);
