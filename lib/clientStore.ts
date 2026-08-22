@@ -66,20 +66,37 @@ function itemMatchesDept(customItem: any, targetDeptSlug: string): boolean {
   if (customItem.departmentSlug === 'all' || customItem.departmentId === 'all') return true;
   if (typeof customItem.departmentId === 'object' && (customItem.departmentId?.slug === 'all' || customItem.departmentId?._id === 'all')) return true;
 
+  const targetClean = targetDeptSlug.toLowerCase().trim();
+
   // Direct slug checks
-  if (customItem.departmentSlug === targetDeptSlug) return true;
-  if (typeof customItem.departmentId === 'object' && customItem.departmentId?.slug === targetDeptSlug) return true;
-  if (typeof customItem.subjectId === 'object' && customItem.subjectId?.departmentId?.slug === targetDeptSlug) return true;
+  if (customItem.departmentSlug === targetDeptSlug || customItem.departmentSlug === targetClean) return true;
+  if (typeof customItem.departmentId === 'object') {
+    const dSlug = (customItem.departmentId?.slug || '').toLowerCase();
+    const dName = (customItem.departmentId?.name || '').toLowerCase();
+    if (dSlug === targetClean) return true;
+    if (targetClean === 'cst' && (dName.includes('computer science') || dSlug.includes('computer-science'))) return true;
+  }
+  if (typeof customItem.subjectId === 'object') {
+    const subDeptSlug = (customItem.subjectId?.departmentId?.slug || '').toLowerCase();
+    const subDeptName = (customItem.subjectId?.departmentId?.name || '').toLowerCase();
+    if (subDeptSlug === targetClean) return true;
+    if (targetClean === 'cst' && (subDeptName.includes('computer science') || subDeptSlug.includes('computer-science'))) return true;
+  }
 
   if (typeof customItem.departmentId === 'string') {
-    const dStr = customItem.departmentId;
-    if (dStr === targetDeptSlug) return true;
-    if (dStr.replace(/^dept_/, '') === targetDeptSlug) return true;
+    const dStr = customItem.departmentId.toLowerCase();
+    if (dStr === targetClean) return true;
+    if (dStr.replace(/^dept_/, '') === targetClean) return true;
 
     // Check custom departments in localStorage
     const depts = getClientCustomItems<any>('departments');
-    const matchedDept = depts.find((d) => d._id === dStr || d.slug === dStr);
-    if (matchedDept && matchedDept.slug === targetDeptSlug) return true;
+    const matchedDept = depts.find((d) => d._id === customItem.departmentId || d.slug === customItem.departmentId);
+    if (matchedDept) {
+      const mSlug = (matchedDept.slug || '').toLowerCase();
+      const mName = (matchedDept.name || '').toLowerCase();
+      if (mSlug === targetClean) return true;
+      if (targetClean === 'cst' && (mName.includes('computer science') || mSlug.includes('computer-science'))) return true;
+    }
   }
 
   // If customItem has subjectId as a string or object, check matched subject's department

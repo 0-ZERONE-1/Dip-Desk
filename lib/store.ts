@@ -313,12 +313,33 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
     let matchedSlugs: string[] = [];
     if (departmentSlug) {
       const cleanSlug = departmentSlug.toLowerCase().trim();
+      const aliasMap: Record<string, string> = {
+        cst: 'Computer Science & Technology',
+        cse: 'Computer Science & Engineering',
+        ce: 'Civil Engineering',
+        civil: 'Civil Engineering',
+        me: 'Mechanical Engineering',
+        mechanical: 'Mechanical Engineering',
+        ee: 'Electrical Engineering',
+        electrical: 'Electrical Engineering',
+        etce: 'Electronics & Telecommunication Engineering',
+        ece: 'Electronics & Communication Engineering',
+        se: 'Survey Engineering',
+        survey: 'Survey Engineering',
+      };
+      const knownFullName = aliasMap[cleanSlug] || '';
+      const knownSlug = knownFullName ? knownFullName.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') : '';
+
+      const searchConditions: any[] = [
+        { slug: cleanSlug },
+        { name: { $regex: new RegExp(cleanSlug, 'i') } },
+        { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined },
+      ];
+      if (knownFullName) searchConditions.push({ name: knownFullName });
+      if (knownSlug) searchConditions.push({ slug: knownSlug });
+
       const matchedDepts = await Department.find({
-        $or: [
-          { slug: cleanSlug },
-          { name: { $regex: new RegExp(cleanSlug, 'i') } },
-          { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined },
-        ].filter(Boolean),
+        $or: searchConditions.filter(Boolean),
       });
 
       const matchedIds = matchedDepts.map((d: any) => d._id);
@@ -333,6 +354,10 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         { departmentId: 'all' },
         { departmentSlug: 'all' },
       ];
+      if (knownSlug) {
+        filter.$or.push({ departmentSlug: knownSlug });
+        filter.$or.push({ departmentId: knownSlug });
+      }
     }
 
     const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
@@ -345,12 +370,14 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         ...(includeInactive ? {} : { isActive: { $ne: false } }),
       }).populate('departmentId', 'name slug');
       
+      const cleanTarget = departmentSlug.toLowerCase().trim();
       finalSubjects = allSemSubjects.filter((s: any) => {
         const sDeptSlug = (s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId : '')).toLowerCase();
         const sDeptName = (s.departmentId?.name || '').toLowerCase();
         if (sDeptSlug === 'all' || s.departmentId === 'all') return true;
-        if (sDeptSlug === departmentSlug.toLowerCase() || sDeptSlug.includes(departmentSlug.toLowerCase())) return true;
-        if (sDeptName.includes(departmentSlug.toLowerCase()) || departmentSlug.toLowerCase().includes(sDeptSlug)) return true;
+        if (sDeptSlug === cleanTarget || sDeptSlug.includes(cleanTarget)) return true;
+        if (sDeptName.includes(cleanTarget) || cleanTarget.includes(sDeptSlug)) return true;
+        if (cleanTarget === 'cst' && (sDeptName.includes('computer science') || sDeptSlug.includes('computer-science'))) return true;
         return false;
       });
     }
@@ -366,9 +393,13 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
   }
   if (departmentSlug) {
     list = list.filter((s) => {
-      const deptSlug = s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId.replace(/^dept_/, '') : '');
+      const deptSlug = (s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId.replace(/^dept_/, '') : '')).toLowerCase();
+      const deptName = (s.departmentId?.name || '').toLowerCase();
       if (deptSlug === 'all' || s.departmentId === 'all' || s.departmentSlug === 'all') return true;
-      return deptSlug === departmentSlug || s.departmentId === departmentSlug;
+      const target = departmentSlug.toLowerCase().trim();
+      if (deptSlug === target || s.departmentId === target) return true;
+      if (target === 'cst' && (deptName.includes('computer science') || deptSlug.includes('computer-science'))) return true;
+      return false;
     });
   }
   if (semesterNumber) {

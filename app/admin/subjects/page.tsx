@@ -97,8 +97,8 @@ export default function AdminSubjectsPage() {
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!form.name.trim() || !form.departmentId || !form.description.trim()) {
-      toast.error('Subject Name, Department, and Description are required');
+    if (!form.name.trim() || !form.departmentId) {
+      toast.error('Subject Name and Department are required');
       return;
     }
 
@@ -501,12 +501,11 @@ export default function AdminSubjectsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Subject Description <span className="text-[11px] font-normal text-gray-400">(100 CH LIM)</span>
+                    Subject Description <span className="text-[11px] font-normal text-gray-400">(Optional - 100 CH LIM)</span>
                   </label>
                   <textarea
                     id="subject-description"
                     rows={3}
-                    required
                     maxLength={100}
                     placeholder="Brief overview of the subject curriculum..."
                     value={form.description}
