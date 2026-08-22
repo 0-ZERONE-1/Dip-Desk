@@ -13,6 +13,7 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import Admin from '@/lib/models/Admin';
 import { findUserByEmailStore } from '@/lib/store';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -28,6 +29,11 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         const inputEmail = credentials.email.toLowerCase().trim();
+
+        // Rate limit: max 10 attempts per email per 15 minutes (prevents brute-force / password spray)
+        if (!checkRateLimit(inputEmail, { name: 'login', max: 10, windowMs: 15 * 60 * 1000 })) {
+          throw new Error('Too many login attempts. Please wait 15 minutes before trying again.');
+        }
 
         // 1. Check local store registered users
         try {
