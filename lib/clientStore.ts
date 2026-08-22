@@ -145,35 +145,11 @@ export function syncAndFilterItems<T = any>(
   if (typeof window === 'undefined') return serverItems || [];
   const rawList = Array.isArray(serverItems) ? [...serverItems] : [];
 
-  // If server returned an array from API (even if empty []), trust server DB 100%!
-  if (Array.isArray(serverItems)) {
-    return filterClientDeleted(serverItems);
-  }
-
   const customList = getClientCustomItems<any>(category);
 
-  // Merge custom created/edited items into rawList if they match active filters
+  // Merge custom created/edited items into rawList
   customList.forEach((customItem) => {
-    if (filters) {
-      if (filters.category && customItem.category && customItem.category !== filters.category) return;
-
-      if (filters.subjectId) {
-        const itemSubId = typeof customItem.subjectId === 'object'
-          ? (customItem.subjectId?._id || customItem.subjectId?.slug)
-          : customItem.subjectId;
-        if (itemSubId && itemSubId !== filters.subjectId) return;
-      }
-
-      if (filters.departmentSlug) {
-        if (!itemMatchesDept(customItem, filters.departmentSlug)) return;
-      }
-
-      if (filters.semesterNumber) {
-        if (!itemMatchesSemester(customItem, filters.semesterNumber)) return;
-      }
-    }
-
-    const index = rawList.findIndex((item: any) => item._id === customItem._id);
+    const index = rawList.findIndex((item: any) => item._id === customItem._id || (item.slug && item.slug === customItem.slug));
     if (index !== -1) {
       rawList[index] = { ...rawList[index], ...customItem };
     } else {
@@ -181,7 +157,32 @@ export function syncAndFilterItems<T = any>(
     }
   });
 
-  return filterClientDeleted(rawList);
+  let filtered = filterClientDeleted(rawList);
+
+  if (filters) {
+    filtered = filtered.filter((item: any) => {
+      if (filters.category && item.category && item.category !== filters.category) return false;
+
+      if (filters.subjectId) {
+        const itemSubId = typeof item.subjectId === 'object'
+          ? (item.subjectId?._id || item.subjectId?.slug)
+          : item.subjectId;
+        if (itemSubId && itemSubId !== filters.subjectId) return false;
+      }
+
+      if (filters.departmentSlug) {
+        if (!itemMatchesDept(item, filters.departmentSlug)) return false;
+      }
+
+      if (filters.semesterNumber) {
+        if (!itemMatchesSemester(item, filters.semesterNumber)) return false;
+      }
+
+      return true;
+    });
+  }
+
+  return filtered;
 }
 
 export function clearAllClientStorage() {

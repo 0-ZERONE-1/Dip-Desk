@@ -328,19 +328,28 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         survey: 'Survey Engineering',
       };
       const knownFullName = aliasMap[cleanSlug] || '';
-      const knownSlug = knownFullName ? knownFullName.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') : '';
+      // Fix: collapse multiple dashes to single dash
+      const knownSlug = knownFullName
+        ? knownFullName.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+        : '';
 
       const searchConditions: any[] = [
         { slug: cleanSlug },
         { name: { $regex: new RegExp(cleanSlug, 'i') } },
-        { _id: mongoose.Types.ObjectId.isValid(departmentSlug) ? departmentSlug : undefined },
       ];
-      if (knownFullName) searchConditions.push({ name: knownFullName });
+      if (knownFullName) {
+        searchConditions.push({ name: knownFullName });
+        // Also search by a regex of the first meaningful words (e.g. "Computer Science" for CST)
+        const firstWords = knownFullName.split(' ').slice(0, 2).join(' ');
+        searchConditions.push({ name: { $regex: new RegExp(firstWords, 'i') } });
+      }
       if (knownSlug) searchConditions.push({ slug: knownSlug });
 
       const matchedDepts = await Department.find({
         $or: searchConditions.filter(Boolean),
       });
+
+      console.log(`[getSubjectsStore] slug=${cleanSlug} knownFullName=${knownFullName} knownSlug=${knownSlug} matchedDepts=${matchedDepts.map((d: any) => d.slug).join(',')}`);
 
       const matchedIds = matchedDepts.map((d: any) => d._id);
       matchedSlugs = matchedDepts.map((d: any) => d.slug);
@@ -359,6 +368,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         filter.$or.push({ departmentId: knownSlug });
       }
     }
+
 
     const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
     
@@ -392,13 +402,24 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
     list = list.filter((s: any) => s.isActive !== false);
   }
   if (departmentSlug) {
+    const target = departmentSlug.toLowerCase().trim();
     list = list.filter((s) => {
       const deptSlug = (s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId.replace(/^dept_/, '') : '')).toLowerCase();
       const deptName = (s.departmentId?.name || '').toLowerCase();
       if (deptSlug === 'all' || s.departmentId === 'all' || s.departmentSlug === 'all') return true;
-      const target = departmentSlug.toLowerCase().trim();
       if (deptSlug === target || s.departmentId === target) return true;
       if (target === 'cst' && (deptName.includes('computer science') || deptSlug.includes('computer-science'))) return true;
+
+      // Look up department object in store.departments if departmentId is a raw ID string
+      if (typeof s.departmentId === 'string') {
+        const found = (store.departments || []).find((d: any) => d._id === s.departmentId || d.slug === s.departmentId);
+        if (found) {
+          const fSlug = (found.slug || '').toLowerCase();
+          const fName = (found.name || '').toLowerCase();
+          if (fSlug === target) return true;
+          if (target === 'cst' && (fName.includes('computer science') || fSlug.includes('computer-science'))) return true;
+        }
+      }
       return false;
     });
   }
