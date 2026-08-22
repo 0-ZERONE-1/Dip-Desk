@@ -23,12 +23,12 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/notices', label: 'Notices', icon: Bell },
-  { href: '/admin/resources', label: 'Resources', icon: BookOpen },
-  { href: '/admin/subjects', label: 'Subjects', icon: BookMarked },
   { href: '/admin/departments', label: 'Departments', icon: Building2 },
+  { href: '/admin/subjects', label: 'Subjects', icon: BookMarked },
+  { href: '/admin/resources', label: 'Resources', icon: BookOpen },
   { href: '/admin/developers', label: 'Developers', icon: Code2 },
-  { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/requests', label: 'Requests', icon: MessageSquare },
+  { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/cheat', label: 'Cheat', icon: Zap },
   { href: '/admin/health-check', label: 'Link Health', icon: Heart },
 ];

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Save, Loader2, RotateCcw, BookOpen } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Loader2, RotateCcw, BookOpen, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { CATEGORIES, formatImageUrl, isImageUrl } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
@@ -272,6 +272,25 @@ export default function AdminResourcesPage() {
     }
   };
 
+  const toggleActive = async (r: Resource) => {
+    const updatedActive = r.isActive === false ? true : false;
+    setResources((prev) =>
+      prev.map((item) => (item._id === r._id ? { ...item, isActive: updatedActive } : item))
+    );
+    try {
+      await fetch(`/api/resources/${r._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: updatedActive }),
+      });
+      saveClientCustomItem('resources', { ...r, isActive: updatedActive });
+      toast.success(updatedActive ? 'Resource activated (visible to students)' : 'Resource deactivated (hidden from students)');
+    } catch {
+      toast.error('Failed to update active status');
+      loadAll();
+    }
+  };
+
   // Filtered resources list
   const filtered = resources.filter((r) => {
     if (filterCategory && r.category !== filterCategory) return false;
@@ -449,6 +468,7 @@ export default function AdminResourcesPage() {
                     id="resource-title"
                     type="text"
                     required
+                    autoComplete="off"
                     maxLength={100}
                     placeholder="e.g. Data Structures Complete Lecture Notes"
                     value={form.title}
@@ -465,6 +485,7 @@ export default function AdminResourcesPage() {
                     id="resource-url"
                     type="url"
                     required
+                    autoComplete="off"
                     maxLength={250}
                     placeholder="https://drive.google.com/..."
                     value={form.url}
@@ -624,6 +645,7 @@ export default function AdminResourcesPage() {
                   <th className="px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Department</th>
                   <th className="px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">Semester</th>
                   <th className="px-4 py-3 font-semibold text-gray-600 hidden lg:table-cell">Votes</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600">Status</th>
                   <th className="px-4 py-3 font-semibold text-gray-600 text-right">Actions</th>
                 </tr>
               </thead>
@@ -641,17 +663,6 @@ export default function AdminResourcesPage() {
                     >
                       <td className="px-4 py-3 font-medium text-gray-900 max-w-[220px]">
                         <div className="truncate font-semibold text-gray-900">{r.title}</div>
-                        {r.url && (
-                          <a
-                            href={r.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] text-primary-600 hover:underline truncate block max-w-[200px]"
-                            title={r.url}
-                          >
-                            {r.url}
-                          </a>
-                        )}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 font-medium whitespace-nowrap">
                         {r.category}
@@ -665,21 +676,56 @@ export default function AdminResourcesPage() {
                         <span className="text-emerald-600 font-semibold">▲{r.upvotes || 0}</span>{' '}
                         <span className="text-rose-500 font-semibold">▼{r.downvotes || 0}</span>
                       </td>
+                      <td className="px-4 py-3 text-sm whitespace-nowrap">
+                        <span
+                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                            r.isActive !== false
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-red-50 text-red-700 border border-red-200'
+                          }`}
+                        >
+                          {r.isActive !== false ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {r.url && (
+                            <a
+                              href={r.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              id={`access-resource-${r._id}`}
+                              className="p-1.5 bg-emerald-50/80 text-emerald-600 border border-emerald-200/80 hover:bg-emerald-100 rounded-lg transition-all"
+                              title="Open Resource"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                          <button
+                            id={`toggle-resource-${r._id}`}
+                            onClick={() => toggleActive(r)}
+                            className={`p-1.5 rounded-lg transition-all border ${
+                              r.isActive !== false
+                                ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                                : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                            }`}
+                            title={r.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                          >
+                            {r.isActive !== false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                          </button>
                           <button
                             id={`edit-resource-${r._id}`}
                             onClick={() => handleEdit(r)}
-                            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                            title="Edit"
+                            className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-lg transition-all"
+                            title="Edit Resource"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             id={`delete-resource-${r._id}`}
                             onClick={() => setDeleteId(r._id)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete"
+                            className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-lg transition-all"
+                            title="Delete Resource"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -690,11 +736,12 @@ export default function AdminResourcesPage() {
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
+                    <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
                       No resources found matching the selected filters.
                     </td>
                   </tr>
                 )}
+
               </tbody>
             </table>
           </div>

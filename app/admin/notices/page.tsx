@@ -393,6 +393,7 @@ export default function AdminNoticesPage() {
                   <input
                     type="text"
                     required
+                    autoComplete="off"
                     maxLength={100}
                     placeholder="e.g. End Semester Exam Schedule Announced"
                     value={form.title}

@@ -439,6 +439,7 @@ export default function AdminSubjectsPage() {
                       id="subject-name"
                       type="text"
                       required
+                      autoComplete="off"
                       maxLength={100}
                       placeholder="e.g. Database Management Systems"
                       value={form.name}
@@ -454,6 +455,7 @@ export default function AdminSubjectsPage() {
                     <input
                       id="subject-slug"
                       type="text"
+                      autoComplete="off"
                       maxLength={100}
                       placeholder="e.g. dbms or database-management"
                       value={form.slug}

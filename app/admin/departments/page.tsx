@@ -368,6 +368,7 @@ export default function AdminDepartmentsPage() {
                       id="dept-name"
                       type="text"
                       required
+                      autoComplete="off"
                       maxLength={50}
                       placeholder="e.g. Computer Science & Technology"
                       value={form.name}
@@ -383,6 +384,7 @@ export default function AdminDepartmentsPage() {
                     <input
                       id="dept-slug"
                       type="text"
+                      autoComplete="off"
                       maxLength={50}
                       placeholder="e.g. cst or computer-science"
                       value={form.slug}
