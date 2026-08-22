@@ -29,7 +29,7 @@ export function filterClientDeleted<T = any>(items: T[]): T[] {
   const deleted = getClientDeletedIds();
   if (deleted.length === 0) return items;
   return items.filter(
-    (item: any) => item && item._id && !deleted.includes(String(item._id)) && (!item.slug || !deleted.includes(String(item.slug)))
+    (item: any) => item && item._id && !deleted.includes(String(item._id))
   );
 }
 

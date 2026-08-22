@@ -208,11 +208,11 @@ export async function getDepartmentsStore(includeInactive = false) {
     await dbConnect();
     const query = includeInactive ? {} : { isActive: { $ne: false } };
     const depts = await Department.find(query).sort({ name: 1 });
-    return depts.filter((d: any) => !deleted.includes(d._id.toString()) && !deleted.includes(d.slug));
+    return depts.filter((d: any) => !deleted.includes(d._id.toString()));
   } catch (err) {
     console.error('Failed to fetch departments from DB:', err);
   }
-  let list = (store.departments || []).filter((d) => !deleted.includes(d._id) && !deleted.includes(d.slug));
+  let list = (store.departments || []).filter((d) => !deleted.includes(d._id));
   if (!includeInactive) {
     list = list.filter((d: any) => d.isActive !== false);
   }
@@ -392,12 +392,12 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
       });
     }
 
-    return finalSubjects.filter((s: any) => !deleted.includes(s._id.toString()) && !deleted.includes(s.slug));
+    return finalSubjects.filter((s: any) => !deleted.includes(s._id.toString()));
   } catch (err) {
     console.error('Failed to fetch subjects from DB:', err);
   }
 
-  let list = (store.subjects || []).filter((s) => !deleted.includes(s._id) && !deleted.includes(s.slug));
+  let list = (store.subjects || []).filter((s) => !deleted.includes(s._id));
   if (!includeInactive) {
     list = list.filter((s: any) => s.isActive !== false);
   }
