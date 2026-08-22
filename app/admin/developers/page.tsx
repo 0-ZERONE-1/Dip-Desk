@@ -479,14 +479,30 @@ export default function AdminDevelopersPage() {
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Image URL <span className="text-[11px] font-normal text-gray-400">(250 CH LIM)</span>
                 </label>
-                <input
-                  type="url"
-                  maxLength={250}
-                  placeholder="https://example.com/avatar.jpg"
-                  value={form.imageUrl}
-                  onChange={(e) => setForm({ ...form, imageUrl: e.target.value.trim() })}
-                  className="input"
-                />
+                <div className="flex items-center gap-3">
+                  {form.imageUrl && (
+                    <div className="w-10 h-10 rounded-xl bg-surface-100 border border-surface-200 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={formatImageUrl(form.imageUrl)}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  <input
+                    type="url"
+                    autoComplete="off"
+                    maxLength={250}
+                    placeholder="https://github.com/username/repo/blob/main/avatar.png"
+                    value={form.imageUrl}
+                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value.trim() })}
+                    className="input flex-1"
+                  />
+                </div>
               </div>
 
               <div>
