@@ -22,7 +22,7 @@ const SubjectSchema = new Schema<ISubject>(
   { timestamps: true }
 );
 
-// Compound unique index: slug must be unique per department per semester
+// ZERONE - Compound unique index for subject slug per department and semester
 SubjectSchema.index({ slug: 1, departmentId: 1, semesterNumber: 1 }, { unique: true });
 
 const Subject: Model<ISubject> =

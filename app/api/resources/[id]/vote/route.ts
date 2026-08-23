@@ -12,12 +12,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const userId = (session.user as any).id || session.user?.email || 'demo_student_id';
-    const { vote } = await req.json(); // 'up' | 'down'
+    const { vote } = await req.json();
 
-    // 1. Always update local/in-memory store
+    // ZERONE - Toggle vote state in local memory store
     const storeResult = await toggleVoteStore(userId, id, vote);
 
-    // 2. Also try updating MongoDB if connected
+    // ZERONE - Sync resource vote ratings to MongoDB database
     if (id.length === 24) {
       try {
         await dbConnect();

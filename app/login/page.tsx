@@ -43,7 +43,7 @@ export default function LoginPage() {
     if (session) router.push('/');
   }, [session, router]);
 
-  // Reset fields when switching tabs
+  // ZERONE - Reset form inputs when switching login roles
   const switchTab = (t: Tab) => {
     if (t === tab) return;
     setDirection(t === 'admin' ? 1 : -1);
@@ -55,7 +55,7 @@ export default function LoginPage() {
 
   if (status === 'loading') return null;
 
-  /* ---- Student Sign In ---- */
+  /* ZERONE - Student Sign In Handler */
   const handleStudentSignIn = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!email || !password) { toast.error('Please enter your email and password'); return; }
@@ -70,7 +70,7 @@ export default function LoginPage() {
     }
   };
 
-  /* ---- Student Register ---- */
+  /* ZERONE - Student Register Handler */
   const handleStudentRegister = async () => {
     if (!email || !password) { toast.error('Please enter your email and password'); return; }
     setLoading(true);
@@ -82,7 +82,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        // If already registered, attempt login directly
+        // ZERONE - Direct login fallback if account already exists
         if (data.error?.includes('already exists') || data.error?.includes('already registered')) {
           const signInRes = await signIn('user-credentials', { email, password, redirect: false });
           if (signInRes?.error) {
@@ -98,7 +98,7 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      // Successfully registered, auto sign-in
+      // ZERONE - Auto sign-in after successful registration
       const signInRes = await signIn('user-credentials', { email, password, redirect: false });
       if (signInRes?.error) {
         toast.success('Account created! Click "Sign In" to log in.');

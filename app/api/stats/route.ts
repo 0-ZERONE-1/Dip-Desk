@@ -28,7 +28,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
 
     if (body.reset) {
-      // Clear all overrides
+      // ZERONE - Reset all custom stats override numbers to default store counts
       const updated = await updateStatsStore({
         overrideResources: null,
         overrideSubjects: null,

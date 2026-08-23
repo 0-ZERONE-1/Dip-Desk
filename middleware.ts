@@ -10,25 +10,25 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: AUTH_SECRET });
   const { pathname } = req.nextUrl;
 
-  // Admin route protection
+  // ZERONE - Protect admin-only routes
   if (pathname.startsWith('/admin') && pathname !== '/admin/auth') {
     if (!token || token.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', req.url));
     }
   }
 
-  // Student protected routes
+  // ZERONE - Protect student dashboard & profile routes
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/complete-profile')) {
     if (!token) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
-    // Redirect banned users
+    // ZERONE - Redirect banned users
     if (token.isBanned) {
       return NextResponse.redirect(new URL('/banned', req.url));
     }
   }
 
-  // Force profile completion for students if profile is explicitly incomplete
+  // ZERONE - Force profile completion for incomplete student accounts
   if (token && token.role === 'student' && token.isProfileComplete === false) {
     if (!pathname.startsWith('/complete-profile') && !pathname.startsWith('/api')) {
       return NextResponse.redirect(new URL('/complete-profile', req.url));

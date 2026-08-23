@@ -14,10 +14,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const userId = (session.user as any).id || session.user?.email || 'demo_student_id';
 
-    // 1. Always update in local/in-memory store
+    // ZERONE - Toggle bookmark state in local memory store
     const isBookmarked = await toggleBookmarkStore(userId, id);
 
-    // 2. Also try updating in MongoDB if available
+    // ZERONE - Sync user bookmarks list to MongoDB database
     if (userId.length === 24) {
       try {
         const resourceId = new mongoose.Types.ObjectId(id);

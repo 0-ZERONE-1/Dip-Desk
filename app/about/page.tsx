@@ -253,7 +253,7 @@ export default function AboutPage() {
     <>
       <Navbar />
       <main className="container-max px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full max-w-full overflow-x-hidden relative">
-        {/* Fixed Site Logo Watermark Background (Stays stationary while scrolling) */}
+        {/* ZERONE - Fixed position background logo watermark */}
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[950px] lg:w-[1150px] h-[750px] sm:h-[950px] lg:h-[1150px] opacity-[0.06] sm:opacity-[0.1] pointer-events-none select-none z-0 flex items-center justify-center blur-[1px]">
           <AboutLogoWatermark />
         </div>

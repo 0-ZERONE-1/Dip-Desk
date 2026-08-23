@@ -50,7 +50,7 @@ export default function StudentPanelPage() {
   const [allResources, setAllResources] = useState<ResourceItem[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
 
-  // Profile Edit Modal State
+  // ZERONE - Student profile editing state
   const [isEditing, setIsEditing] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -61,7 +61,7 @@ export default function StudentPanelPage() {
     regNumber: '',
   });
 
-  // Request Form State
+  // ZERONE - Student material request form state
   const [requestDept, setRequestDept] = useState('Computer Science & Technology');
   const [requestSemester, setRequestSemester] = useState('Semester 3');
   const [requestSubjectSelect, setRequestSubjectSelect] = useState('Select Subject');
@@ -71,7 +71,7 @@ export default function StudentPanelPage() {
   const [requestDesc, setRequestDesc] = useState('');
   const [submittingRequest, setSubmittingRequest] = useState(false);
 
-  // Deleting Pending Request State
+  // ZERONE - Pending request deletion state
   const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const [deletingRequestTitle, setDeletingRequestTitle] = useState<string>('');
   const [deletingLoading, setDeletingLoading] = useState<boolean>(false);
@@ -216,7 +216,7 @@ export default function StudentPanelPage() {
   const currentUserId = (session?.user as any)?.id || 'demo_student_id';
   const userEmail = session?.user?.email;
 
-  // Filtered resources
+  // ZERONE - Filter resources liked or disliked by student
   const likedResources = allResources.filter((r) =>
     r.ratings?.some((rt) => (rt.userId === currentUserId || (userEmail && rt.userId === userEmail)) && rt.vote === 'up')
   );

@@ -1,6 +1,6 @@
 import { NextAuthOptions } from 'next-auth';
 
-// Fail loudly at startup if the secret is missing — never use a hardcoded fallback
+// ZERONE - Fail loudly if NEXTAUTH_SECRET is not configured
 if (!process.env.NEXTAUTH_SECRET) {
   throw new Error(
     '[Auth] NEXTAUTH_SECRET environment variable is not set. ' +
@@ -17,7 +17,7 @@ import { checkRateLimit } from '@/lib/rateLimit';
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    // --- STUDENT LOGIN ---
+    // ZERONE - Student Login Provider
     CredentialsProvider({
       id: 'user-credentials',
       name: 'Student Login',
@@ -30,17 +30,17 @@ export const authOptions: NextAuthOptions = {
 
         const inputEmail = credentials.email.toLowerCase().trim();
 
-        // Rate limit: max 10 attempts per email per 15 minutes (prevents brute-force / password spray)
+        // ZERONE - Rate limit login attempts per email (max 10 / 15 mins)
         if (!checkRateLimit(inputEmail, { name: 'login', max: 10, windowMs: 15 * 60 * 1000 })) {
           throw new Error('Too many login attempts. Please wait 15 minutes before trying again.');
         }
 
-        // 1. Check local store registered users
+        // ZERONE - Check student account in local store
         try {
           const storeUser = await findUserByEmailStore(inputEmail);
           if (storeUser) {
             let isValid = false;
-            // Only accept bcrypt-hashed passwords — never compare plaintext
+            // ZERONE - Verify password against bcrypt hash
             if (storeUser.hashedPassword) {
               try {
                 isValid = await bcrypt.compare(credentials.password, storeUser.hashedPassword);
@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch {}
 
-        // 2. Check MongoDB registered users
+        // ZERONE - Check student account in MongoDB database
         try {
           await dbConnect();
           const user = await User.findOne({ email: inputEmail });
@@ -86,7 +86,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
 
-    // --- ADMIN LOGIN ---
+    // ZERONE - Admin Login Provider
     CredentialsProvider({
       id: 'admin-credentials',
       name: 'Admin Login',
@@ -99,7 +99,7 @@ export const authOptions: NextAuthOptions = {
 
         const inputEmail = credentials.email.toLowerCase().trim();
 
-        // Strict Admin Credentials (reads exclusively from ADMIN_EMAIL & ADMIN_PASSWORD env vars)
+        // ZERONE - Check admin credentials configured via environment variables
         const targetAdminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.toLowerCase().trim() : '';
         const targetAdminPassword = process.env.ADMIN_PASSWORD || '';
 
@@ -112,7 +112,7 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // Check MongoDB Admin model if present
+        // ZERONE - Check admin credentials in MongoDB Admin collection
         try {
           await dbConnect();
           const admin = await Admin.findOne({ email: inputEmail });

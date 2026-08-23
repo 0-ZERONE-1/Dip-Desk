@@ -1,4 +1,4 @@
-// Client-side persistent store helper for demo/mock mode on Vercel serverless environments
+// ZERONE - Client-side persistent store helper for demo/mock mode on Vercel serverless environments
 
 const DELETED_KEY = 'dipdesk_deleted_ids';
 const CUSTOM_PREFIX = 'dipdesk_custom_';
@@ -62,13 +62,13 @@ export function getClientCustomItems<T = any>(category: string): T[] {
 function itemMatchesDept(customItem: any, targetDeptSlug: string): boolean {
   if (!targetDeptSlug) return true;
 
-  // If item is assigned to All Departments, it matches every department
+  // ZERONE - Match items assigned to all departments
   if (customItem.departmentSlug === 'all' || customItem.departmentId === 'all') return true;
   if (typeof customItem.departmentId === 'object' && (customItem.departmentId?.slug === 'all' || customItem.departmentId?._id === 'all')) return true;
 
   const targetClean = targetDeptSlug.toLowerCase().trim();
 
-  // Direct slug checks
+  // ZERONE - Match by direct slug equality
   if (customItem.departmentSlug === targetDeptSlug || customItem.departmentSlug === targetClean) return true;
   if (typeof customItem.departmentId === 'object') {
     const dSlug = (customItem.departmentId?.slug || '').toLowerCase();
@@ -88,7 +88,7 @@ function itemMatchesDept(customItem: any, targetDeptSlug: string): boolean {
     if (dStr === targetClean) return true;
     if (dStr.replace(/^dept_/, '') === targetClean) return true;
 
-    // Check custom departments in localStorage
+    // ZERONE - Check matching custom departments in localStorage
     const depts = getClientCustomItems<any>('departments');
     const matchedDept = depts.find((d) => d._id === customItem.departmentId || d.slug === customItem.departmentId);
     if (matchedDept) {

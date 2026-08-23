@@ -102,20 +102,20 @@ function TiltCard({
   const ref = useRef<HTMLDivElement>(null);
   const origin = shardOrigins[index % shardOrigins.length];
 
-  /* Raw mouse-derived tilt values */
-  const rawX = useMotionValue(0);   // rotateX (up/down)
-  const rawY = useMotionValue(0);   // rotateY (left/right)
+  // ZERONE - 3D card tilt motion values
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
   const rawGlowX = useMotionValue(50);
   const rawGlowY = useMotionValue(50);
 
-  /* Spring-smoothed versions for butter-smooth tilt */
+  // ZERONE - Spring configurations for smooth tilt transitions
   const springConfig = { stiffness: 200, damping: 22, mass: 0.6 };
   const rotateX = useSpring(rawX, springConfig);
   const rotateY = useSpring(rawY, springConfig);
   const glowX   = useSpring(rawGlowX, { stiffness: 150, damping: 20 });
   const glowY   = useSpring(rawGlowY, { stiffness: 150, damping: 20 });
 
-  /* Mouse spotlight gradient inside card */
+  // ZERONE - Mouse position spotlight background gradient
   const glowBackground = useTransform(
     [glowX, glowY],
     ([gx, gy]: number[]) =>
@@ -129,11 +129,11 @@ function TiltCard({
       const rect = el.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const dx = (e.clientX - cx) / (rect.width / 2);   // −1 … +1
-      const dy = (e.clientY - cy) / (rect.height / 2);  // −1 … +1
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
 
-      rawY.set(dx * 14);    // tilt left/right up to 14°
-      rawX.set(-dy * 10);   // tilt up/down up to 10°
+      rawY.set(dx * 14);
+      rawX.set(-dy * 10);
       rawGlowX.set(((e.clientX - rect.left) / rect.width) * 100);
       rawGlowY.set(((e.clientY - rect.top) / rect.height) * 100);
     },

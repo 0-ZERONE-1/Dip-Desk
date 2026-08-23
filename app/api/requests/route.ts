@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.json();
     const { subjectTitle, category, description, department, semester, url } = rawBody;
 
-    // Sanitize all text fields to prevent NoSQL injection and oversized payloads
+    // ZERONE - Sanitize text fields and validate URL payload
     const cleanCategory    = sanitizeString(category, 100);
     const cleanDescription = sanitizeString(description, 1000);
     const cleanSubject     = sanitizeString(subjectTitle, 200);
@@ -82,7 +82,7 @@ export async function DELETE(req: NextRequest) {
     const userEmail = session.user?.email || '';
     const userRole  = (session.user as any).role || 'student';
 
-    // Non-admins can only delete their own requests
+    // ZERONE - Restrict non-admin users to deleting only their own submitted requests
     if (userRole !== 'admin') {
       try {
         await dbConnect();
@@ -97,7 +97,7 @@ export async function DELETE(req: NextRequest) {
           );
         }
       } catch {
-        // If DB check fails, fall through to deletion (local-store mode)
+        // ZERONE - Local memory store fallback on DB query error
       }
     }
 

@@ -107,7 +107,7 @@ export async function isDbConnected(): Promise<boolean> {
   }
 }
 
-// --- DEVELOPERS ---
+// ZERONE - DEVELOPERS STORE OPERATIONS
 export async function getDevelopersStore(includeInactive = false) {
   try {
     await dbConnect();
@@ -201,7 +201,7 @@ export async function deleteDeveloperStore(id: string) {
   return true;
 }
 
-// --- DEPARTMENTS ---
+// ZERONE - DEPARTMENTS STORE OPERATIONS
 export async function getDepartmentsStore(includeInactive = false) {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
@@ -301,8 +301,8 @@ export async function deleteDepartmentStore(id: string) {
   return true;
 }
 
-// --- SUBJECTS ---
-export async function getSubjectsStore(departmentSlug?: string, semesterNumber?: number, includeInactive = false) {
+// ZERONE - SUBJECTS STORE OPERATIONS
+export async function getSubjectsStore(departmentSlug?: string, semesterNumber?: string | number, includeInactive = false) {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
   try {
@@ -329,7 +329,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         survey: 'Survey Engineering',
       };
       const knownFullName = aliasMap[cleanSlug] || '';
-      // Fix: collapse multiple dashes to single dash
+      // ZERONE - Collapse multiple dashes to single dash
       const knownSlug = knownFullName
         ? knownFullName.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
         : '';
@@ -340,7 +340,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
       ];
       if (knownFullName) {
         searchConditions.push({ name: knownFullName });
-        // Also search by a regex of the first meaningful words (e.g. "Computer Science" for CST)
+        // ZERONE - Search by regex of department name prefix
         const firstWords = knownFullName.split(' ').slice(0, 2).join(' ');
         searchConditions.push({ name: { $regex: new RegExp(firstWords, 'i') } });
       }
@@ -349,8 +349,6 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
       const matchedDepts = await Department.find({
         $or: searchConditions.filter(Boolean),
       });
-
-      console.log(`[getSubjectsStore] slug=${cleanSlug} knownFullName=${knownFullName} knownSlug=${knownSlug} matchedDepts=${matchedDepts.map((d: any) => d.slug).join(',')}`);
 
       const matchedIds = matchedDepts.map((d: any) => d._id);
       matchedSlugs = matchedDepts.map((d: any) => d.slug);
@@ -373,7 +371,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
 
     const subjects = await Subject.find(filter).populate('departmentId', 'name slug').sort({ name: 1 });
     
-    // Fallback: If DB query returned 0 subjects but departmentSlug is provided, retry fetching all subjects for the semester and filter in JS
+    // ZERONE - Fallback subject query by semester if slug match yields zero results
     let finalSubjects = subjects;
     if (subjects.length === 0 && departmentSlug && semesterNumber) {
       const allSemSubjects = await Subject.find({
@@ -528,7 +526,7 @@ export async function deleteSubjectStore(id: string) {
   return true;
 }
 
-// --- RESOURCES ---
+// ZERONE - RESOURCES STORE OPERATIONS
 export async function getResourcesStore(category?: string, subjectId?: string) {
   const store = readLocalStore();
   const deleted = store.deletedIds || [];
@@ -673,18 +671,18 @@ export async function deleteResourceStore(id: string) {
   return true;
 }
 
-// --- USERS ---
+// ZERONE - USERS STORE OPERATIONS
 export async function getUsersStore() {
   try {
     await dbConnect();
-    // Exclude hashedPassword — it should never leave the server
+    // ZERONE - Exclude hashedPassword field from user queries
     const users = await User.find({}).select('-hashedPassword').sort({ createdAt: -1 });
     if (users && users.length > 0) return users;
   } catch (err) {
     console.error('Failed to fetch users from DB:', err);
   }
   const store = readLocalStore();
-  // Strip password fields from local store too
+  // ZERONE - Strip password fields from local store items
   return (store.users || []).map((u: any) => {
     const { hashedPassword, password, ...safe } = u;
     return safe;
@@ -726,13 +724,12 @@ export async function findUserByIdStore(id: string) {
 }
 
 export async function createUserStore(data: any) {
-  // Strip fields that must never come from user-supplied input
-  // (role, isBanned, isAdmin can only be set by server-side logic)
+  // ZERONE - Strip restricted user privilege fields from input payload
   const { password: _pw, role: _role, isBanned: _banned, isAdmin: _isAdmin, ...safeData } = data;
 
-  // Use server-enforced values, not whatever came from the body
-  const role    = data.role    === 'admin' ? 'admin' : 'student'; // only allow admin if explicitly passed by trusted server code
-  const isBanned = false;  // always start unbanned
+  // ZERONE - Server-enforced role and ban defaults
+  const role    = data.role    === 'admin' ? 'admin' : 'student';
+  const isBanned = false;
 
   try {
     await dbConnect();
@@ -745,7 +742,7 @@ export async function createUserStore(data: any) {
       isBanned,
       isProfileComplete: true,
       ...safeData,
-      role, // enforce role AFTER spread so body cannot override it
+      role, // ZERONE - Enforce role after spread
     });
     return created;
   } catch (err) {
@@ -764,7 +761,7 @@ export async function createUserStore(data: any) {
     downvotedResources: [],
     createdAt: new Date().toISOString(),
     ...safeData,
-    role, // enforce role AFTER spread
+    role, // ZERONE - Enforce role after spread
   };
   store.users.push(newUser);
   saveLocalStore(store);
@@ -804,7 +801,7 @@ export async function updateUserStore(id: string, data: any) {
   return updated;
 }
 
-// --- NOTICES ---
+// ZERONE - NOTICES STORE OPERATIONS
 export async function getNoticesStore(includeInactive = false) {
   try {
     await dbConnect();
@@ -899,7 +896,7 @@ export async function deleteNoticeStore(id: string) {
   return true;
 }
 
-// --- REQUESTS ---
+// ZERONE - REQUESTS STORE OPERATIONS
 export async function getRequestsStore() {
   let mongoRequests: any[] = [];
   try {
@@ -924,7 +921,7 @@ export async function getRequestsStore() {
 
   for (const item of combined) {
     const idKey = item._id?.toString() || item.id;
-    // Format timestamp rounded to nearest second for duplicate detection
+    // ZERONE - Rounded timestamp key for duplicate request detection
     const timeSec = item.createdAt ? Math.floor(new Date(item.createdAt).getTime() / 2000) : '';
     const contentKey = `${item.studentEmail}_${item.description}_${item.subjectTitle}_${timeSec}`;
 
@@ -1016,7 +1013,7 @@ export async function deleteRequestStore(id: string) {
   return true;
 }
 
-// --- BOOKMARKS & VOTES ---
+// ZERONE - BOOKMARKS & VOTES STORE OPERATIONS
 export async function toggleBookmarkStore(userId: string, resourceId: string) {
   const store = readLocalStore();
   if (!store.users) store.users = [];
@@ -1079,7 +1076,7 @@ export async function toggleVoteStore(userId: string, resourceId: string, vote: 
   return { upvotes: 0, downvotes: 0 };
 }
 
-// --- HERO STATS CHEAT OVERRIDES & VISITOR TRACKING ---
+// ZERONE - HERO STATS CHEAT OVERRIDES & VISITOR TRACKING
 export async function getStatsStore() {
   let actualResources = 0;
   let actualSubjects = 0;

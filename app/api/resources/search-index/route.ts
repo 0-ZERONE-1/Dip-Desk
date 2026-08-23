@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getResourcesStore, getSubjectsStore } from '@/lib/store';
 
-// Lightweight index for Fuse.js search — uses the same store fallback as all other routes
+// ZERONE - Build lightweight JSON index for client-side Fuse.js global search
 export async function GET() {
   try {
     const [resources, subjects] = await Promise.all([
@@ -9,7 +9,7 @@ export async function GET() {
       getSubjectsStore(),
     ]);
 
-    // Build a subject lookup map by _id for quick join
+    // ZERONE - Build subject lookup map for quick relational joins
     const subjectMap: Record<string, any> = {};
     for (const s of subjects) {
       const id = s._id?.toString();
@@ -19,7 +19,7 @@ export async function GET() {
     const formattedResources = resources
       .filter((r: any) => r.isActive !== false)
       .map((r: any) => {
-        // subjectId can be a string ID or a populated object
+        // ZERONE - Resolve subject object from string ID or populated reference
         let subjectObj: any = null;
         if (typeof r.subjectId === 'object' && r.subjectId !== null) {
           subjectObj = r.subjectId;

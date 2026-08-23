@@ -31,7 +31,7 @@ export default function CompleteProfilePage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error();
-      await update(); // Refresh session
+      await update(); // ZERONE - Refresh session token with complete profile state
       toast.success('Profile complete! Welcome to Dip-Desk 🎉');
       router.push('/');
     } catch {

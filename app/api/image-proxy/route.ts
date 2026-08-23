@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const decodedUrl = decodeURIComponent(targetUrl).trim();
 
-    // SSRF Guard: Validate URL protocol & host
+    // ZERONE - SSRF Guard: validate URL protocol and IP blocklist
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(decodedUrl);
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Access to local/private network addresses is forbidden', { status: 403 });
     }
 
-    // 1. Google Drive direct link handling
+    // ZERONE - Google Drive direct image URL redirect
     if (decodedUrl.includes('drive.google.com')) {
       const fileIdMatch = decodedUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || decodedUrl.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
@@ -48,13 +48,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 2. GitHub Blob / Permalink handling
+    // ZERONE - GitHub Blob raw image redirect
     if (decodedUrl.includes('github.com/') && decodedUrl.includes('/blob/')) {
       const rawUrl = decodedUrl.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
       return NextResponse.redirect(rawUrl, 302);
     }
 
-    // 3. Fetch page/image content with strict timeout
+    // ZERONE - Fetch external image with strict timeout
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 6000);
 
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     const contentType = res.headers.get('content-type') || '';
 
-    // If it's already an image, stream it back
+    // ZERONE - Stream image response if direct image content type
     if (contentType.startsWith('image/')) {
       const buffer = await res.arrayBuffer();
       return new NextResponse(buffer, {
@@ -85,10 +85,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // If it's HTML (like ImgBB ibb.co webpage link, PostImages, Flickr, etc.)
+    // ZERONE - Extract og:image meta tag from HTML image host webpages (ImgBB, PostImages)
     const htmlText = await res.text();
 
-    // Parse og:image meta tag
     const ogImageMatch =
       htmlText.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i) ||
       htmlText.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i) ||
@@ -99,7 +98,7 @@ export async function GET(request: NextRequest) {
     if (ogImageMatch && ogImageMatch[1]) {
       let directImageUrl = ogImageMatch[1];
 
-      // Fix relative protocol URLs (e.g. //i.ibb.co/...)
+      // ZERONE - Fix relative protocol URLs
       if (directImageUrl.startsWith('//')) {
         directImageUrl = 'https:' + directImageUrl;
       }

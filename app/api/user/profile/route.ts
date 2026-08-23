@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const userEmail = session.user?.email ? session.user.email.toLowerCase().trim() : '';
     const { name, title, institute, regNumber, image } = await req.json();
 
-    // Sanitize and validate all profile fields
+    // ZERONE - Sanitize student profile text fields
     const cleanName      = sanitizeString(name, 80);
     const cleanTitle     = sanitizeString(title, 60);
     const cleanInstitute = sanitizeString(institute, 120);
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
-    // Validate the image URL — must be https and not a private/local address
+    // ZERONE - Validate profile avatar image URL
     let cleanImage = '';
     if (image) {
       const validatedUrl = validateUrl(image);
@@ -53,13 +53,13 @@ export async function POST(req: NextRequest) {
       isProfileComplete: true,
     };
 
-    // Update in local store under ID and Email
+    // ZERONE - Update user profile in local store
     let localUser = await updateUserStore(userId, updatedData);
     if (userEmail && userEmail !== userId) {
       await updateUserStore(userEmail, updatedData);
     }
 
-    // Update in MongoDB Atlas
+    // ZERONE - Sync user profile update to MongoDB database
     try {
       await dbConnect();
       const queryConditions: any[] = [];
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Also update Admin name if admin
+      // ZERONE - Sync name change to Admin collection if admin account
       if (userEmail) {
         await Admin.findOneAndUpdate({ email: userEmail }, { $set: { name } });
       }
@@ -99,7 +99,7 @@ export async function GET() {
     const userId = (session.user as any).id || session.user?.email || 'demo_student_id';
     const userEmail = session.user?.email ? session.user.email.toLowerCase().trim() : '';
 
-    // 1. Try to fetch from MongoDB
+    // ZERONE - Fetch profile and populated bookmarks from MongoDB database
     try {
       await dbConnect();
       const queryConditions: any[] = [];
@@ -142,7 +142,7 @@ export async function GET() {
       console.error('Error fetching profile from MongoDB:', dbErr);
     }
 
-    // 2. Fallback to Local Store / Session
+    // ZERONE - Fallback user profile query from local store
     let storeUser = (await findUserByIdStore(userId)) || (userEmail ? await findUserByIdStore(userEmail) : null);
     if (!storeUser) {
       storeUser = {

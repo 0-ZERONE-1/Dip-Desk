@@ -51,7 +51,7 @@ export default function RegisterPage() {
 
       toast.success('Account created! Signing you in...');
 
-      // Auto sign in after registration
+      // ZERONE - Automatic session sign in upon successful registration
       const signInRes = await signIn('user-credentials', {
         email,
         password,

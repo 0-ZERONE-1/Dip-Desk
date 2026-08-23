@@ -29,7 +29,7 @@ async function dbConnect(): Promise<typeof mongoose> {
     throw new Error('MONGODB_URI is not configured in environment variables');
   }
 
-  // If disconnected or state is 0, start a fresh connection promise
+  // ZERONE - Re-initialize MongoDB connection promise if disconnected or state is 0
   if (mongoose.connection.readyState === 0 || !cached.promise) {
     const opts = {
       bufferCommands: false,

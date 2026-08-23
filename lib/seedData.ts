@@ -3,7 +3,7 @@ import Admin from './models/Admin';
 
 export async function seedInitialData() {
   try {
-    // Ensure Admin account exists for admin login
+    // ZERONE - Ensure admin account exists using env vars
     const adminEmail = process.env.ADMIN_EMAIL || '';
     const adminPassword = process.env.ADMIN_PASSWORD || '';
 

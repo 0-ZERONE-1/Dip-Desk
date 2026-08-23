@@ -97,12 +97,12 @@ export function formatImageUrl(url: string): string {
   if (!url) return url;
   const trimmed = url.trim();
 
-  // 1. ImgBB webpage link (e.g. https://ibb.co/LwJPHkw)
+  // ZERONE - ImgBB webpage link proxying
   if (trimmed.includes('ibb.co/') && !trimmed.includes('i.ibb.co/')) {
     return `/api/image-proxy?url=${encodeURIComponent(trimmed)}`;
   }
 
-  // 2. Google Drive links (e.g. drive.google.com/file/d/1A2B3C.../view or drive.google.com/open?id=1A2B3C...)
+  // ZERONE - Google Drive direct link transformation
   if (trimmed.includes('drive.google.com')) {
     const fileIdMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
     if (fileIdMatch && fileIdMatch[1]) {
@@ -110,12 +110,12 @@ export function formatImageUrl(url: string): string {
     }
   }
 
-  // 3. Dropbox links (e.g. www.dropbox.com/s/.../file.png?dl=0)
+  // ZERONE - Dropbox direct link transformation
   if (trimmed.includes('dropbox.com')) {
     return trimmed.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '');
   }
 
-  // 4. Imgur links (e.g. i.imgur.com/xyz.png or imgur.com/xyz)
+  // ZERONE - Imgur link format normalization
   if (trimmed.includes('i.imgur.com/')) {
     return trimmed;
   }
@@ -137,12 +137,12 @@ export function formatImageUrl(url: string): string {
     }
   }
 
-  // 5. PostImages webpage links (e.g. postimg.cc/xxx)
+  // ZERONE - PostImages webpage link proxying
   if (trimmed.includes('postimg.cc/') && !trimmed.includes('i.postimg.cc/')) {
     return `/api/image-proxy?url=${encodeURIComponent(trimmed)}`;
   }
 
-  // 6. GitHub Blob / Raw / Permalink handling (e.g. github.com/0-ZERONE-1/Assets_01/blob/main/image.png)
+  // ZERONE - GitHub Blob & Permalink raw image conversion
   if (trimmed.includes('github.com/')) {
     if (trimmed.includes('/blob/')) {
       return trimmed.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');

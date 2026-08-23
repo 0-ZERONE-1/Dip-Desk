@@ -22,7 +22,7 @@ export default function DipDeskLogo({ className = 'h-8', showText = true }: { cl
 
   return (
     <div className="flex items-center gap-2.5 flex-shrink-0 group cursor-pointer select-none">
-      {/* Custom Logo Image or Simple Book Icon */}
+      {/* ZERONE - Render custom branding logo image or simple book icon fallback */}
       <div className="relative flex items-center justify-center">
         {rawLogoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -38,7 +38,7 @@ export default function DipDeskLogo({ className = 'h-8', showText = true }: { cl
         )}
       </div>
 
-      {/* Typography */}
+      {/* ZERONE - Dip-Desk header typography */}
       {showText && (
         <div className="hidden sm:flex items-center text-lg font-black tracking-tight leading-none">
           <span className="text-gray-900 group-hover:text-primary-600 transition-colors">Dip-</span>

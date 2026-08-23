@@ -30,7 +30,7 @@ export async function GET() {
   }
 }
 
-// Admin: check link health for all resources
+// ZERONE - Admin endpoint to scan and verify resource link health
 export async function POST(req: NextRequest) {
   const authError = await requireAdmin();
   if (authError) return authError;
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const results = [];
 
     for (const resource of resources) {
-      // SSRF Guard: validate each URL from DB before fetching server-side
+      // ZERONE - Validate URL to prevent server-side request forgery (SSRF)
       const safeUrl = validateUrl(resource.url);
       if (!safeUrl) {
         results.push({ id: resource._id, url: resource.url, isActive: false, error: 'invalid_url' });

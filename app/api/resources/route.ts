@@ -35,13 +35,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Title, URL, category, and subject are required' }, { status: 400 });
     }
 
-    // Sanitize all text fields to prevent NoSQL injection / oversized payloads
+    // ZERONE - Sanitize text input fields
     const cleanTitle    = sanitizeString(title, 300);
     const cleanCategory = sanitizeString(category, 100);
     const cleanDesc     = description ? sanitizeString(description, 2000) : '';
     const cleanSubject  = sanitizeString(subjectId, 100);
 
-    // Validate the resource URL — must be public https/http
+    // ZERONE - Validate URL to prevent SSRF and malicious protocol schemes
     const cleanUrl = validateUrl(url);
     if (!cleanUrl) {
       return NextResponse.json({ error: 'Invalid or disallowed resource URL provided' }, { status: 400 });

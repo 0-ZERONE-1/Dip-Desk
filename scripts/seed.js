@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 /**
- * Database Seed Script
- * Run: node scripts/seed.js
- * 
- * Seeds: Admin account, 3 departments (CST, EE, ETC), subjects for each.
+ * ZERONE - Database seed script for initial admin, departments, and subjects
  */
 
 const mongoose = require('mongoose');
@@ -11,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
 
-// Simple .env.local loader
+// ZERONE - Load .env.local configuration file
 const envPath = path.join(__dirname, '..', '.env.local');
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf8');
@@ -37,7 +34,7 @@ if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
   process.exit(1);
 }
 
-// Mongoose schemas (inline for script)
+// ZERONE - Inline Mongoose schemas for seeding script
 const AdminSchema = new mongoose.Schema({ email: String, hashedPassword: String, name: String });
 const DepartmentSchema = new mongoose.Schema({ name: String, slug: String, description: String, icon: String, color: String, isActive: { type: Boolean, default: true } });
 const SubjectSchema = new mongoose.Schema({ name: String, slug: String, semesterNumber: Number, departmentId: mongoose.Schema.Types.ObjectId, description: String, isActive: { type: Boolean, default: true } });
@@ -106,7 +103,7 @@ async function seed() {
   await mongoose.connect(MONGODB_URI);
   console.log('✅ Connected!');
 
-  // Seed Admin
+  // ZERONE - Seed default admin account
   const existingAdmin = await Admin.findOne({ email: ADMIN_EMAIL });
   if (!existingAdmin) {
     const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
@@ -116,14 +113,14 @@ async function seed() {
     console.log(`ℹ️  Admin already exists: ${ADMIN_EMAIL}`);
   }
 
-  // Seed Departments
+  // ZERONE - Seed departments and subjects
   for (const dept of departments) {
     const existing = await Department.findOne({ slug: dept.slug });
     if (!existing) {
       const created = await Department.create(dept);
       console.log(`✅ Department: ${dept.name}`);
 
-      // Seed subjects for this dept
+      // ZERONE - Seed subjects for current department
       const subjects = subjectsBySemester[dept.slug];
       for (const [sem, subjectNames] of Object.entries(subjects)) {
         for (const name of subjectNames) {

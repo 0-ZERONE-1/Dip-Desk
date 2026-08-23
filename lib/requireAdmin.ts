@@ -3,8 +3,7 @@ import { NextResponse } from 'next/server';
 import { authOptions } from './auth';
 
 /**
- * Call at the top of any admin-only API route.
- * Returns a 403 NextResponse if no valid admin session exists, or null if OK to proceed.
+ * ZERONE - Verifies admin session on protected API routes and returns 403 if unauthorized
  */
 export async function requireAdmin(): Promise<NextResponse | null> {
   const session = await getServerSession(authOptions);
@@ -16,3 +15,4 @@ export async function requireAdmin(): Promise<NextResponse | null> {
   }
   return null;
 }
+
