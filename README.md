@@ -134,20 +134,25 @@ npm install
 ```
 
 ### 4. Configure Environment Variables
-Create a `.env.local` file in the root directory:
+Copy the example file and fill in your own values:
+```bash
+cp .env.example .env.local
+```
+Then edit `.env.local`:
 ```env
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-strong-random-secret-here
+NEXTAUTH_SECRET=your-own-random-secret
 
-# Optional: MongoDB Atlas connection
+# Optional: MongoDB Atlas connection (app works without it using local fallback)
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/dipdesk
 
-# Admin login credentials (required)
+# Set your own admin credentials — you choose these yourself
 ADMIN_EMAIL=admin@yourdomain.com
-ADMIN_PASSWORD=your-strong-admin-password
+ADMIN_PASSWORD=your-strong-password
 ```
 
-> 💡 Without `MONGODB_URI`, the app runs fully on an in-memory localStorage fallback store — great for demos.
+> 💡 **Note for cloners:** These credentials are for YOUR local instance only. They have nothing to do with the live deployed site. The live site uses its own separate environment variables set on Vercel.
+
 
 ### 5. Run Development Server
 ```bash

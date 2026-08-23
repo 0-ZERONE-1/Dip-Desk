@@ -24,11 +24,16 @@ if (fs.existsSync(envPath)) {
 }
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@dipdesk.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin.DipDesk';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
 if (!MONGODB_URI) {
   console.error('❌ MONGODB_URI not set in .env.local');
+  process.exit(1);
+}
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('❌ ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env.local — refusing to seed with default credentials.');
   process.exit(1);
 }
 
