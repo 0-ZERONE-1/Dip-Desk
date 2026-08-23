@@ -15,12 +15,14 @@ import {
   X,
   Eye,
   EyeOff,
+  RotateCcw,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import { formatImageUrl } from '@/lib/utils';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 import GenericLottieLoader from '@/components/GenericLottieLoader';
+import AnimatedSelect from '@/components/AnimatedSelect';
 
 interface Developer {
   _id: string;
@@ -83,6 +85,7 @@ export default function AdminDevelopersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingDev, setEditingDev] = useState<Developer | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -109,7 +112,11 @@ export default function AdminDevelopersPage() {
       const res = await fetch(`/api/developers?all=true&t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       const rawList = Array.isArray(data) ? data : data.developers || [];
-      const synced = syncAndFilterItems<Developer>('developers', rawList);
+      const formatted = rawList.map((d: Developer) => ({
+        ...d,
+        isActive: d.isActive !== false,
+      }));
+      const synced = syncAndFilterItems<Developer>('developers', formatted);
       synced.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
       setDevelopers(synced);
     } catch {
@@ -271,9 +278,18 @@ export default function AdminDevelopersPage() {
     }
   };
 
+  const filtered = developers.filter((d) => {
+    if (filterStatus === 'active' && d.isActive === false) return false;
+    if (filterStatus === 'inactive' && d.isActive !== false) return false;
+    return true;
+  });
+
+  const hasActiveFilters = Boolean(filterStatus);
+  const resetFilters = () => setFilterStatus('');
+
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
@@ -284,7 +300,11 @@ export default function AdminDevelopersPage() {
             </h1>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            {loading ? 'Loading developers...' : `${developers.length} ${developers.length === 1 ? 'Developer' : 'Developers'}`}
+            {loading
+              ? 'Loading developers...'
+              : hasActiveFilters
+              ? `Showing ${filtered.length} of ${developers.length} ${developers.length === 1 ? 'Developer' : 'Developers'}`
+              : `${developers.length} ${developers.length === 1 ? 'Developer' : 'Developers'}`}
           </p>
         </div>
 
@@ -294,113 +314,175 @@ export default function AdminDevelopersPage() {
         </button>
       </div>
 
-      {/* List */}
+      {/* Filters Bar */}
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 flex-wrap">
+        <AnimatedSelect
+          id="filter-dev-status"
+          value={filterStatus}
+          onChange={(val) => setFilterStatus(val)}
+          options={[
+            { value: '', label: 'All Status' },
+            { value: 'active', label: 'Active (Visible)' },
+            { value: 'inactive', label: 'Inactive (Hidden)' },
+          ]}
+          placeholder="All Status"
+          className="min-w-[150px]"
+        />
+        {hasActiveFilters && (
+          <button
+            onClick={resetFilters}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-600 hover:text-primary-600 bg-surface-100 hover:bg-surface-200 rounded-xl transition-all border border-surface-200"
+            title="Reset all filters"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset Filters
+          </button>
+        )}
+      </div>
+
+      {/* Table */}
       {loading ? (
         <GenericLottieLoader text="Loading Developers..." />
-      ) : developers.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
           <Code2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-gray-700">No Developers Added</h3>
+          <h3 className="text-lg font-bold text-gray-700">No Developers Found</h3>
           <p className="text-sm text-gray-400 mt-1 mb-4">Click below to add your first developer profile.</p>
           <button onClick={openAddModal} className="btn-primary mx-auto">
             Add Developer Profile
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {developers.map((dev, idx) => (
-            <div
-              key={dev._id}
-              className="card p-6 flex flex-col justify-between relative group shadow-sm hover:shadow-card transition-all border border-surface-200 min-w-0"
-            >
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-surface-200 flex-shrink-0 bg-surface-100 shadow-2xs">
-                    {dev.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={formatImageUrl(dev.imageUrl)}
-                        alt={dev.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-lg">
-                        {dev.name?.[0]?.toUpperCase() || 'D'}
+        <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[750px]">
+              <thead>
+                <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
+                  <th className="py-3.5 px-5">Developer</th>
+                  <th className="py-3.5 px-5">Role</th>
+                  <th className="py-3.5 px-5">Social Links</th>
+                  <th className="py-3.5 px-5">Order</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
+                {filtered.map((dev, idx) => (
+                  <tr key={dev._id} className="hover:bg-primary-50/30 transition-colors group">
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden aspect-square border border-surface-200/80 shadow-xs bg-surface-100">
+                          {dev.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={formatImageUrl(dev.imageUrl)}
+                              alt={dev.name}
+                              className="w-full h-full object-cover rounded-2xl"
+                            />
+                          ) : (
+                            <div className="w-full h-full rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-base shadow-xs">
+                              {dev.name?.[0]?.toUpperCase() || 'D'}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-gray-900 text-sm sm:text-base leading-snug group-hover:text-primary-600 transition-colors">
+                            {dev.name}
+                          </h3>
+                          <p className="text-xs text-gray-400 line-clamp-1 max-w-md mt-0.5">
+                            {dev.bio || 'No bio provided'}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                      <span
-                        className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap">
+                      <span className="badge-primary text-xs px-2.5 py-1 font-semibold">
+                        {dev.role}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap">
+                      <div className="flex items-center gap-2 text-gray-400">
+                        {dev.githubUrl && (
+                          <a href={dev.githubUrl} target="_blank" rel="noreferrer" className="p-1 hover:text-gray-800 transition-colors" title="GitHub">
+                            <Github className="w-4 h-4" />
+                          </a>
+                        )}
+                        {dev.linkedinUrl && (
+                          <a href={dev.linkedinUrl} target="_blank" rel="noreferrer" className="p-1 hover:text-blue-600 transition-colors" title="LinkedIn">
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        )}
+                        {dev.instagramUrl && (
+                          <a href={dev.instagramUrl} target="_blank" rel="noreferrer" className="p-1 hover:text-pink-600 transition-colors" title="Instagram">
+                            <Instagram className="w-4 h-4" />
+                          </a>
+                        )}
+                        {dev.emailUrl && (
+                          <a href={dev.emailUrl} target="_blank" rel="noreferrer" className="p-1 hover:text-emerald-600 transition-colors" title="Email">
+                            <Mail className="w-4 h-4" />
+                          </a>
+                        )}
+                        {dev.portfolioUrl && (
+                          <a href={dev.portfolioUrl} target="_blank" rel="noreferrer" className="p-1 hover:text-purple-600 transition-colors" title="Portfolio">
+                            <Globe className="w-4 h-4" />
+                          </a>
+                        )}
+                        {!dev.githubUrl && !dev.linkedinUrl && !dev.instagramUrl && !dev.emailUrl && !dev.portfolioUrl && (
+                          <span className="text-xs text-gray-400 italic">—</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap">
+                      <span className="text-xs font-extrabold px-2.5 py-1 rounded-xl bg-primary-50 text-primary-700 border border-primary-100/90 shadow-2xs">
+                        #{dev.order ?? idx + 1}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap">
+                      <button
+                        onClick={() => toggleActive(dev)}
+                        className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border ${
                           dev.isActive !== false
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : 'bg-red-50 text-red-700 border border-red-200'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
                         }`}
                       >
                         {dev.isActive !== false ? 'Active' : 'Inactive'}
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 text-base break-words [overflow-wrap:anywhere] leading-tight">
-                      {dev.name}
-                    </h3>
-                    <span className="badge-primary text-xs mt-1.5 inline-block break-words [overflow-wrap:anywhere] max-w-full">
-                      {dev.role}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Clean Order Pill Badge */}
-                <span className="flex-shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-xl bg-primary-50 text-primary-700 border border-primary-100/90 shadow-2xs">
-                  #{dev.order ?? idx + 1}
-                </span>
-              </div>
-
-              {dev.bio && (
-                <p className="text-xs text-gray-500 line-clamp-4 break-words [overflow-wrap:anywhere] mb-4 leading-relaxed max-w-full">
-                  {dev.bio}
-                </p>
-              )}
-
-              <div className="flex items-center justify-between pt-3 border-t border-surface-100 mt-auto">
-                <div className="flex items-center gap-2 text-gray-400">
-                  {dev.githubUrl && <Github className="w-4 h-4" />}
-                  {dev.linkedinUrl && <Linkedin className="w-4 h-4" />}
-                  {dev.instagramUrl && <Instagram className="w-4 h-4" />}
-                  {dev.emailUrl && <Mail className="w-4 h-4" />}
-                  {dev.portfolioUrl && <Globe className="w-4 h-4" />}
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => toggleActive(dev)}
-                    className={`p-1.5 rounded-xl transition-all border ${
-                      dev.isActive !== false
-                        ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
-                        : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
-                    }`}
-                    title={dev.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
-                  >
-                    {dev.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                  <button
-                    onClick={() => openEditModal(dev)}
-                    className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
-                    title="Edit Developer Profile"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(dev._id)}
-                    className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
-                    title="Delete Developer Profile"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+                      </button>
+                    </td>
+                    <td className="py-3.5 px-5 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => toggleActive(dev)}
+                          className={`p-1.5 rounded-xl transition-all border ${
+                            dev.isActive !== false
+                              ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                              : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                          }`}
+                          title={dev.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                        >
+                          {dev.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => openEditModal(dev)}
+                          className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
+                          title="Edit Developer Profile"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(dev._id)}
+                          className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
+                          title="Delete Developer Profile"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

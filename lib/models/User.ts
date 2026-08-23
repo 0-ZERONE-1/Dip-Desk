@@ -12,6 +12,7 @@ export interface IUser extends Document {
   institute: string;
   regNumber: string;
   isBanned: boolean;
+  bannedUntil?: Date | string | null;
   isProfileComplete: boolean;
   bookmarks: mongoose.Types.ObjectId[];
   resourceRequests: mongoose.Types.ObjectId[];
@@ -32,6 +33,7 @@ const UserSchema = new Schema<IUser>(
     institute: { type: String, default: '' },
     regNumber: { type: String, default: '' },
     isBanned: { type: Boolean, default: false },
+    bannedUntil: { type: Schema.Types.Mixed, default: null },
     isProfileComplete: { type: Boolean, default: false },
     bookmarks: [{ type: Schema.Types.ObjectId, ref: 'Resource' }],
     resourceRequests: [{ type: Schema.Types.ObjectId, ref: 'ResourceRequest' }],

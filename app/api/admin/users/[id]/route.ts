@@ -10,7 +10,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { id } = await params;
     const body = await req.json();
 
-    const updatedUser = await updateUserStore(id, { isBanned: body.isBanned });
+    const updateData: any = {};
+    if (typeof body.isBanned === 'boolean') {
+      updateData.isBanned = body.isBanned;
+    }
+    if ('bannedUntil' in body) {
+      updateData.bannedUntil = body.bannedUntil;
+    }
+
+    const updatedUser = await updateUserStore(id, updateData);
     if (!updatedUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     return NextResponse.json({ user: updatedUser });

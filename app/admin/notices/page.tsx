@@ -90,9 +90,21 @@ export default function AdminNoticesPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Filters
-  const [filterBadge, setFilterBadge] = useState('');
-  const [filterPin, setFilterPin] = useState('');
-  const [filterSort, setFilterSort] = useState<'newest' | 'oldest'>('newest');
+  const filterBadgeState = useState('');
+  const filterBadge = filterBadgeState[0];
+  const setFilterBadge = filterBadgeState[1];
+  
+  const filterPinState = useState('');
+  const filterPin = filterPinState[0];
+  const setFilterPin = filterPinState[1];
+
+  const filterStatusState = useState('');
+  const filterStatus = filterStatusState[0];
+  const setFilterStatus = filterStatusState[1];
+
+  const filterSortState = useState<'newest' | 'oldest'>('newest');
+  const filterSort = filterSortState[0];
+  const setFilterSort = filterSortState[1];
 
   useEffect(() => {
     load();
@@ -247,6 +259,8 @@ export default function AdminNoticesPage() {
       if (filterBadge && n.badge !== filterBadge) return false;
       if (filterPin === 'pinned' && !n.isPinned) return false;
       if (filterPin === 'unpinned' && n.isPinned) return false;
+      if (filterStatus === 'active' && n.isActive === false) return false;
+      if (filterStatus === 'inactive' && n.isActive !== false) return false;
       return true;
     })
     .sort((a, b) => {
@@ -258,11 +272,12 @@ export default function AdminNoticesPage() {
       return filterSort === 'newest' ? timeB - timeA : timeA - timeB;
     });
 
-  const hasActiveFilters = Boolean(filterBadge || filterPin || filterSort !== 'newest');
+  const hasActiveFilters = Boolean(filterBadge || filterPin || filterStatus || filterSort !== 'newest');
 
   const resetFilters = () => {
     setFilterBadge('');
     setFilterPin('');
+    setFilterStatus('');
     setFilterSort('newest');
   };
 
@@ -326,6 +341,20 @@ export default function AdminNoticesPage() {
           ]}
           placeholder="All Notices"
           className="min-w-[140px]"
+        />
+
+        {/* Active / Visibility Filter */}
+        <AnimatedSelect
+          id="filter-notice-status"
+          value={filterStatus}
+          onChange={(val) => setFilterStatus(val)}
+          options={[
+            { value: '', label: 'All Visibility' },
+            { value: 'active', label: 'Visible (Active)' },
+            { value: 'inactive', label: 'Hidden (Inactive)' },
+          ]}
+          placeholder="All Visibility"
+          className="min-w-[150px]"
         />
 
         {/* Sort Order */}
@@ -530,104 +559,122 @@ export default function AdminNoticesPage() {
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filtered.map((n) => (
-            <div
-              key={n._id}
-              className={`card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-card ${
-                n.isPinned ? 'border-amber-200 bg-amber-50/20' : ''
-              }`}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span
-                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${getBadgeStyle(
-                      n.badge
-                    )}`}
-                  >
-                    {n.badge}
-                  </span>
-                  <span
-                    className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                      n.isActive !== false
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
+        <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[750px]">
+              <thead>
+                <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
+                  <th className="py-3.5 px-5">Notice & Details</th>
+                  <th className="py-3.5 px-5">Category</th>
+                  <th className="py-3.5 px-5">Date</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
+                {filtered.map((n) => (
+                  <tr
+                    key={n._id}
+                    className={`hover:bg-primary-50/30 transition-colors group ${
+                      n.isPinned ? 'bg-amber-50/20 hover:bg-amber-50/40' : ''
                     }`}
                   >
-                    {n.isActive !== false ? 'Active' : 'Inactive'}
-                  </span>
-                  {n.createdAt && (
-                    <span className="text-xs text-gray-400 font-medium">
-                      {new Date(n.createdAt).toLocaleDateString('en-IN', {
+                    <td className="py-3.5 px-5">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                          <h3 className="font-bold text-gray-900 text-sm sm:text-base leading-snug group-hover:text-primary-600 transition-colors">
+                            {n.title}
+                          </h3>
+                          {n.isPinned && (
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 flex items-center gap-1 border border-amber-200">
+                              <Pin className="w-2.5 h-2.5 fill-amber-700 text-amber-800" /> Pinned
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 line-clamp-1 max-w-lg leading-relaxed">
+                          {n.content}
+                        </p>
+                        {n.link && (
+                          <a
+                            href={n.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:underline mt-1"
+                          >
+                            {n.link} <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${getBadgeStyle(n.badge)}`}>
+                        {n.badge}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap text-xs text-gray-500 font-medium">
+                      {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',
-                      })}
-                    </span>
-                  )}
-                  {n.isPinned && (
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 flex items-center gap-1">
-                      <Pin className="w-3 h-3 fill-amber-700 text-amber-800" /> Pinned
-                    </span>
-                  )}
-                </div>
-
-                <h3 className="font-bold text-gray-900 text-base mb-1">{n.title}</h3>
-                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">{n.content}</p>
-
-                {n.link && (
-                  <a
-                    href={n.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline mt-1.5 font-medium"
-                  >
-                    {n.link} <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-
-              {/* Actions on the right */}
-              <div className="flex items-center gap-2 flex-shrink-0 self-end md:self-center">
-                <button
-                  onClick={() => togglePin(n)}
-                  title={n.isPinned ? 'Unpin Notice' : 'Pin Notice to top'}
-                  className={`p-2 rounded-xl transition-all border ${
-                    n.isPinned
-                      ? 'bg-amber-500 text-white border-amber-600 shadow-xs hover:bg-amber-600'
-                      : 'bg-amber-50/80 text-amber-600 border-amber-200/80 hover:bg-amber-100'
-                  }`}
-                >
-                  <Pin className={`w-4 h-4 ${n.isPinned ? 'fill-white' : ''}`} />
-                </button>
-                <button
-                  onClick={() => toggleActive(n)}
-                  title={n.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
-                  className={`p-2 rounded-xl transition-all border ${
-                    n.isActive !== false
-                      ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
-                      : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
-                  }`}
-                >
-                  {n.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={() => handleEdit(n)}
-                  className="p-2 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
-                  title="Edit Notice"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setDeleteId(n._id)}
-                  className="p-2 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
-                  title="Delete Notice"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+                      }) : '—'}
+                    </td>
+                    <td className="py-3.5 px-5 whitespace-nowrap">
+                      <button
+                        onClick={() => toggleActive(n)}
+                        className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border ${
+                          n.isActive !== false
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                        }`}
+                      >
+                        {n.isActive !== false ? 'Active' : 'Inactive'}
+                      </button>
+                    </td>
+                    <td className="py-3.5 px-5 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => togglePin(n)}
+                          title={n.isPinned ? 'Unpin Notice' : 'Pin Notice to top'}
+                          className={`p-1.5 rounded-xl transition-all border ${
+                            n.isPinned
+                              ? 'bg-amber-500 text-white border-amber-600 shadow-xs hover:bg-amber-600'
+                              : 'bg-amber-50/80 text-amber-600 border-amber-200/80 hover:bg-amber-100'
+                          }`}
+                        >
+                          <Pin className={`w-4 h-4 ${n.isPinned ? 'fill-white' : ''}`} />
+                        </button>
+                        <button
+                          onClick={() => toggleActive(n)}
+                          title={n.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                          className={`p-1.5 rounded-xl transition-all border ${
+                            n.isActive !== false
+                              ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                              : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                          }`}
+                        >
+                          {n.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleEdit(n)}
+                          className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
+                          title="Edit Notice"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(n._id)}
+                          className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
+                          title="Delete Notice"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

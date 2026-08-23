@@ -76,6 +76,7 @@ export default function AdminSubjectsPage() {
   const [saving, setSaving] = useState(false);
   const [filterDept, setFilterDept] = useState('');
   const [filterSem, setFilterSem] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -90,7 +91,12 @@ export default function AdminSubjectsPage() {
       fetch(`/api/subjects?all=true&t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/departments?all=true&t=${t}`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
-    setSubjects(syncAndFilterItems<Subject>('subjects', subData.subjects || []));
+    const rawSubs = subData.subjects || [];
+    const formattedSubs = rawSubs.map((s: Subject) => ({
+      ...s,
+      isActive: s.isActive !== false
+    }));
+    setSubjects(syncAndFilterItems<Subject>('subjects', formattedSubs));
     setDepartments(syncAndFilterItems<Department>('departments', deptData.departments || []));
     setLoading(false);
   };
@@ -224,13 +230,16 @@ export default function AdminSubjectsPage() {
       if (sDept !== 'all' && sDept !== filterDept) return false;
     }
     if (filterSem && s.semesterNumber !== parseInt(filterSem)) return false;
+    if (filterStatus === 'active' && s.isActive === false) return false;
+    if (filterStatus === 'inactive' && s.isActive !== false) return false;
     return true;
   });
 
-  const hasActiveFilters = Boolean(filterDept || filterSem);
+  const hasActiveFilters = Boolean(filterDept || filterSem || filterStatus);
   const resetFilters = () => {
     setFilterDept('');
     setFilterSem('');
+    setFilterStatus('');
   };
 
   return (
@@ -289,6 +298,18 @@ export default function AdminSubjectsPage() {
             ...SEMESTERS.map((s) => ({ value: String(s), label: `Semester ${s}` })),
           ]}
           placeholder="All Semesters"
+          className="min-w-[140px]"
+        />
+        <AnimatedSelect
+          id="filter-status"
+          value={filterStatus}
+          onChange={(val) => setFilterStatus(val)}
+          options={[
+            { value: '', label: 'All Status' },
+            { value: 'active', label: 'Active (Visible)' },
+            { value: 'inactive', label: 'Inactive (Hidden)' },
+          ]}
+          placeholder="All Status"
           className="min-w-[140px]"
         />
         {hasActiveFilters && (

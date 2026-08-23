@@ -1,40 +1,40 @@
-import { Search, Bookmark, Star, Shield, Eye, Bell } from 'lucide-react';
+import { BookOpen, Layers, Bell, Eye, PlusCircle, Bookmark } from 'lucide-react';
 
 const features = [
   {
-    icon: Search,
-    title: 'Instant Search',
-    description: 'Find any resource in milliseconds with our global search — search by title, subject, or branch.',
+    icon: BookOpen,
+    title: 'Notes & Previous Question Papers',
+    description: 'Access curated lecture notes, reference books, model question papers, and lab manuals tailored for every semester.',
     color: 'bg-blue-500/10 text-blue-600',
   },
   {
-    icon: Eye,
-    title: 'Inline Document Preview',
-    description: 'Preview study materials directly in the browser without downloading.',
+    icon: Layers,
+    title: 'Branch & Semester Filters',
+    description: 'Quickly navigate resources organized cleanly by department (CST, EE, ME, Civil, ETC) and semester in seconds.',
     color: 'bg-violet-500/10 text-violet-600',
   },
   {
-    icon: Bookmark,
-    title: 'Bookmarks & Library',
-    description: 'Save resources to your personal library and access them anytime from your dashboard.',
-    color: 'bg-emerald-500/10 text-emerald-600',
-  },
-  {
-    icon: Star,
-    title: 'Quality Ratings',
-    description: 'Upvote or downvote resources so students know which materials are most helpful.',
+    icon: Bell,
+    title: 'Live Notice & Exam Alerts',
+    description: 'Stay up-to-date with official exam routines, syllabus updates, and urgent department announcements.',
     color: 'bg-amber-500/10 text-amber-600',
   },
   {
-    icon: Bell,
-    title: 'Resource Requests',
-    description: 'Can\'t find what you need? Submit a request and admins will upload it for you.',
+    icon: Eye,
+    title: 'Instant Online Document Viewer',
+    description: 'Preview PDFs, study guides, and question papers directly in your browser without taking up device storage.',
+    color: 'bg-emerald-500/10 text-emerald-600',
+  },
+  {
+    icon: PlusCircle,
+    title: 'Request Missing Materials',
+    description: 'Can\'t find a specific subject note or lab manual? Submit a request and administrators will upload it for you.',
     color: 'bg-pink-500/10 text-pink-600',
   },
   {
-    icon: Shield,
-    title: 'Verified Links',
-    description: 'We automatically verify all resource links so you never waste time on broken URLs.',
+    icon: Bookmark,
+    title: 'Personal Bookmarks & Saved Library',
+    description: 'Save your most-used subject materials into your personal dashboard for instant 1-click access during exam season.',
     color: 'bg-indigo-500/10 text-indigo-600',
   },
 ];

@@ -9,6 +9,7 @@ import Resource from './models/Resource';
 import Notice from './models/Notice';
 import User from './models/User';
 import ResourceRequest from './models/ResourceRequest';
+import Stat from './models/Stat';
 import {
   defaultDevelopers,
   defaultDepartments,
@@ -1077,3 +1078,147 @@ export async function toggleVoteStore(userId: string, resourceId: string, vote: 
   }
   return { upvotes: 0, downvotes: 0 };
 }
+
+// --- HERO STATS CHEAT OVERRIDES & VISITOR TRACKING ---
+export async function getStatsStore() {
+  let actualResources = 0;
+  let actualSubjects = 0;
+  let actualStudents = 0;
+  let actualVisitors = 0;
+
+  let overrideResources: number | null = null;
+  let overrideSubjects: number | null = null;
+  let overrideStudents: number | null = null;
+  let overrideVisitors: number | null = null;
+
+  const isDb = await isDbConnected();
+  if (isDb) {
+    try {
+      const [resCount, subCount, userCount, statDoc] = await Promise.all([
+        Resource.countDocuments({ isActive: { $ne: false } }),
+        Subject.countDocuments({ isActive: { $ne: false } }),
+        User.countDocuments({}),
+        Stat.findOne({ key: 'hero_stats' }),
+      ]);
+      actualResources = resCount;
+      actualSubjects = subCount;
+      actualStudents = userCount;
+
+      if (statDoc) {
+        actualVisitors = statDoc.totalVisitors || 0;
+        overrideResources = typeof statDoc.overrideResources === 'number' ? statDoc.overrideResources : null;
+        overrideSubjects = typeof statDoc.overrideSubjects === 'number' ? statDoc.overrideSubjects : null;
+        overrideStudents = typeof statDoc.overrideStudents === 'number' ? statDoc.overrideStudents : null;
+        overrideVisitors = typeof statDoc.overrideVisitors === 'number' ? statDoc.overrideVisitors : null;
+      }
+    } catch (err) {
+      console.error('Failed to get stats from DB:', err);
+    }
+  }
+
+  // Local store fallback / augmentation
+  const store = readLocalStore();
+  if (!actualResources) {
+    actualResources = (store.resources || []).filter((r) => r.isActive !== false).length;
+  }
+  if (!actualSubjects) {
+    actualSubjects = (store.subjects || []).filter((s) => s.isActive !== false).length;
+  }
+  if (!actualStudents) {
+    actualStudents = (store.users || []).length;
+  }
+
+  const localStats = (store as any).heroStats || {};
+  if (overrideResources === null && typeof localStats.overrideResources === 'number') {
+    overrideResources = localStats.overrideResources;
+  }
+  if (overrideSubjects === null && typeof localStats.overrideSubjects === 'number') {
+    overrideSubjects = localStats.overrideSubjects;
+  }
+  if (overrideStudents === null && typeof localStats.overrideStudents === 'number') {
+    overrideStudents = localStats.overrideStudents;
+  }
+  if (overrideVisitors === null && typeof localStats.overrideVisitors === 'number') {
+    overrideVisitors = localStats.overrideVisitors;
+  }
+  if (!actualVisitors && typeof localStats.totalVisitors === 'number') {
+    actualVisitors = localStats.totalVisitors;
+  }
+
+  return {
+    resources: overrideResources !== null ? overrideResources : actualResources,
+    subjects: overrideSubjects !== null ? overrideSubjects : actualSubjects,
+    students: overrideStudents !== null ? overrideStudents : actualStudents,
+    visitors: overrideVisitors !== null ? overrideVisitors : actualVisitors,
+    actuals: {
+      resources: actualResources,
+      subjects: actualSubjects,
+      students: actualStudents,
+      visitors: actualVisitors,
+    },
+    overrides: {
+      resources: overrideResources,
+      subjects: overrideSubjects,
+      students: overrideStudents,
+      visitors: overrideVisitors,
+    },
+  };
+}
+
+export async function updateStatsStore(data: {
+  overrideResources?: number | null;
+  overrideSubjects?: number | null;
+  overrideStudents?: number | null;
+  overrideVisitors?: number | null;
+}) {
+  const isDb = await isDbConnected();
+  if (isDb) {
+    try {
+      await Stat.findOneAndUpdate(
+        { key: 'hero_stats' },
+        {
+          overrideResources: data.overrideResources,
+          overrideSubjects: data.overrideSubjects,
+          overrideStudents: data.overrideStudents,
+          overrideVisitors: data.overrideVisitors,
+        },
+        { upsert: true, new: true }
+      );
+    } catch (err) {
+      console.error('Failed to update stats in DB:', err);
+    }
+  }
+
+  const store = readLocalStore();
+  if (!(store as any).heroStats) (store as any).heroStats = {};
+  (store as any).heroStats = {
+    ...(store as any).heroStats,
+    overrideResources: data.overrideResources,
+    overrideSubjects: data.overrideSubjects,
+    overrideStudents: data.overrideStudents,
+    overrideVisitors: data.overrideVisitors,
+  };
+  saveLocalStore(store);
+  return getStatsStore();
+}
+
+export async function incrementVisitorStore() {
+  const isDb = await isDbConnected();
+  if (isDb) {
+    try {
+      await Stat.findOneAndUpdate(
+        { key: 'hero_stats' },
+        { $inc: { totalVisitors: 1 } },
+        { upsert: true, new: true }
+      );
+    } catch (err) {
+      console.error('Failed to increment visitors in DB:', err);
+    }
+  }
+
+  const store = readLocalStore();
+  if (!(store as any).heroStats) (store as any).heroStats = { totalVisitors: 0 };
+  (store as any).heroStats.totalVisitors = ((store as any).heroStats.totalVisitors || 0) + 1;
+  saveLocalStore(store);
+}
+

@@ -136,6 +136,7 @@ export default function AdminResourcesPage() {
   const [filterDept, setFilterDept] = useState('');
   const [filterSem, setFilterSem] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
   const requiresCoverImage = ['Books', 'Model Question Papers', 'Syllabus'].includes(form.category);
 
@@ -294,6 +295,8 @@ export default function AdminResourcesPage() {
   // Filtered resources list
   const filtered = resources.filter((r) => {
     if (filterCategory && r.category !== filterCategory) return false;
+    if (filterStatus === 'active' && r.isActive === false) return false;
+    if (filterStatus === 'inactive' && r.isActive !== false) return false;
 
     const subObj = getSubjectObj(r.subjectId, subjects);
     const subIdStr = subObj ? String(subObj._id || subObj.slug) : String(r.subjectId || '');
@@ -324,13 +327,14 @@ export default function AdminResourcesPage() {
     return dId === formDept || dId === 'all';
   });
 
-  const hasActiveFilters = Boolean(filterCategory || filterDept || filterSem || filterSubject);
+  const hasActiveFilters = Boolean(filterCategory || filterDept || filterSem || filterSubject || filterStatus);
 
   const resetFilters = () => {
     setFilterCategory('');
     setFilterDept('');
     setFilterSem('');
     setFilterSubject('');
+    setFilterStatus('');
   };
 
   return (
@@ -412,6 +416,20 @@ export default function AdminResourcesPage() {
             ...[1, 2, 3, 4, 5, 6].map((s) => ({ value: String(s), label: `Semester ${s}` })),
           ]}
           placeholder="All Semesters"
+          className="min-w-[140px]"
+        />
+
+        {/* Status / Visibility Filter */}
+        <AnimatedSelect
+          id="filter-status"
+          value={filterStatus}
+          onChange={(val) => setFilterStatus(val)}
+          options={[
+            { value: '', label: 'All Status' },
+            { value: 'active', label: 'Active (Visible)' },
+            { value: 'inactive', label: 'Inactive (Hidden)' },
+          ]}
+          placeholder="All Status"
           className="min-w-[140px]"
         />
 

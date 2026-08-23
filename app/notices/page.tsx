@@ -94,7 +94,7 @@ export default function PublicNoticesPage() {
       <Navbar />
       <main className="w-full max-w-[1400px] mx-auto px-3.5 sm:px-6 py-6 sm:py-10 flex-1 overflow-x-hidden">
         {/* Hero Header */}
-        <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-10">
+        <div className="text-center max-w-4xl mx-auto mb-6 sm:mb-10">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -113,8 +113,8 @@ export default function PublicNoticesPage() {
           </motion.p>
         </div>
 
-        {/* Content Area */}
-        <div className="max-w-4xl mx-auto w-full">
+        {/* Content Area - Full page width matching Semester & Subject page */}
+        <div className="w-full">
           {loading ? (
             <NoticeLottieLoader />
           ) : (

@@ -62,18 +62,15 @@ export default function ConfirmDeleteModal({
             onClick={onCancel}
           />
 
-          {/* Modal */}
+          {/* Modal Container with Curved Top Accent Warning Bar */}
           <motion.div
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden z-10"
+            className="relative bg-gradient-to-r from-red-500 via-rose-500 to-red-600 p-[1.5px] pt-3.5 rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden z-10"
             initial={{ scale: 0.88, opacity: 0, y: 24 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.92, opacity: 0, y: 16 }}
             transition={{ type: 'spring', stiffness: 340, damping: 24, mass: 0.8 }}
           >
-            {/* Red top accent bar */}
-            <div className="h-1 w-full bg-gradient-to-r from-red-400 via-red-500 to-rose-500" />
-
-            <div className="p-6 sm:p-7">
+            <div className="bg-white rounded-t-[28px] rounded-b-[30px] p-6 sm:p-7 relative">
               {/* Close button */}
               <button
                 onClick={onCancel}

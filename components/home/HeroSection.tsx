@@ -60,44 +60,24 @@ export default function HeroSection() {
   });
 
   useEffect(() => {
-    // 1. Resources total count
-    fetch('/api/resources')
+    fetch(`/api/stats?track=1&t=${Date.now()}`)
       .then((r) => r.json())
       .then((data) => {
-        const rawRes = syncAndFilterItems('resources', data.resources || []);
-        const total = Math.max(rawRes.length, 24);
-        setCounts((prev) => ({ ...prev, resources: total }));
+        setCounts({
+          resources: typeof data.resources === 'number' ? data.resources : 0,
+          subjects: typeof data.subjects === 'number' ? data.subjects : 0,
+          students: typeof data.students === 'number' ? data.students : 0,
+          visitors: typeof data.visitors === 'number' ? data.visitors : 0,
+        });
       })
-      .catch(() => setCounts((prev) => ({ ...prev, resources: 24 })));
-
-    // 2. Subjects total count
-    fetch('/api/subjects')
-      .then((r) => r.json())
-      .then((data) => {
-        const rawSub = syncAndFilterItems('subjects', data.subjects || []);
-        const total = Math.max(rawSub.length, 36);
-        setCounts((prev) => ({ ...prev, subjects: total }));
-      })
-      .catch(() => setCounts((prev) => ({ ...prev, subjects: 36 })));
-
-    // 3. Registered Students count
-    fetch('/api/admin/users')
-      .then((r) => r.json())
-      .then((data) => {
-        const total = Math.max(data.users?.length || 0, 150);
-        setCounts((prev) => ({ ...prev, students: total }));
-      })
-      .catch(() => setCounts((prev) => ({ ...prev, students: 150 })));
-
-    // 4. Visitors count (tracked via local counter + base)
-    try {
-      const storedVisits = parseInt(localStorage.getItem('dipdesk_visit_count') || '1420', 10);
-      const newCount = storedVisits + 1;
-      localStorage.setItem('dipdesk_visit_count', newCount.toString());
-      setCounts((prev) => ({ ...prev, visitors: newCount }));
-    } catch {
-      setCounts((prev) => ({ ...prev, visitors: 1420 }));
-    }
+      .catch(() => {
+        setCounts({
+          resources: 0,
+          subjects: 0,
+          students: 0,
+          visitors: 0,
+        });
+      });
   }, []);
 
   const stats = [
@@ -136,22 +116,29 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-5 text-balance"
+            className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none mb-2"
           >
-            Your Complete{' '}
-            <span className="gradient-text">Study Library</span>
-            <br />for Diploma Students
+            <span className="gradient-text">Dip-Desk</span>
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* Sub Heading */}
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.18 }}
+            className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 tracking-tight mb-4"
+          >
+            Built for students by Students
+          </motion.h2>
+
+          {/* Subtext */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed"
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed"
           >
-            Access notes, books, model question papers, and lab manuals for every
-            branch and semester — organized, searchable, and always available.
+            Stop hunting through group chats. Search notes, preview files online, and organize your personal study library effortlessly.
           </motion.p>
 
           {/* CTA */}

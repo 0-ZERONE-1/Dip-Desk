@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, Save, Loader2, Building2, GraduationCap, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Loader2, Building2, GraduationCap, Eye, EyeOff, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatImageUrl, isImageUrl } from '@/lib/utils';
 import { addClientDeletedId, saveClientCustomItem, syncAndFilterItems } from '@/lib/clientStore';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 import GenericLottieLoader from '@/components/GenericLottieLoader';
+import AnimatedSelect from '@/components/AnimatedSelect';
 
 interface Department {
   _id: string;
@@ -63,6 +64,7 @@ export default function AdminDepartmentsPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -74,7 +76,12 @@ export default function AdminDepartmentsPage() {
     setLoading(true);
     try {
       const data = await fetch(`/api/departments?all=true&t=${Date.now()}`, { cache: 'no-store' }).then((r) => r.json());
-      setDepartments(syncAndFilterItems<Department>('departments', data.departments || []));
+      const rawDepts = data.departments || [];
+      const formattedDepts = rawDepts.map((d: Department) => ({
+        ...d,
+        isActive: d.isActive !== false
+      }));
+      setDepartments(syncAndFilterItems<Department>('departments', formattedDepts));
     } catch {
       toast.error('Failed to load departments');
     } finally {
@@ -197,6 +204,15 @@ export default function AdminDepartmentsPage() {
     }
   };
 
+  const filtered = departments.filter((d) => {
+    if (filterStatus === 'active' && d.isActive === false) return false;
+    if (filterStatus === 'inactive' && d.isActive !== false) return false;
+    return true;
+  });
+
+  const hasActiveFilters = Boolean(filterStatus);
+  const resetFilters = () => setFilterStatus('');
+
   return (
     <div>
       {/* Header */}
@@ -213,6 +229,8 @@ export default function AdminDepartmentsPage() {
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
             {loading
               ? 'Loading departments...'
+              : hasActiveFilters
+              ? `Showing ${filtered.length} of ${departments.length} ${departments.length === 1 ? 'Department' : 'Departments'}`
               : `${departments.length} ${departments.length === 1 ? 'Department' : 'Departments'}`}
           </p>
         </div>
@@ -225,105 +243,138 @@ export default function AdminDepartmentsPage() {
         </button>
       </div>
 
-      {/* Departments List Grid */}
+      {/* Filters Bar */}
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 flex-wrap">
+        <AnimatedSelect
+          id="filter-dept-status"
+          value={filterStatus}
+          onChange={(val) => setFilterStatus(val)}
+          options={[
+            { value: '', label: 'All Status' },
+            { value: 'active', label: 'Active (Visible)' },
+            { value: 'inactive', label: 'Inactive (Hidden)' },
+          ]}
+          placeholder="All Status"
+          className="min-w-[150px]"
+        />
+        {hasActiveFilters && (
+          <button
+            onClick={resetFilters}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-600 hover:text-primary-600 bg-surface-100 hover:bg-surface-200 rounded-xl transition-all border border-surface-200"
+            title="Reset all filters"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset Filters
+          </button>
+        )}
+      </div>
+
+      {/* Departments Table */}
       {loading ? (
         <GenericLottieLoader text="Loading Departments..." />
-      ) : departments.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
           <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-gray-700">No Departments Added</h3>
+          <h3 className="text-lg font-bold text-gray-700">No Departments Found</h3>
           <p className="text-sm text-gray-400 mt-1 mb-4">Click below to add your first academic department.</p>
           <button onClick={openAddModal} className="btn-primary mx-auto">
             Add Department
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {departments.map((d) => (
-            <div
-              key={d._id}
-              className="card p-6 flex flex-col justify-between relative group shadow-sm hover:shadow-card transition-all border border-surface-200 min-w-0"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden aspect-square">
-                      {isImageUrl(d.icon) ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={formatImageUrl(d.icon)}
-                          alt={d.name}
-                          className="w-full h-full object-cover rounded-2xl shadow-sm"
-                        />
-                      ) : (
-                        <div className="w-full h-full rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white shadow-md shadow-primary-500/25">
-                          <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-xs" />
+        <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[700px]">
+              <thead>
+                <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
+                  <th className="py-3.5 px-5">Department</th>
+                  <th className="py-3.5 px-5">URL Path / Code</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
+                {filtered.map((d) => (
+                  <tr key={d._id} className="hover:bg-primary-50/30 transition-colors group">
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden aspect-square border border-surface-200/80 shadow-xs">
+                          {isImageUrl(d.icon) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={formatImageUrl(d.icon)}
+                              alt={d.name}
+                              className="w-full h-full object-cover rounded-2xl"
+                            />
+                          ) : (
+                            <div className="w-full h-full rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white shadow-xs">
+                              <GraduationCap className="w-6 h-6 text-white drop-shadow-xs" />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                        <span
-                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            d.isActive !== false
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-red-50 text-red-700 border border-red-200'
-                          }`}
-                        >
-                          {d.isActive !== false ? 'Active' : 'Inactive'}
-                        </span>
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-gray-900 leading-snug group-hover:text-primary-600 transition-colors text-sm sm:text-base">
+                            {d.name}
+                          </h3>
+                          <p className="text-xs text-gray-400 line-clamp-1 mt-0.5 max-w-md">
+                            {d.description || 'No description provided'}
+                          </p>
+                        </div>
                       </div>
-                      <h3 className="font-bold text-gray-900 text-base leading-tight break-words [overflow-wrap:anywhere]">
-                        {d.name}
-                      </h3>
-                      <p className="text-xs text-primary-600 font-medium mt-1">/browse/{d.slug}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {d.description ? (
-                  <p className="text-xs text-gray-500 line-clamp-3 break-words [overflow-wrap:anywhere] leading-relaxed mb-4">
-                    {d.description}
-                  </p>
-                ) : (
-                  <p className="text-xs text-gray-400 italic mb-4">No description provided</p>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-surface-100 mt-auto">
-                <span className="text-[11px] font-semibold text-gray-400">Department</span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => toggleActive(d)}
-                    className={`p-1.5 rounded-xl transition-all border ${
-                      d.isActive !== false
-                        ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
-                        : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
-                    }`}
-                    title={d.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
-                  >
-                    {d.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                  <button
-                    id={`edit-dept-${d._id}`}
-                    onClick={() => openEditModal(d)}
-                    className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
-                    title="Edit Department"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    id={`delete-dept-${d._id}`}
-                    onClick={() => setDeleteId(d._id)}
-                    className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
-                    title="Delete Department"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <span className="font-mono text-xs text-primary-600 bg-primary-50 px-2.5 py-1 rounded-lg font-semibold border border-primary-100/80">
+                        /browse/{d.slug}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <button
+                        onClick={() => toggleActive(d)}
+                        className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border ${
+                          d.isActive !== false
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                        }`}
+                      >
+                        {d.isActive !== false ? 'Active' : 'Inactive'}
+                      </button>
+                    </td>
+                    <td className="py-3.5 px-5 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => toggleActive(d)}
+                          className={`p-1.5 rounded-xl transition-all border ${
+                            d.isActive !== false
+                              ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
+                              : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
+                          }`}
+                          title={d.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
+                        >
+                          {d.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
+                        <button
+                          id={`edit-dept-${d._id}`}
+                          onClick={() => openEditModal(d)}
+                          className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
+                          title="Edit Department"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          id={`delete-dept-${d._id}`}
+                          onClick={() => setDeleteId(d._id)}
+                          className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
+                          title="Delete Department"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

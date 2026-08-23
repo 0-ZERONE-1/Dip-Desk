@@ -70,7 +70,7 @@
       "name": "Computer Science & Technology",
       "slug": "cst",
       "description": "Programming, databases, networking, and software development",
-      "icon": "💻",
+      "icon": "",
       "color": "#6366f1",
       "isActive": true
     },
@@ -727,5 +727,8 @@
         "res_1"
       ]
     }
-  ]
+  ],
+  "heroStats": {
+    "totalVisitors": 16
+  }
 }

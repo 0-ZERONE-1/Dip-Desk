@@ -13,6 +13,7 @@ import {
   Sliders,
   TrendingUp,
   BookOpen,
+  Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AnimatedSelect from '@/components/AnimatedSelect';
@@ -75,6 +76,23 @@ export default function AdminCheatPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Hero Stats Cheat State
+  const [statsData, setStatsData] = useState<{
+    resources: number;
+    subjects: number;
+    students: number;
+    visitors: number;
+    actuals: { resources: number; subjects: number; students: number; visitors: number };
+    overrides: { resources: number | null; subjects: number | null; students: number | null; visitors: number | null };
+  } | null>(null);
+
+  const [inputResources, setInputResources] = useState<string>('');
+  const [inputSubjects, setInputSubjects] = useState<string>('');
+  const [inputStudents, setInputStudents] = useState<string>('');
+  const [inputVisitors, setInputVisitors] = useState<string>('');
+  const [savingStats, setSavingStats] = useState(false);
+  const [resettingStats, setResettingStats] = useState(false);
+
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -90,7 +108,67 @@ export default function AdminCheatPage() {
 
   useEffect(() => {
     loadAll();
+    loadStats();
   }, []);
+
+  const loadStats = async () => {
+    try {
+      const res = await fetch(`/api/stats?t=${Date.now()}`, { cache: 'no-store' });
+      const d = await res.json();
+      setStatsData(d);
+      setInputResources(d.overrides?.resources !== null && d.overrides?.resources !== undefined ? String(d.overrides.resources) : '');
+      setInputSubjects(d.overrides?.subjects !== null && d.overrides?.subjects !== undefined ? String(d.overrides.subjects) : '');
+      setInputStudents(d.overrides?.students !== null && d.overrides?.students !== undefined ? String(d.overrides.students) : '');
+      setInputVisitors(d.overrides?.visitors !== null && d.overrides?.visitors !== undefined ? String(d.overrides.visitors) : '');
+    } catch {}
+  };
+
+  const handleSaveStatsOverride = async () => {
+    setSavingStats(true);
+    try {
+      const res = await fetch('/api/stats', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          overrideResources: inputResources.trim() !== '' ? Math.max(0, parseInt(inputResources, 10) || 0) : null,
+          overrideSubjects: inputSubjects.trim() !== '' ? Math.max(0, parseInt(inputSubjects, 10) || 0) : null,
+          overrideStudents: inputStudents.trim() !== '' ? Math.max(0, parseInt(inputStudents, 10) || 0) : null,
+          overrideVisitors: inputVisitors.trim() !== '' ? Math.max(0, parseInt(inputVisitors, 10) || 0) : null,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setStatsData(updated);
+      toast.success('Hero landing stats updated!');
+    } catch {
+      toast.error('Failed to update hero stats');
+    } finally {
+      setSavingStats(false);
+    }
+  };
+
+  const handleResetStatsActual = async () => {
+    setResettingStats(true);
+    try {
+      const res = await fetch('/api/stats', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reset: true }),
+      });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setStatsData(updated);
+      setInputResources('');
+      setInputSubjects('');
+      setInputStudents('');
+      setInputVisitors('');
+      toast.success('Reset to live actual database numbers!');
+    } catch {
+      toast.error('Failed to reset stats');
+    } finally {
+      setResettingStats(false);
+    }
+  };
 
   const loadAll = async () => {
     setLoading(true);
@@ -242,6 +320,137 @@ export default function AdminCheatPage() {
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
             You Cheater, Shame On you
           </p>
+        </div>
+      </div>
+
+      {/* Hero Stats Manipulator Card */}
+      <div className="card p-6 border border-primary-200/80 bg-gradient-to-br from-primary-50/50 via-white to-accent-50/30 mb-8 rounded-2xl shadow-sm">
+        <div className="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-surface-200/80 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary-600" />
+              <h2 className="text-lg font-extrabold text-gray-900">
+                Hero Landing Stats Control
+              </h2>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Manipulate home page numbers or reset anytime to live actual database counts.
+            </p>
+          </div>
+          <button
+            onClick={handleResetStatsActual}
+            disabled={resettingStats}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-700 bg-white hover:bg-surface-100 border border-surface-200 rounded-xl transition-all shadow-xs"
+            title="Reset to 100% live database counts"
+          >
+            {resettingStats ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <RotateCcw className="w-3.5 h-3.5 text-primary-600" />
+            )}
+            Reset to Actual Live Counts
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+          {/* Resources */}
+          <div className="bg-white p-3.5 rounded-xl border border-surface-200 shadow-2xs">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-gray-700">Resources</span>
+              <span className="text-[10px] text-gray-400 font-semibold">
+                Actual: {statsData?.actuals.resources ?? 0}
+              </span>
+            </div>
+            <input
+              type="number"
+              min="0"
+              placeholder={`Live (${statsData?.actuals.resources ?? 0})`}
+              value={inputResources}
+              onChange={(e) => setInputResources(e.target.value)}
+              className="input text-xs py-2 font-semibold text-primary-700"
+            />
+            <p className="text-[10px] text-gray-400 mt-1">
+              {inputResources.trim() !== '' ? `Custom override: ${inputResources}+` : `Using live actual: ${statsData?.actuals.resources ?? 0}`}
+            </p>
+          </div>
+
+          {/* Subjects */}
+          <div className="bg-white p-3.5 rounded-xl border border-surface-200 shadow-2xs">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-gray-700">Subjects</span>
+              <span className="text-[10px] text-gray-400 font-semibold">
+                Actual: {statsData?.actuals.subjects ?? 0}
+              </span>
+            </div>
+            <input
+              type="number"
+              min="0"
+              placeholder={`Live (${statsData?.actuals.subjects ?? 0})`}
+              value={inputSubjects}
+              onChange={(e) => setInputSubjects(e.target.value)}
+              className="input text-xs py-2 font-semibold text-primary-700"
+            />
+            <p className="text-[10px] text-gray-400 mt-1">
+              {inputSubjects.trim() !== '' ? `Custom override: ${inputSubjects}+` : `Using live actual: ${statsData?.actuals.subjects ?? 0}`}
+            </p>
+          </div>
+
+          {/* Registered Students */}
+          <div className="bg-white p-3.5 rounded-xl border border-surface-200 shadow-2xs">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-gray-700">Registered Students</span>
+              <span className="text-[10px] text-gray-400 font-semibold">
+                Actual: {statsData?.actuals.students ?? 0}
+              </span>
+            </div>
+            <input
+              type="number"
+              min="0"
+              placeholder={`Live (${statsData?.actuals.students ?? 0})`}
+              value={inputStudents}
+              onChange={(e) => setInputStudents(e.target.value)}
+              className="input text-xs py-2 font-semibold text-primary-700"
+            />
+            <p className="text-[10px] text-gray-400 mt-1">
+              {inputStudents.trim() !== '' ? `Custom override: ${inputStudents}+` : `Using live actual: ${statsData?.actuals.students ?? 0}`}
+            </p>
+          </div>
+
+          {/* Visitors */}
+          <div className="bg-white p-3.5 rounded-xl border border-surface-200 shadow-2xs">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-gray-700">Visitors</span>
+              <span className="text-[10px] text-gray-400 font-semibold">
+                Actual: {statsData?.actuals.visitors ?? 0}
+              </span>
+            </div>
+            <input
+              type="number"
+              min="0"
+              placeholder={`Live (${statsData?.actuals.visitors ?? 0})`}
+              value={inputVisitors}
+              onChange={(e) => setInputVisitors(e.target.value)}
+              className="input text-xs py-2 font-semibold text-primary-700"
+            />
+            <p className="text-[10px] text-gray-400 mt-1">
+              {inputVisitors.trim() !== '' ? `Custom override: ${inputVisitors}+` : `Using live actual: ${statsData?.actuals.visitors ?? 0}`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3">
+          <button
+            onClick={handleSaveStatsOverride}
+            disabled={savingStats}
+            className="btn-primary text-xs py-2 px-4"
+          >
+            {savingStats ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
+            Save Custom Hero Numbers
+          </button>
         </div>
       </div>
 
