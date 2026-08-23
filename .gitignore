@@ -29,3 +29,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI agent meta files (not for public repo)
+CLAUDE.md
+AGENTS.md
