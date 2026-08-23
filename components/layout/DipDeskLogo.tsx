@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
+import { getRawImageUrl } from '@/lib/utils';
 
 export default function DipDeskLogo({ className = 'h-8', showText = true }: { className?: string; showText?: boolean }) {
   const [customLogo, setCustomLogo] = useState<string>('');
@@ -17,14 +18,16 @@ export default function DipDeskLogo({ className = 'h-8', showText = true }: { cl
       .catch(() => {});
   }, []);
 
+  const rawLogoUrl = getRawImageUrl(customLogo);
+
   return (
     <div className="flex items-center gap-2.5 flex-shrink-0 group cursor-pointer select-none">
       {/* Custom Logo Image or Simple Book Icon */}
       <div className="relative flex items-center justify-center">
-        {customLogo ? (
+        {rawLogoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={customLogo}
+            src={rawLogoUrl}
             alt="Dip-Desk Logo"
             className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-xl drop-shadow-md group-hover:scale-105 transition-transform duration-300"
           />

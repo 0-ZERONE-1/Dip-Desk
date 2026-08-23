@@ -5,6 +5,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function getRawImageUrl(url: string): string {
+  if (!url) return '';
+  let cleanUrl = url.trim();
+  if (cleanUrl.includes('github.com') && cleanUrl.includes('/blob/')) {
+    cleanUrl = cleanUrl
+      .replace('github.com', 'raw.githubusercontent.com')
+      .replace('/blob/', '/');
+  }
+  return cleanUrl;
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

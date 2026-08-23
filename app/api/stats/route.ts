@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStatsStore, updateStatsStore, incrementVisitorStore } from '@/lib/store';
 import { requireAdmin } from '@/lib/requireAdmin';
+import { getRawImageUrl } from '@/lib/utils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -42,7 +43,7 @@ export async function PUT(req: NextRequest) {
       overrideSubjects: typeof body.overrideSubjects === 'number' ? body.overrideSubjects : body.overrideSubjects === null ? null : undefined,
       overrideStudents: typeof body.overrideStudents === 'number' ? body.overrideStudents : body.overrideStudents === null ? null : undefined,
       overrideVisitors: typeof body.overrideVisitors === 'number' ? body.overrideVisitors : body.overrideVisitors === null ? null : undefined,
-      customLogoUrl: typeof body.customLogoUrl === 'string' ? body.customLogoUrl : undefined,
+      customLogoUrl: typeof body.customLogoUrl === 'string' ? getRawImageUrl(body.customLogoUrl) : undefined,
     });
 
     return NextResponse.json(updated);
