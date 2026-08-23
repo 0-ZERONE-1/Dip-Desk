@@ -8,7 +8,7 @@ import { syncAndFilterItems } from '@/lib/clientStore';
 function CountUp({
   target,
   suffix = '',
-  duration = 1.8,
+  duration = 2.2,
   delay = 0,
 }: {
   target: number;
@@ -32,7 +32,7 @@ function CountUp({
     const ctrl = animate(motionVal, target, {
       duration,
       delay,
-      ease: [0.16, 1, 0.3, 1], // expo-out — fast start, snappy finish
+      ease: [0.16, 1, 0.3, 1],
     });
     return ctrl.stop;
   }, [inView, target, duration, delay, motionVal]);
@@ -44,6 +44,8 @@ function CountUp({
     </span>
   );
 }
+
+let hasHeroAnimatedThisHardLoad = false;
 
 /* ─── Hero Section ──────────────────────────────────────────────────── */
 export default function HeroSection() {
@@ -58,6 +60,12 @@ export default function HeroSection() {
     students: null,
     visitors: null,
   });
+
+  const [isFirstLoad] = useState(() => !hasHeroAnimatedThisHardLoad);
+
+  useEffect(() => {
+    hasHeroAnimatedThisHardLoad = true;
+  }, []);
 
   useEffect(() => {
     fetch(`/api/stats?track=1&t=${Date.now()}`)
@@ -108,24 +116,25 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative px-4 pt-12 pb-6 md:pt-20 md:pb-8">
-      <div className="container-max relative">
+    <section className="relative px-4 pt-10 pb-6 md:pt-16 md:pb-8 overflow-hidden">
+      <div className="container-max relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none mb-2"
+          {/* Heading with Silky Smooth Blur-In Reveal */}
+          <motion.div
+            initial={isFirstLoad ? { opacity: 0, filter: 'blur(20px)', scale: 0.88, y: 35 } : false}
+            animate={{ opacity: 1, filter: 'blur(0px)', scale: 1, y: 0 }}
+            transition={isFirstLoad ? { duration: 1.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 } : { duration: 0 }}
           >
-            <span className="gradient-text">Dip-Desk</span>
-          </motion.h1>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none mb-3">
+              <span className="gradient-text">Dip-Desk</span>
+            </h1>
+          </motion.div>
 
           {/* Sub Heading */}
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.18 }}
+            initial={isFirstLoad ? { opacity: 0, filter: 'blur(12px)', y: 25 } : false}
+            animate={{ opacity: 1, filter: 'blur(0px)', y: 0 }}
+            transition={isFirstLoad ? { duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 } : { duration: 0 }}
             className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 tracking-tight mb-4"
           >
             Built for students by Students
@@ -133,9 +142,9 @@ export default function HeroSection() {
 
           {/* Subtext */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={isFirstLoad ? { opacity: 0, y: 20 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
+            transition={isFirstLoad ? { duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.45 } : { duration: 0 }}
             className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed"
           >
             Stop hunting through group chats. Search notes, preview files online, and organize your personal study library effortlessly.
@@ -143,9 +152,9 @@ export default function HeroSection() {
 
           {/* CTA */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={isFirstLoad ? { opacity: 0, y: 20 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={isFirstLoad ? { duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.6 } : { duration: 0 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3"
           >
             <Link
@@ -158,9 +167,9 @@ export default function HeroSection() {
 
           {/* Stats — count-up animation */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={isFirstLoad ? { opacity: 0, y: 20 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.45 }}
+            transition={isFirstLoad ? { duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.75 } : { duration: 0 }}
             className="flex items-center justify-center gap-6 sm:gap-10 md:gap-14 mt-12 mb-6 flex-wrap"
           >
             {stats.map((stat, i) => (

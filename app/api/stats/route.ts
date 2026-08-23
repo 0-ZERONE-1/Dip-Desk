@@ -42,6 +42,7 @@ export async function PUT(req: NextRequest) {
       overrideSubjects: typeof body.overrideSubjects === 'number' ? body.overrideSubjects : body.overrideSubjects === null ? null : undefined,
       overrideStudents: typeof body.overrideStudents === 'number' ? body.overrideStudents : body.overrideStudents === null ? null : undefined,
       overrideVisitors: typeof body.overrideVisitors === 'number' ? body.overrideVisitors : body.overrideVisitors === null ? null : undefined,
+      customLogoUrl: typeof body.customLogoUrl === 'string' ? body.customLogoUrl : undefined,
     });
 
     return NextResponse.json(updated);

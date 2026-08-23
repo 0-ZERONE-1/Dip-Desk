@@ -652,22 +652,22 @@ export default function AdminResourcesPage() {
       {loading ? (
         <GenericLottieLoader text="Loading Resources..." />
       ) : (
-        <div className="card overflow-hidden">
+        <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
-                <tr className="border-b border-surface-200 bg-surface-50 text-left">
-                  <th className="px-4 py-3 font-semibold text-gray-600">Title</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600">Category</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600">Subject</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Department</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">Semester</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 hidden lg:table-cell">Votes</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600">Status</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 text-right">Actions</th>
+                <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
+                  <th className="py-3.5 px-5">Title</th>
+                  <th className="py-3.5 px-5">Category</th>
+                  <th className="py-3.5 px-5">Subject</th>
+                  <th className="py-3.5 px-5 hidden md:table-cell">Department</th>
+                  <th className="py-3.5 px-5 hidden sm:table-cell">Semester</th>
+                  <th className="py-3.5 px-5 hidden lg:table-cell">Votes</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
                 {filtered.map((r) => {
                   const subObj = getSubjectObj(r.subjectId, subjects);
                   const subName = subObj?.name || '—';
@@ -677,35 +677,39 @@ export default function AdminResourcesPage() {
                   return (
                     <tr
                       key={r._id}
-                      className="border-b border-surface-100 hover:bg-surface-50 transition-colors"
+                      className="hover:bg-primary-50/30 transition-colors group"
                     >
-                      <td className="px-4 py-3 font-medium text-gray-900 max-w-[220px]">
-                        <div className="truncate font-semibold text-gray-900">{r.title}</div>
+                      <td className="py-3.5 px-5 font-bold text-gray-900 max-w-[220px]">
+                        <div className="truncate group-hover:text-primary-600 transition-colors text-sm sm:text-base">{r.title}</div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 font-medium whitespace-nowrap">
-                        {r.category}
-                      </td>
-                      <td className="px-4 py-3 text-gray-700 font-medium">{subName}</td>
-                      <td className="px-4 py-3 text-gray-600 hidden md:table-cell text-xs">{deptName}</td>
-                      <td className="px-4 py-3 text-gray-600 hidden sm:table-cell text-xs font-medium">
-                        {semNum ? `Sem ${semNum}` : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 hidden lg:table-cell text-xs whitespace-nowrap">
-                        <span className="text-emerald-600 font-semibold">▲{r.upvotes || 0}</span>{' '}
-                        <span className="text-rose-500 font-semibold">▼{r.downvotes || 0}</span>
-                      </td>
-                      <td className="px-4 py-3 text-sm whitespace-nowrap">
-                        <span
-                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            r.isActive !== false
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-red-50 text-red-700 border border-red-200'
-                          }`}
-                        >
-                          {r.isActive !== false ? 'Active' : 'Inactive'}
+                      <td className="py-3.5 px-5 text-gray-700 font-semibold whitespace-nowrap">
+                        <span className="badge-primary text-xs px-2.5 py-1 font-semibold">
+                          {r.category}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="py-3.5 px-5 text-gray-700 font-medium">{subName}</td>
+                      <td className="py-3.5 px-5 text-gray-600 hidden md:table-cell text-xs">{deptName}</td>
+                      <td className="py-3.5 px-5 text-gray-600 hidden sm:table-cell text-xs font-medium">
+                        {semNum ? `Sem ${semNum}` : '—'}
+                      </td>
+                      <td className="py-3.5 px-5 text-gray-500 hidden lg:table-cell text-xs whitespace-nowrap font-mono">
+                        <span className="text-emerald-600 font-bold">▲{r.upvotes || 0}</span>{' '}
+                        <span className="text-rose-500 font-bold">▼{r.downvotes || 0}</span>
+                      </td>
+                      <td className="py-3.5 px-5 whitespace-nowrap">
+                        <button
+                          onClick={() => toggleActive(r)}
+                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border ${
+                            r.isActive !== false
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                              : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                          }`}
+                          title={r.isActive !== false ? 'Click to Deactivate' : 'Click to Activate'}
+                        >
+                          {r.isActive !== false ? 'Active' : 'Inactive'}
+                        </button>
+                      </td>
+                      <td className="py-3.5 px-5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           {r.url && (
                             <a
@@ -713,39 +717,39 @@ export default function AdminResourcesPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               id={`access-resource-${r._id}`}
-                              className="p-1.5 bg-emerald-50/80 text-emerald-600 border border-emerald-200/80 hover:bg-emerald-100 rounded-lg transition-all"
+                              className="p-1.5 bg-emerald-50/80 text-emerald-600 border border-emerald-200/80 hover:bg-emerald-100 rounded-xl transition-all"
                               title="Open Resource"
                             >
-                              <ExternalLink className="w-3.5 h-3.5" />
+                              <ExternalLink className="w-4 h-4" />
                             </a>
                           )}
                           <button
                             id={`toggle-resource-${r._id}`}
                             onClick={() => toggleActive(r)}
-                            className={`p-1.5 rounded-lg transition-all border ${
+                            className={`p-1.5 rounded-xl transition-all border ${
                               r.isActive !== false
                                 ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
                                 : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
                             }`}
                             title={r.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
                           >
-                            {r.isActive !== false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            {r.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                           </button>
                           <button
                             id={`edit-resource-${r._id}`}
                             onClick={() => handleEdit(r)}
-                            className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-lg transition-all"
+                            className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
                             title="Edit Resource"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             id={`delete-resource-${r._id}`}
                             onClick={() => setDeleteId(r._id)}
-                            className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-lg transition-all"
+                            className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
                             title="Delete Resource"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>

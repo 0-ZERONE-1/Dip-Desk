@@ -90,6 +90,7 @@ export default function AdminCheatPage() {
   const [inputSubjects, setInputSubjects] = useState<string>('');
   const [inputStudents, setInputStudents] = useState<string>('');
   const [inputVisitors, setInputVisitors] = useState<string>('');
+  const [inputLogoUrl, setInputLogoUrl] = useState<string>('');
   const [savingStats, setSavingStats] = useState(false);
   const [resettingStats, setResettingStats] = useState(false);
 
@@ -120,6 +121,7 @@ export default function AdminCheatPage() {
       setInputSubjects(d.overrides?.subjects !== null && d.overrides?.subjects !== undefined ? String(d.overrides.subjects) : '');
       setInputStudents(d.overrides?.students !== null && d.overrides?.students !== undefined ? String(d.overrides.students) : '');
       setInputVisitors(d.overrides?.visitors !== null && d.overrides?.visitors !== undefined ? String(d.overrides.visitors) : '');
+      if (d.customLogoUrl) setInputLogoUrl(d.customLogoUrl);
     } catch {}
   };
 
@@ -134,6 +136,7 @@ export default function AdminCheatPage() {
           overrideSubjects: inputSubjects.trim() !== '' ? Math.max(0, parseInt(inputSubjects, 10) || 0) : null,
           overrideStudents: inputStudents.trim() !== '' ? Math.max(0, parseInt(inputStudents, 10) || 0) : null,
           overrideVisitors: inputVisitors.trim() !== '' ? Math.max(0, parseInt(inputVisitors, 10) || 0) : null,
+          customLogoUrl: inputLogoUrl.trim(),
         }),
       });
       if (!res.ok) throw new Error();
@@ -234,6 +237,42 @@ export default function AdminCheatPage() {
       toast.error('Failed to update votes');
     } finally {
       setSavingId(null);
+    }
+  };
+
+  const [resettingAllVotes, setResettingAllVotes] = useState(false);
+
+  const handleResetCurrentModalVotes = () => {
+    if (!activeModalResource) return;
+    const ratings = (activeModalResource as any).ratings || [];
+    const organicUp = ratings.filter((r: any) => r.vote === 'up').length;
+    const organicDown = ratings.filter((r: any) => r.vote === 'down').length;
+    setModalUpvotes(organicUp);
+    setModalDownvotes(organicDown);
+    toast.success(`Reset to original student votes (${organicUp} Likes, ${organicDown} Dislikes)`);
+  };
+
+  const handleResetAllResourceVotes = async () => {
+    setResettingAllVotes(true);
+    try {
+      await Promise.all(
+        resources.map(async (r) => {
+          const ratings = (r as any).ratings || [];
+          const organicUp = ratings.filter((rate: any) => rate.vote === 'up').length;
+          const organicDown = ratings.filter((rate: any) => rate.vote === 'down').length;
+          return fetch(`/api/resources/${r._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ upvotes: organicUp, downvotes: organicDown }),
+          });
+        })
+      );
+      toast.success('All resource votes reset to original organic student counts!');
+      loadAll();
+    } catch {
+      toast.error('Failed to reset resource votes');
+    } finally {
+      setResettingAllVotes(false);
     }
   };
 
@@ -436,6 +475,34 @@ export default function AdminCheatPage() {
               {inputVisitors.trim() !== '' ? `Custom override: ${inputVisitors}+` : `Using live actual: ${statsData?.actuals.visitors ?? 0}`}
             </p>
           </div>
+
+          {/* Website Custom Logo URL Input Box */}
+          <div className="bg-white p-3.5 rounded-xl border border-purple-200/80 bg-gradient-to-r from-purple-50/30 to-indigo-50/30 shadow-2xs col-span-1 sm:col-span-2 lg:col-span-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-600 animate-pulse" />
+                Website Custom Logo Link / SVG URL (Applies Everywhere)
+              </span>
+              {inputLogoUrl && (
+                <button
+                  onClick={() => setInputLogoUrl('')}
+                  className="text-[10px] text-red-600 hover:underline font-bold"
+                >
+                  Reset to Simple Book Icon
+                </button>
+              )}
+            </div>
+            <input
+              type="text"
+              placeholder="Paste logo image link (e.g., /logo.svg or https://example.com/logo.png)"
+              value={inputLogoUrl}
+              onChange={(e) => setInputLogoUrl(e.target.value)}
+              className="input text-xs py-2 font-semibold text-purple-800 border-purple-200 focus:ring-purple-400"
+            />
+            <p className="text-[10px] text-gray-500 mt-1">
+              {inputLogoUrl.trim() !== '' ? `Active custom logo link: ${inputLogoUrl}` : 'No custom logo link added — Displaying simple book icon across website'}
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center justify-end gap-3">
@@ -551,6 +618,20 @@ export default function AdminCheatPage() {
           placeholder="Sort Order"
           className="min-w-[140px]"
         />
+
+        <button
+          onClick={handleResetAllResourceVotes}
+          disabled={resettingAllVotes}
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-all shadow-xs"
+          title="Reset all resource votes to original student counts"
+        >
+          {resettingAllVotes ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <RotateCcw className="w-3.5 h-3.5" />
+          )}
+          <span>Reset All Votes to Original</span>
+        </button>
 
         {/* Clear Filters */}
         {hasActiveFilters && (
@@ -802,26 +883,37 @@ export default function AdminCheatPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-100 mt-6">
+                <div className="flex items-center justify-between gap-3 pt-4 border-t border-surface-100 mt-6">
                   <button
                     type="button"
-                    onClick={() => setActiveModalResource(null)}
-                    className="btn-ghost text-sm"
+                    onClick={handleResetCurrentModalVotes}
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 bg-surface-100 hover:bg-surface-200 border border-surface-200 rounded-xl transition-all shadow-2xs"
+                    title="Reset votes to original organic student ratings count"
                   >
-                    Cancel
+                    <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Reset to Original</span>
                   </button>
-                  <button
-                    type="submit"
-                    disabled={savingId === activeModalResource._id}
-                    className="btn-primary flex items-center gap-2"
-                  >
-                    {savingId === activeModalResource._id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
-                    <span>Save Changes</span>
-                  </button>
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveModalResource(null)}
+                      className="btn-ghost text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={savingId === activeModalResource._id}
+                      className="btn-primary flex items-center gap-2"
+                    >
+                      {savingId === activeModalResource._id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4" />
+                      )}
+                      <span>Save Changes</span>
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>

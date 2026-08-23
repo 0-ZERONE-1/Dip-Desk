@@ -1090,6 +1090,7 @@ export async function getStatsStore() {
   let overrideSubjects: number | null = null;
   let overrideStudents: number | null = null;
   let overrideVisitors: number | null = null;
+  let customLogoUrl = '';
 
   const isDb = await isDbConnected();
   if (isDb) {
@@ -1110,6 +1111,7 @@ export async function getStatsStore() {
         overrideSubjects = typeof statDoc.overrideSubjects === 'number' ? statDoc.overrideSubjects : null;
         overrideStudents = typeof statDoc.overrideStudents === 'number' ? statDoc.overrideStudents : null;
         overrideVisitors = typeof statDoc.overrideVisitors === 'number' ? statDoc.overrideVisitors : null;
+        if (statDoc.customLogoUrl) customLogoUrl = statDoc.customLogoUrl;
       }
     } catch (err) {
       console.error('Failed to get stats from DB:', err);
@@ -1144,12 +1146,16 @@ export async function getStatsStore() {
   if (!actualVisitors && typeof localStats.totalVisitors === 'number') {
     actualVisitors = localStats.totalVisitors;
   }
+  if (!customLogoUrl && localStats.customLogoUrl) {
+    customLogoUrl = localStats.customLogoUrl;
+  }
 
   return {
     resources: overrideResources !== null ? overrideResources : actualResources,
     subjects: overrideSubjects !== null ? overrideSubjects : actualSubjects,
     students: overrideStudents !== null ? overrideStudents : actualStudents,
     visitors: overrideVisitors !== null ? overrideVisitors : actualVisitors,
+    customLogoUrl,
     actuals: {
       resources: actualResources,
       subjects: actualSubjects,
@@ -1170,18 +1176,21 @@ export async function updateStatsStore(data: {
   overrideSubjects?: number | null;
   overrideStudents?: number | null;
   overrideVisitors?: number | null;
+  customLogoUrl?: string;
 }) {
   const isDb = await isDbConnected();
   if (isDb) {
     try {
+      const updateData: any = {};
+      if (data.overrideResources !== undefined) updateData.overrideResources = data.overrideResources;
+      if (data.overrideSubjects !== undefined) updateData.overrideSubjects = data.overrideSubjects;
+      if (data.overrideStudents !== undefined) updateData.overrideStudents = data.overrideStudents;
+      if (data.overrideVisitors !== undefined) updateData.overrideVisitors = data.overrideVisitors;
+      if (data.customLogoUrl !== undefined) updateData.customLogoUrl = data.customLogoUrl;
+
       await Stat.findOneAndUpdate(
         { key: 'hero_stats' },
-        {
-          overrideResources: data.overrideResources,
-          overrideSubjects: data.overrideSubjects,
-          overrideStudents: data.overrideStudents,
-          overrideVisitors: data.overrideVisitors,
-        },
+        updateData,
         { upsert: true, new: true }
       );
     } catch (err) {
@@ -1191,12 +1200,16 @@ export async function updateStatsStore(data: {
 
   const store = readLocalStore();
   if (!(store as any).heroStats) (store as any).heroStats = {};
+  const updateObj: any = {};
+  if (data.overrideResources !== undefined) updateObj.overrideResources = data.overrideResources;
+  if (data.overrideSubjects !== undefined) updateObj.overrideSubjects = data.overrideSubjects;
+  if (data.overrideStudents !== undefined) updateObj.overrideStudents = data.overrideStudents;
+  if (data.overrideVisitors !== undefined) updateObj.overrideVisitors = data.overrideVisitors;
+  if (data.customLogoUrl !== undefined) updateObj.customLogoUrl = data.customLogoUrl;
+
   (store as any).heroStats = {
     ...(store as any).heroStats,
-    overrideResources: data.overrideResources,
-    overrideSubjects: data.overrideSubjects,
-    overrideStudents: data.overrideStudents,
-    overrideVisitors: data.overrideVisitors,
+    ...updateObj,
   };
   saveLocalStore(store);
   return getStatsStore();

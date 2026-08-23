@@ -19,6 +19,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import DipDeskLogo from '@/components/layout/DipDeskLogo';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -103,7 +104,17 @@ export default function AdminNav() {
       </div>
 
       {/* Desktop Sticky Sidebar Card */}
-      <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 sticky top-20 self-start">
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 sticky top-20 self-start space-y-3">
+        {/* Logo Option Over Admin Controls Box */}
+        <div className="card px-4 py-3 border border-surface-200/90 shadow-card rounded-2xl bg-white flex items-center justify-between">
+          <Link href="/" title="Go to Platform Home">
+            <DipDeskLogo />
+          </Link>
+          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+            Admin
+          </span>
+        </div>
+
         <div className="card p-3.5 border border-surface-200/90 shadow-card rounded-3xl bg-white space-y-1">
           {/* Header Title */}
           <div className="px-3.5 py-2.5 mb-1.5 border-b border-surface-100 flex items-center justify-between gap-2">

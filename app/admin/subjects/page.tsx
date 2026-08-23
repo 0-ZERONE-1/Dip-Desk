@@ -328,78 +328,80 @@ export default function AdminSubjectsPage() {
       {loading ? (
         <GenericLottieLoader text="Loading Subjects..." />
       ) : (
-        <div className="card overflow-hidden">
+        <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
-                <tr className="border-b border-surface-200/80 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-surface-50/50">
-                  <th className="px-4 py-3">Subject</th>
-                  <th className="px-4 py-3 hidden md:table-cell">Department</th>
-                  <th className="px-4 py-3">Semester</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
+                  <th className="py-3.5 px-5">Subject</th>
+                  <th className="py-3.5 px-5 hidden md:table-cell">Department</th>
+                  <th className="py-3.5 px-5">Semester</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
                 {filtered.map((s) => {
                   const deptName = getDeptName(s.departmentId, departments);
                   const isAllDept = deptName === 'All Departments' || getDeptIdStr(s.departmentId) === 'all';
                   return (
                     <tr
                       key={s._id}
-                      className="border-b border-surface-100 hover:bg-surface-50 transition-colors"
+                      className="hover:bg-primary-50/30 transition-colors group"
                     >
-                      <td className="px-4 py-3">
-                        <p className="font-bold text-gray-900">{s.name}</p>
+                      <td className="py-3.5 px-5">
+                        <p className="font-bold text-gray-900 leading-snug group-hover:text-primary-600 transition-colors text-sm sm:text-base">{s.name}</p>
                         {s.description && (
                           <p className="text-xs text-gray-400 line-clamp-1 mt-0.5 max-w-md">{s.description}</p>
                         )}
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-600">
+                      <td className="py-3.5 px-5 hidden md:table-cell text-gray-600">
                         {deptName}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                      <td className="py-3.5 px-5 text-gray-600 whitespace-nowrap">
                         Sem {s.semesterNumber}
                       </td>
-                      <td className="px-4 py-3 text-sm whitespace-nowrap">
-                        <span
-                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                      <td className="py-3.5 px-5 whitespace-nowrap">
+                        <button
+                          onClick={() => toggleActive(s)}
+                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border ${
                             s.isActive !== false
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-red-50 text-red-700 border border-red-200'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                              : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
                           }`}
+                          title={s.isActive !== false ? 'Click to Deactivate' : 'Click to Activate'}
                         >
                           {s.isActive !== false ? 'Active' : 'Inactive'}
-                        </span>
+                        </button>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="py-3.5 px-5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => toggleActive(s)}
-                            className={`p-1.5 rounded-lg transition-all border ${
+                            className={`p-1.5 rounded-xl transition-all border ${
                               s.isActive !== false
                                 ? 'bg-emerald-50/80 text-emerald-600 border-emerald-200/80 hover:bg-emerald-100'
                                 : 'bg-red-50/80 text-red-600 border-red-200/80 hover:bg-red-100'
                             }`}
                             title={s.isActive !== false ? 'Deactivate (Hide from Students)' : 'Activate (Show to Students)'}
                           >
-                            {s.isActive !== false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            {s.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                           </button>
                           <button
                             id={`edit-subject-${s._id}`}
                             onClick={() => handleEdit(s)}
-                            className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-lg transition-all"
+                            className="p-1.5 bg-primary-50/80 text-primary-600 border border-primary-200/80 hover:bg-primary-100 rounded-xl transition-all"
                             title="Edit Subject"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             id={`delete-subject-${s._id}`}
                             onClick={() => setDeleteId(s._id)}
-                            className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-lg transition-all"
+                            className="p-1.5 bg-red-50/80 text-red-600 border border-red-200/80 hover:bg-red-100 rounded-xl transition-all"
                             title="Delete Subject"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -408,7 +410,7 @@ export default function AdminSubjectsPage() {
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-4 py-12 text-center text-gray-400">
+                    <td colSpan={5} className="px-4 py-12 text-center text-gray-400">
                       No subjects found matching the selected filters.
                     </td>
                   </tr>

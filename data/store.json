@@ -568,8 +568,8 @@
       "description": "Comprehensive chapter-wise handwritten notes covering Stacks, Queues, Trees, and Sorting algorithms.",
       "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
       "category": "Notes",
-      "upvotes": 500,
-      "downvotes": 2,
+      "upvotes": 0,
+      "downvotes": 1,
       "isActive": true,
       "createdAt": "2026-08-08T23:02:12.267Z",
       "subjectId": "sub_cst_3_1",
@@ -587,7 +587,7 @@
       "description": "Official board model question paper with detailed solved answers.",
       "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
       "category": "Model Question Papers",
-      "upvotes": 28,
+      "upvotes": 0,
       "downvotes": 0,
       "isActive": true,
       "createdAt": "2026-08-08T23:02:12.267Z",
@@ -614,8 +614,8 @@
       "description": "All 15 required lab experiment programs with output screenshots.",
       "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
       "category": "Lab Manuals",
-      "upvotes": 35,
-      "downvotes": 2,
+      "upvotes": 0,
+      "downvotes": 0,
       "isActive": true,
       "createdAt": "2026-08-08T23:02:12.267Z",
       "subjectId": {
@@ -721,14 +721,15 @@
       "institute": "sadcds",
       "regNumber": "DSACdsc",
       "image": "",
-      "isBanned": true,
+      "isBanned": false,
       "bookmarks": [
         "res_1786897108626",
         "res_1"
-      ]
+      ],
+      "bannedUntil": null
     }
   ],
   "heroStats": {
-    "totalVisitors": 16
+    "totalVisitors": 48
   }
 }

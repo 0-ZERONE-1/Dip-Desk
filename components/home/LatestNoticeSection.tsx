@@ -24,9 +24,16 @@ const badgeStyles: Record<string, string> = {
   General: 'bg-gray-50 text-gray-700 border-gray-200',
 };
 
+let hasNoticeAnimatedThisHardLoad = false;
+
 export default function LatestNoticeSection() {
   const [latestNotice, setLatestNotice] = useState<Notice | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFirstLoad] = useState(() => !hasNoticeAnimatedThisHardLoad);
+
+  useEffect(() => {
+    hasNoticeAnimatedThisHardLoad = true;
+  }, []);
 
   useEffect(() => {
     fetch(`/api/notices?t=${Date.now()}`, { cache: 'no-store' })
@@ -58,9 +65,22 @@ export default function LatestNoticeSection() {
   return (
     <section className="px-4 py-10 relative z-10 max-w-5xl mx-auto">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={
+          isFirstLoad
+            ? { opacity: 0, y: 25, filter: 'blur(6px)' }
+            : false
+        }
+        whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        viewport={{ once: true, margin: '-20px' }}
+        transition={
+          isFirstLoad
+            ? {
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.1, // Animates instantly as soon as scrolled into view
+              }
+            : { duration: 0 }
+        }
         className="card p-6 sm:p-8 bg-gradient-to-r from-primary-500/5 via-accent-500/5 to-primary-500/5 border border-primary-200/80 shadow-md relative overflow-hidden group hover:shadow-lg transition-all duration-300"
       >
         {/* Glowing Background Blob */}

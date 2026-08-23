@@ -6,6 +6,7 @@ export interface IStat extends Document {
   overrideSubjects?: number | null;
   overrideStudents?: number | null;
   overrideVisitors?: number | null;
+  customLogoUrl?: string;
   totalVisitors: number;
   updatedAt: Date;
 }
@@ -17,6 +18,7 @@ const StatSchema = new Schema<IStat>(
     overrideSubjects: { type: Number, default: null },
     overrideStudents: { type: Number, default: null },
     overrideVisitors: { type: Number, default: null },
+    customLogoUrl: { type: String, default: '' },
     totalVisitors: { type: Number, default: 0 },
   },
   { timestamps: true }

@@ -1,3 +1,6 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { BookOpen, Layers, Bell, Eye, PlusCircle, Bookmark } from 'lucide-react';
 
 const features = [
@@ -39,16 +42,40 @@ const features = [
   },
 ];
 
+let hasFeaturesAnimatedThisHardLoad = false;
+
 export default function FeaturesSection() {
+  const [isFirstLoad] = useState(() => !hasFeaturesAnimatedThisHardLoad);
+
+  useEffect(() => {
+    hasFeaturesAnimatedThisHardLoad = true;
+  }, []);
+
   return (
     <section className="pt-2 pb-16 px-4">
       <div className="container-max">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((feature) => {
+          {features.map((feature, i) => {
             const Icon = feature.icon;
             return (
-              <div
+              <motion.div
                 key={feature.title}
+                initial={
+                  isFirstLoad
+                    ? { opacity: 0, y: 35, filter: 'blur(8px)' }
+                    : false
+                }
+                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={
+                  isFirstLoad
+                    ? {
+                        duration: 0.7,
+                        ease: [0.16, 1, 0.3, 1],
+                        delay: 0.15 + i * 0.08,
+                      }
+                    : { duration: 0 }
+                }
                 className="bg-white/80 backdrop-blur-md rounded-2xl border border-white/80 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6"
               >
                 <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${feature.color}`}>
@@ -56,7 +83,7 @@ export default function FeaturesSection() {
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{feature.description}</p>
-              </div>
+              </motion.div>
             );
           })}
         </div>

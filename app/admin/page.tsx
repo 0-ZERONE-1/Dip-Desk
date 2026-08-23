@@ -12,6 +12,7 @@ import {
   ArrowRight,
   LayoutDashboard,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { syncAndFilterItems } from '@/lib/clientStore';
@@ -157,6 +158,13 @@ export default function AdminDashboard() {
       color: 'text-amber-600 bg-amber-50',
     },
     {
+      href: '/admin/cheat',
+      label: 'Website Logo & Branding',
+      desc: 'Set custom SVG logo link or restore default vector monogram',
+      icon: Sparkles,
+      color: 'text-pink-600 bg-pink-50',
+    },
+    {
       href: '/admin/health-check',
       label: 'Run Link Health Check',
       desc: 'Verify and diagnose all external resource links',
@@ -219,7 +227,7 @@ export default function AdminDashboard() {
             const Icon = action.icon;
             return (
               <Link
-                key={action.href}
+                key={action.label}
                 href={action.href}
                 id={`quick-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
                 className="card-hover p-4 block group border border-surface-200/90 flex flex-col justify-between"
