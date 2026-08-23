@@ -1,7 +1,9 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { getRawImageUrl } from '@/lib/utils';
 import {
   Code2,
   Cpu,
@@ -119,13 +121,13 @@ const platformCapabilities = [
     title: 'Inline Document Previewer',
     icon: FileText,
     color: 'from-violet-500 to-purple-600',
-    desc: 'Embedded PDF previewer and direct external link access without mandatory downloads.',
+    desc: 'Embedded PDF previewer and direct external link access without mandatory downloads or taking up device storage.',
   },
   {
     title: 'Personal Bookmarks & Library',
     icon: Bookmark,
     color: 'from-amber-500 to-orange-600',
-    desc: 'Save critical exam notes and question papers to your personalized student dashboard for quick revision.',
+    desc: 'Save critical exam notes and question papers to your personalized student dashboard for quick 1-click revision.',
   },
   {
     title: 'Community Quality Voting',
@@ -152,13 +154,13 @@ const platformCapabilities = [
     desc: 'Broadcast pinned diploma announcements regarding council exams, routine updates, and polytechnic news.',
   },
   {
-    title: 'Comprehensive Admin Panel',
+    title: 'Comprehensive Admin Suite',
     icon: Workflow,
     color: 'from-cyan-500 to-blue-600',
-    desc: 'Full CRUD management suite for departments, subjects, resources, notices, requests, and developer team profiles.',
+    desc: 'Full management suite for departments, subjects, resources, notices, requests, users, and developer team profiles.',
   },
   {
-    title: 'Hybrid Serverless Store & Sync',
+    title: 'Hybrid Store & Demo Sync',
     icon: Database,
     color: 'from-teal-500 to-emerald-600',
     desc: 'MongoDB cloud database integrated with client-side localStorage fallback ensuring 100% demo uptime.',
@@ -168,67 +170,103 @@ const platformCapabilities = [
 const howToGuideSteps = [
   {
     step: '01',
-    title: 'Student Account & Login Requirements',
+    title: 'Student & Admin Access',
     icon: KeyRound,
     badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
-    summary: 'How to sign in and what information is needed to get started.',
+    summary: 'How to sign in and navigate directly to your panel.',
     details: [
-      { label: 'Login Requirements', text: 'Valid Email Address and Password.' },
-      { label: 'Profile Options', text: 'Full Name, Polytechnic Institute Name, Roll / Registration Number, and Designation.' },
-      { label: 'How to Sign In', text: 'Click the "Sign In" or "Register" button in the top right corner of the Navbar. Once authenticated, click your avatar to access the "Student Panel".' },
+      { label: 'Login Credentials', text: 'Valid Email Address and Password.' },
+      { label: 'Direct Panel Transfer', text: 'Clicking your account avatar circle in the top-right corner transfers you directly to your Student Panel (or Admin Panel if you are an administrator).' },
+      { label: 'Profile Customization', text: 'Customize your Full Name, Polytechnic Institute Name, Roll / Registration Number, and Designation anytime.' },
     ],
   },
   {
     step: '02',
-    title: 'How to Find Specific Study Resources',
+    title: 'Finding & Previewing Study Resources',
     icon: Compass,
     badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
     summary: 'Locate notes, books, and model papers in seconds.',
     details: [
       { label: 'Global Search Bar', text: 'Click the top Search Bar or press "Ctrl + K" (on desktop). Type any subject name, topic title, or resource keyword to see live suggestions.' },
-      { label: 'Inline Previewing', text: 'Click "Open" or the Eye icon on any card to read PDFs directly in your browser without forcing downloads.' },
+      { label: 'Instant Document Previewer', text: 'Preview PDFs, question papers, and study guides directly in your browser without taking up device storage.' },
       { label: 'Category Filtering', text: 'Inside any subject page, switch between "Notes", "Books", "Model Question Papers", and "Lab Manuals" tabs.' },
     ],
   },
   {
     step: '03',
-    title: 'Navigating Departments & Semesters',
+    title: 'Navigating Branches & Layouts',
     icon: FolderTree,
     badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     summary: 'Browse subject curriculums step-by-step.',
     details: [
-      { label: 'Step 1: Department', text: 'Click "Browse" in the top Navbar and choose your Engineering Branch (e.g., Computer Science, Mechanical, Electrical, ETCE).' },
-      { label: 'Step 2: Semester', text: 'Select your current academic semester (Semester 1 through Semester 6).' },
-      { label: 'Step 3: Subject', text: 'Click on any subject card to view all verified study materials associated with that subject.' },
+      { label: 'Step 1: Choose Branch', text: 'Click "Browse" in the top Navbar and choose your Engineering Branch (e.g., Computer Science, Mechanical, Electrical, ETCE).' },
+      { label: 'Step 2: Choose Semester', text: 'Select your current academic semester (Semester 1 through Semester 6).' },
+      { label: 'Step 3: Responsive Layouts', text: 'Subject & Notice pages span full width and auto-resize cleanly when zooming out or resizing your browser window.' },
     ],
   },
   {
     step: '04',
-    title: 'Bookmarking & Requesting Missing Materials',
+    title: 'Bookmarks, Requests & Custom Branding',
     icon: BookmarkCheck,
     badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
-    summary: 'Save resources for revision or request new notes.',
+    summary: 'Save resources for revision or update site branding.',
     details: [
-      { label: 'Saving Bookmarks', text: 'Click the Bookmark icon on any resource card to save it. View all your saved notes anytime under your "Student Panel".' },
-      { label: 'Requesting Materials', text: 'Can\'t find notes for a specific topic? Submit a resource request from your Student Panel, and site admins will upload it for you!' },
+      { label: 'Saving Bookmarks', text: 'Click the Bookmark icon on any resource card to save it into your personal library for 1-click exam season access.' },
+      { label: 'Requesting Materials', text: 'Can\'t find notes for a specific subject? Submit a request from your Student Panel, and administrators will upload it for you.' },
+      { label: 'Site Logo & Branding Control', text: 'Administrators can set a custom SVG logo URL or reset to default simple book icon anytime from Admin Controls.' },
     ],
   },
 ];
+
+function AboutLogoWatermark() {
+  const [logoUrl, setLogoUrl] = useState<string>('');
+
+  useEffect(() => {
+    fetch('/api/stats')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.customLogoUrl) {
+          setLogoUrl(data.customLogoUrl);
+        }
+      })
+      .catch(() => { });
+  }, []);
+
+  const rawUrl = getRawImageUrl(logoUrl);
+
+  if (rawUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={rawUrl} alt="" className="w-full h-full object-contain filter drop-shadow-xl" />
+    );
+  }
+
+  return (
+    <div className="w-full h-full flex items-center justify-center text-primary-600">
+      <BookOpen className="w-full h-full stroke-[0.6]" />
+    </div>
+  );
+}
 
 export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main className="container-max px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full max-w-full overflow-x-hidden">
+      <main className="container-max px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full max-w-full overflow-x-hidden relative">
+        {/* Fixed Site Logo Watermark Background (Stays stationary while scrolling) */}
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[950px] lg:w-[1150px] h-[750px] sm:h-[950px] lg:h-[1150px] opacity-[0.06] sm:opacity-[0.1] pointer-events-none select-none z-0 flex items-center justify-center blur-[1px]">
+          <AboutLogoWatermark />
+        </div>
+
         {/* Header Hero Section */}
-        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20 pt-2 sm:pt-4">
+        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20 pt-2 sm:pt-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary-500/10 via-accent-500/10 to-primary-500/10 border border-primary-200 text-xs sm:text-sm font-semibold text-primary-700 mb-4 shadow-sm"
           >
             <Terminal className="w-3.5 h-3.5 text-primary-600 flex-shrink-0" />
-            <span>Dip-Desk is running on Beta 0.7.3</span>
+            <span>Dip-Desk is running on v1.0.3</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping flex-shrink-0" />
           </motion.div>
 
