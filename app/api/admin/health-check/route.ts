@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
 import Resource from '@/lib/models/Resource';
 import { requireAdmin } from '@/lib/requireAdmin';
+import { validateUrl } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,11 +41,18 @@ export async function POST(req: NextRequest) {
     const results = [];
 
     for (const resource of resources) {
+      // SSRF Guard: validate each URL from DB before fetching server-side
+      const safeUrl = validateUrl(resource.url);
+      if (!safeUrl) {
+        results.push({ id: resource._id, url: resource.url, isActive: false, error: 'invalid_url' });
+        continue;
+      }
+
       let isActive = false;
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
-        const response = await fetch(resource.url, {
+        const response = await fetch(safeUrl, {
           method: 'HEAD',
           signal: controller.signal,
           redirect: 'follow',

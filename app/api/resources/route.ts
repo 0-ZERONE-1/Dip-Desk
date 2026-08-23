@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getResourcesStore, createResourceStore } from '@/lib/store';
 import { requireAdmin } from '@/lib/requireAdmin';
+import { sanitizeString, validateUrl } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -28,13 +29,32 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { title, url, category, subjectId } = body;
+    const { title, url, category, subjectId, description } = body;
 
     if (!title || !url || !category || !subjectId) {
       return NextResponse.json({ error: 'Title, URL, category, and subject are required' }, { status: 400 });
     }
 
-    const resource = await createResourceStore(body);
+    // Sanitize all text fields to prevent NoSQL injection / oversized payloads
+    const cleanTitle    = sanitizeString(title, 300);
+    const cleanCategory = sanitizeString(category, 100);
+    const cleanDesc     = description ? sanitizeString(description, 2000) : '';
+    const cleanSubject  = sanitizeString(subjectId, 100);
+
+    // Validate the resource URL — must be public https/http
+    const cleanUrl = validateUrl(url);
+    if (!cleanUrl) {
+      return NextResponse.json({ error: 'Invalid or disallowed resource URL provided' }, { status: 400 });
+    }
+
+    const resource = await createResourceStore({
+      ...body,
+      title: cleanTitle,
+      url: cleanUrl,
+      category: cleanCategory,
+      subjectId: cleanSubject,
+      description: cleanDesc,
+    });
     return NextResponse.json({ resource }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create resource' }, { status: 500 });
