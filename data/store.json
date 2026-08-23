@@ -100,6 +100,14 @@
       "color": "#6366f1",
       "slug": "12345",
       "isActive": true
+    },
+    {
+      "_id": "dept_1787459432813",
+      "name": "123",
+      "slug": "123",
+      "description": "123",
+      "icon": "",
+      "isActive": true
     }
   ],
   "subjects": [
@@ -480,6 +488,15 @@
       "semesterNumber": 2,
       "departmentId": "dept_cst",
       "description": "fchgnghn"
+    },
+    {
+      "_id": "sub_1787459388753",
+      "slug": "123",
+      "isActive": true,
+      "name": "123",
+      "semesterNumber": 1,
+      "departmentId": "dept_cst",
+      "description": ""
     }
   ],
   "resources": [

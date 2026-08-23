@@ -208,7 +208,7 @@ export async function getDepartmentsStore(includeInactive = false) {
     await dbConnect();
     const query = includeInactive ? {} : { isActive: { $ne: false } };
     const depts = await Department.find(query).sort({ name: 1 });
-    return depts.filter((d: any) => !deleted.includes(d._id.toString()));
+    return depts;
   } catch (err) {
     console.error('Failed to fetch departments from DB:', err);
   }
@@ -392,7 +392,7 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
       });
     }
 
-    return finalSubjects.filter((s: any) => !deleted.includes(s._id.toString()));
+    return finalSubjects;
   } catch (err) {
     console.error('Failed to fetch subjects from DB:', err);
   }
@@ -551,7 +551,7 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
         populate: { path: 'departmentId', select: 'name slug' },
       })
       .sort({ createdAt: -1 });
-    return resList.filter((r: any) => !deleted.includes(r._id.toString()));
+    return resList;
   } catch (err) {
     console.error('Failed to fetch resources from DB:', err);
   }

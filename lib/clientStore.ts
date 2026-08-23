@@ -143,21 +143,26 @@ export function syncAndFilterItems<T = any>(
   filters?: { category?: string; subjectId?: string; departmentSlug?: string; semesterNumber?: number }
 ): T[] {
   if (typeof window === 'undefined') return serverItems || [];
+  
+  // If server returned items from API database, prioritize server items!
+  const hasServerItems = Array.isArray(serverItems) && serverItems.length > 0;
   const rawList = Array.isArray(serverItems) ? [...serverItems] : [];
 
   const customList = getClientCustomItems<any>(category);
+  const deletedIds = getClientDeletedIds();
 
-  // Merge custom created/edited items into rawList
+  // Merge custom created/edited items into rawList if they aren't already covered by server API
   customList.forEach((customItem) => {
+    if (deletedIds.includes(String(customItem._id))) return; // Skip locally deleted custom items
     const index = rawList.findIndex((item: any) => item._id === customItem._id || (item.slug && item.slug === customItem.slug));
     if (index !== -1) {
       rawList[index] = { ...rawList[index], ...customItem };
-    } else {
+    } else if (!hasServerItems) {
       rawList.unshift(customItem);
     }
   });
 
-  let filtered = filterClientDeleted(rawList);
+  let filtered = rawList;
 
   if (filters) {
     filtered = filtered.filter((item: any) => {
