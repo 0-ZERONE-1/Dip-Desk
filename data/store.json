@@ -725,6 +725,10 @@
     }
   ],
   "heroStats": {
+<<<<<<< Updated upstream
     "totalVisitors": 28
+=======
+    "totalVisitors": 2
+>>>>>>> Stashed changes
   }
 }
