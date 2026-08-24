@@ -102,7 +102,8 @@ export default function BrowsePage() {
           <motion.div
             variants={containerVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 w-full"
           >
             {departments.map((dept) => (

@@ -158,7 +158,7 @@ function TiltCard({
         scale: origin.scale,
         filter: 'blur(14px)',
       }}
-      animate={{
+      whileInView={{
         opacity: 1,
         x: 0,
         y: 0,
@@ -166,14 +166,15 @@ function TiltCard({
         scale: 1,
         filter: 'blur(0px)',
       }}
+      viewport={{ once: true, margin: '-40px' }}
       transition={{
-        delay: index * 0.18,
+        delay: index * 0.15,
         duration: 0.8,
         type: 'spring',
         stiffness: 110,
         damping: 13,
-        opacity: { duration: 0.35, delay: index * 0.18 },
-        filter: { duration: 0.55, delay: index * 0.18, ease: 'easeOut' },
+        opacity: { duration: 0.35, delay: index * 0.15 },
+        filter: { duration: 0.55, delay: index * 0.15, ease: 'easeOut' },
       }}
       style={{ perspective: 900 }}
       className="max-w-sm mx-auto w-full h-full flex flex-col"

@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
+import AnimatedSelect from '@/components/AnimatedSelect';
 import {
   LayoutDashboard,
   BookOpen,
@@ -36,6 +37,7 @@ const navItems = [
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const user = session?.user;
   const [pendingCount, setPendingCount] = useState<number>(0);
@@ -61,46 +63,30 @@ export default function AdminNav() {
       : (pathname.startsWith(href) && href !== '/admin') ||
         (pathname === '/admin' && href === '/admin');
 
+  const currentOption = navItems.find(({ href, exact }) => isActive(href, exact))?.href || '/admin';
+
+  const selectOptions = navItems.map(({ href, label, icon: Icon }) => ({
+    value: href,
+    label: label === 'Requests' && pendingCount > 0 ? `${label} (${pendingCount})` : label,
+    icon: <Icon className="w-4 h-4 text-primary-600 flex-shrink-0" />,
+  }));
+
   return (
     <>
-      {/* Mobile Horizontal Sub-Navigation Tabs Bar */}
-      <div className="md:hidden w-full overflow-x-auto no-scrollbar py-2 -mx-3.5 px-3.5 flex items-center gap-1.5 border-b border-surface-200/80 bg-white sticky top-16 z-30 shadow-2xs">
-        {navItems.map(({ href, label, icon: Icon, exact }) => {
-          const active = isActive(href, exact);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors duration-150 shadow-2xs',
-                active
-                  ? 'text-white'
-                  : 'bg-surface-50 text-gray-700 hover:bg-surface-100 border border-surface-200/90'
-              )}
-            >
-              {active && (
-                <motion.span
-                  layoutId="mobile-admin-pill"
-                  layout="position"
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-600 to-accent-600 shadow-md shadow-primary-500/25"
-                  transition={{ type: 'spring', stiffness: 380, damping: 34 }}
-                />
-              )}
-              <Icon className="relative z-10 w-3.5 h-3.5 flex-shrink-0" />
-              <span className="relative z-10">{label}</span>
-              {label === 'Requests' && pendingCount > 0 && (
-                <span
-                  className={cn(
-                    'relative z-10 ml-0.5 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full',
-                    active ? 'bg-white text-primary-700' : 'bg-amber-500 text-white'
-                  )}
-                >
-                  {pendingCount}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      {/* Mobile Section Switcher Dropdown */}
+      <div className="md:hidden sticky top-14 z-30 bg-white/95 backdrop-blur-md border-b border-surface-200/90 px-4 py-2.5 shadow-2xs mb-4">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Admin Section
+          </span>
+          <div className="relative flex-1 max-w-[240px]">
+            <AnimatedSelect
+              options={selectOptions}
+              value={currentOption}
+              onChange={(val) => router.push(val)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Desktop Sticky Sidebar Card */}
@@ -159,22 +145,24 @@ export default function AdminNav() {
                   )}
                   {/* Hover layer for inactive items */}
                   {!active && (
-                    <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-surface-100 transition-opacity duration-150" />
+                    <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-surface-100/70 transition-opacity duration-150" />
                   )}
+
                   <Icon
                     className={cn(
-                      'relative z-10 w-4 h-4 transition-colors',
+                      'relative z-10 w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110',
                       active ? 'text-white' : 'text-gray-400 group-hover:text-primary-600'
                     )}
                   />
-                  <span className="relative z-10">{label}</span>
+                  <span className="relative z-10 flex-1 truncate">{label}</span>
+
                   {label === 'Requests' && pendingCount > 0 && (
                     <span
                       className={cn(
-                        'relative z-10 ml-auto text-[10px] font-black px-2 py-0.5 rounded-full shadow-2xs transition-all',
+                        'relative z-10 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full transition-colors',
                         active
-                          ? 'bg-white text-primary-700 font-extrabold'
-                          : 'bg-amber-100 text-amber-800 border border-amber-200 animate-pulse'
+                          ? 'bg-white text-primary-700'
+                          : 'bg-amber-500 text-white group-hover:bg-amber-600'
                       )}
                     >
                       {pendingCount}
@@ -184,23 +172,6 @@ export default function AdminNav() {
               );
             })}
           </nav>
-
-          {/* Footer Utilities */}
-          <div className="pt-3 mt-2 border-t border-surface-100">
-            <div className="flex items-center justify-between px-2 pt-1">
-              <div className="truncate">
-                <p className="text-xs font-bold text-gray-900 truncate">{user?.name || 'Administrator'}</p>
-                <p className="text-[11px] text-gray-400 truncate">{user?.email || 'admin@dipdesk.com'}</p>
-              </div>
-              <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
-                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                title="Sign Out"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
       </aside>
     </>

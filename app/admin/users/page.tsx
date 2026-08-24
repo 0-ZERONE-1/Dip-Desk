@@ -189,7 +189,63 @@ export default function AdminUsersPage() {
         <GenericLottieLoader text="Loading Users..." />
       ) : (
         <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
-          <div className="overflow-x-auto">
+          {/* Mobile Stacked Card View */}
+          <div className="md:hidden divide-y divide-surface-100">
+            {filtered.map((u) => {
+              const bannedActive = isUserBannedActive(u);
+              return (
+                <div key={u._id} className="p-4 space-y-3 hover:bg-primary-50/20 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-gray-900 text-sm leading-snug break-words">{u.name}</h3>
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{u.email}</p>
+                      {u.institute && <p className="text-xs text-gray-500 mt-1 font-medium truncate">🏢 {u.institute}</p>}
+                    </div>
+                    <span
+                      className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md border flex-shrink-0 ${
+                        bannedActive
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}
+                    >
+                      {getBanStatusText(u)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-surface-100 text-xs text-gray-500">
+                    <span className="badge-primary text-[10px] px-2 py-0.5 font-semibold">
+                      {u.designation || u.title || 'Student'}
+                    </span>
+
+                    <button
+                      id={`ban-user-mob-${u._id}`}
+                      onClick={() => setTargetUser(u)}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg border flex items-center gap-1.5 transition-all ${
+                        bannedActive
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                          : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                      }`}
+                    >
+                      {bannedActive ? (
+                        <>
+                          <UserCheck className="w-3.5 h-3.5" />
+                          Unban User
+                        </>
+                      ) : (
+                        <>
+                          <UserX className="w-3.5 h-3.5" />
+                          Ban User
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
                 <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">

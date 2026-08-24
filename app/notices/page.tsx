@@ -178,10 +178,11 @@ export default function PublicNoticesPage() {
                   return (
                     <motion.div
                       key={notice._id}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, y: 25, scale: 0.97 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, margin: '-30px' }}
                       exit={{ opacity: 0, scale: 0.98 }}
-                      transition={{ delay: i * 0.04, duration: 0.25 }}
+                      transition={{ delay: Math.min(i * 0.05, 0.4), duration: 0.35, ease: 'easeOut' }}
                       whileHover={{ y: -4, transition: { duration: 0.2, ease: 'easeOut' } }}
                       className={cn(
                         'group bg-white rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 p-3.5 sm:p-5 relative overflow-hidden shadow-card hover:shadow-xl break-words',

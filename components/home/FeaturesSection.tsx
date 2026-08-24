@@ -42,15 +42,7 @@ const features = [
   },
 ];
 
-let hasFeaturesAnimatedThisHardLoad = false;
-
 export default function FeaturesSection() {
-  const [isFirstLoad] = useState(() => !hasFeaturesAnimatedThisHardLoad);
-
-  useEffect(() => {
-    hasFeaturesAnimatedThisHardLoad = true;
-  }, []);
-
   return (
     <section className="pt-2 pb-16 px-4">
       <div className="container-max">
@@ -60,22 +52,16 @@ export default function FeaturesSection() {
             return (
               <motion.div
                 key={feature.title}
-                initial={
-                  isFirstLoad
-                    ? { opacity: 0, y: 35, filter: 'blur(8px)' }
-                    : false
-                }
-                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                initial={{ opacity: 0, y: 35, scale: 0.94 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: '-40px' }}
-                transition={
-                  isFirstLoad
-                    ? {
-                        duration: 0.7,
-                        ease: [0.16, 1, 0.3, 1],
-                        delay: 0.15 + i * 0.08,
-                      }
-                    : { duration: 0 }
-                }
+                transition={{
+                  duration: 0.5,
+                  type: 'spring',
+                  stiffness: 180,
+                  damping: 18,
+                  delay: (i % 3) * 0.08,
+                }}
                 className="bg-white/80 backdrop-blur-md rounded-2xl border border-white/80 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6"
               >
                 <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${feature.color}`}>

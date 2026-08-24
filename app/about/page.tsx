@@ -290,8 +290,10 @@ export default function AboutPage() {
 
         {/* Software & Technologies Used Section */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30, filter: 'blur(6px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           whileHover={{ y: -3, transition: { duration: 0.2 } }}
           className="group bg-white rounded-3xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 mb-14 sm:mb-20 w-full relative overflow-hidden"
         >
@@ -378,8 +380,10 @@ export default function AboutPage() {
 
         {/* Purpose & Vision Section — Full Width & Rich Details */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 35, filter: 'blur(6px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           whileHover={{ y: -3, transition: { duration: 0.2 } }}
           className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-50 via-white to-primary-50/50 p-6 sm:p-10 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 mb-12 sm:mb-16 border border-surface-200/90 w-full"
         >
@@ -410,8 +414,11 @@ export default function AboutPage() {
           {/* 3 Pillar Grid of Deep Content */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
             <motion.div
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-30px' }}
+              transition={{ duration: 0.5, delay: 0.1 }}
               whileHover={{ y: -4, scale: 1.01 }}
-              transition={{ duration: 0.2 }}
               className="p-6 rounded-2xl bg-white border border-surface-200/90 hover:border-rose-300 shadow-xs hover:shadow-lg hover:shadow-rose-500/10 transition-all duration-300 flex flex-col justify-between group/pillar relative overflow-hidden"
             >
               <div className="absolute top-0 inset-x-4 h-[2px] bg-gradient-to-r from-rose-500/0 via-rose-500 to-rose-500/0 rounded-full opacity-0 group-hover/pillar:opacity-100 transition-opacity" />
@@ -427,8 +434,11 @@ export default function AboutPage() {
             </motion.div>
 
             <motion.div
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-30px' }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               whileHover={{ y: -4, scale: 1.01 }}
-              transition={{ duration: 0.2 }}
               className="p-6 rounded-2xl bg-white border border-surface-200/90 hover:border-primary-300 shadow-xs hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 flex flex-col justify-between group/pillar relative overflow-hidden"
             >
               <div className="absolute top-0 inset-x-4 h-[2px] bg-gradient-to-r from-primary-500/0 via-primary-500 to-primary-500/0 rounded-full opacity-0 group-hover/pillar:opacity-100 transition-opacity" />
@@ -444,8 +454,11 @@ export default function AboutPage() {
             </motion.div>
 
             <motion.div
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-30px' }}
+              transition={{ duration: 0.5, delay: 0.3 }}
               whileHover={{ y: -4, scale: 1.01 }}
-              transition={{ duration: 0.2 }}
               className="p-6 rounded-2xl bg-white border border-surface-200/90 hover:border-emerald-300 shadow-xs hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 flex flex-col justify-between group/pillar relative overflow-hidden"
             >
               <div className="absolute top-0 inset-x-4 h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500 to-emerald-500/0 rounded-full opacity-0 group-hover/pillar:opacity-100 transition-opacity" />
@@ -475,9 +488,10 @@ export default function AboutPage() {
             {platformCapabilities.map((cap, i) => (
               <motion.div
                 key={cap.title}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.05 * i }}
+                initial={{ opacity: 0, y: 30, scale: 0.96 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ delay: 0.08 * i, duration: 0.5, ease: 'easeOut' }}
                 whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
                 className="group bg-white rounded-2xl sm:rounded-3xl border border-surface-200/90 hover:border-primary-300 p-5 sm:p-6 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between"
               >
@@ -514,9 +528,10 @@ export default function AboutPage() {
             {howToGuideSteps.map((item, idx) => (
               <motion.div
                 key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * idx }}
+                initial={{ opacity: 0, y: 30, scale: 0.97 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ delay: 0.1 * idx, duration: 0.5, ease: 'easeOut' }}
                 whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
                 className="group bg-white rounded-2xl sm:rounded-3xl border border-surface-200/90 hover:border-primary-300 p-6 sm:p-7 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between"
               >
@@ -555,6 +570,10 @@ export default function AboutPage() {
 
         {/* Bottom CTA Card */}
         <motion.div
+          initial={{ opacity: 0, y: 35, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           whileHover={{ y: -4, transition: { duration: 0.2 } }}
           className="group bg-gradient-to-r from-primary-500/5 via-accent-500/5 to-primary-500/5 border border-primary-200/90 hover:border-primary-400 rounded-3xl p-6 sm:p-10 text-center shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 relative overflow-hidden max-w-3xl mx-auto"
         >

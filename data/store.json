@@ -569,17 +569,12 @@
       "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
       "category": "Notes",
       "upvotes": 0,
-      "downvotes": 1,
+      "downvotes": 0,
       "isActive": true,
       "createdAt": "2026-08-08T23:02:12.267Z",
       "subjectId": "sub_cst_3_1",
       "tags": [],
-      "ratings": [
-        {
-          "userId": "user_1787169236156",
-          "vote": "down"
-        }
-      ]
+      "ratings": []
     },
     {
       "_id": "res_2",
@@ -730,11 +725,6 @@
     }
   ],
   "heroStats": {
-    "totalVisitors": 70,
-    "overrideResources": null,
-    "overrideSubjects": null,
-    "overrideStudents": null,
-    "overrideVisitors": null,
-    "customLogoUrl": "https://raw.githubusercontent.com/0-ZERONE-1/Assets_01/144c26fa103e1a052fd50b50b48a5543d3f3b012/Dip-Desk/Site%20Logo/Dip-Desk%20Logo%20V1.svg"
+    "totalVisitors": 28
   }
 }
