@@ -66,10 +66,70 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Top-Left Logo Island */}
+      {/* Mobile Single Joint Header Panel (Full-width single bar on mobile) */}
+      <motion.header
+        {...motionProps}
+        className="md:hidden fixed top-0 inset-x-0 w-full z-50 pointer-events-auto"
+      >
+        <div
+          className={cn(
+            'w-full transition-all duration-300 px-3 py-2 flex items-center justify-between gap-2 border-b shadow-md shadow-gray-900/5',
+            scrolled
+              ? 'bg-white/95 backdrop-blur-xl border-surface-200/90 shadow-primary-900/10'
+              : 'bg-white/90 backdrop-blur-lg border-surface-200/80 shadow-gray-900/5'
+          )}
+        >
+          {/* Left: Logo */}
+          <Link href="/" className="flex-shrink-0">
+            <DipDeskLogo className="h-7" />
+          </Link>
+
+          {/* Center: Search Input */}
+          <div className="flex-1 min-w-0 max-w-[210px] xs:max-w-[260px]">
+            <NavbarSearch />
+          </div>
+
+          {/* Right: Auth / Account Avatar & Mobile Menu Toggle */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {status === 'loading' ? (
+              <div className="w-7 h-7 skeleton rounded-full" />
+            ) : status === 'authenticated' ? (
+              <button
+                id="mobile-header-profile-btn"
+                onClick={handleAccountClick}
+                title={isAdmin ? 'Go to Admin Panel' : 'Go to Student Panel'}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border-2 border-surface-200 hover:border-primary-400 transition-all cursor-pointer"
+              >
+                {user?.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xs font-bold">
+                    {user?.name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                )}
+              </button>
+            ) : (
+              <Link href="/login" className="btn-primary rounded-full px-3 py-1 text-xs">
+                Sign In
+              </Link>
+            )}
+
+            <button
+              id="mobile-header-menu-btn"
+              className="btn-ghost p-1.5 rounded-full"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Desktop Top-Left Logo Island */}
       <motion.div
         {...motionProps}
-        className="fixed top-0 left-0 z-50 pointer-events-auto"
+        className="hidden md:block fixed top-0 left-0 z-50 pointer-events-auto"
       >
         <div
           className={cn(
@@ -85,10 +145,10 @@ export default function Navbar() {
         </div>
       </motion.div>
 
-      {/* Top-Center Navigation Bar Island */}
+      {/* Desktop Top-Center Navigation Bar Island */}
       <motion.header
         {...motionProps}
-        className="fixed top-0 inset-x-0 mx-auto z-40 pointer-events-auto w-fit flex justify-center"
+        className="hidden md:flex fixed top-0 inset-x-0 mx-auto z-40 pointer-events-auto w-fit justify-center"
       >
         <div
           className={cn(
@@ -99,7 +159,7 @@ export default function Navbar() {
           )}
         >
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="flex items-center gap-1">
             {topNavItems.map(({ href, label, exact }) => {
               const active = exact ? pathname === href : pathname.startsWith(href);
               return (
@@ -138,10 +198,10 @@ export default function Navbar() {
         </div>
       </motion.header>
 
-      {/* Top-Right Account / Profile Island */}
+      {/* Desktop Top-Right Account / Profile Island */}
       <motion.div
         {...motionProps}
-        className="fixed top-0 right-0 z-50 pointer-events-auto"
+        className="hidden md:block fixed top-0 right-0 z-50 pointer-events-auto"
       >
         <div
           className={cn(
@@ -175,15 +235,6 @@ export default function Navbar() {
               Sign In
             </Link>
           )}
-
-          {/* Mobile menu toggle */}
-          <button
-            id="mobile-menu-btn"
-            className="md:hidden btn-ghost p-2 rounded-full"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
       </motion.div>
 

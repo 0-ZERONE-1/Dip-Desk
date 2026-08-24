@@ -136,7 +136,7 @@ export default function NavbarSearch() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-36 xs:w-44 sm:w-64 md:w-72 lg:w-80">
+    <div ref={containerRef} className="relative w-full sm:w-64 md:w-72 lg:w-80">
       {/* Search Input Box */}
       <div
         className={cn(

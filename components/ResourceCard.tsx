@@ -109,7 +109,7 @@ export default function ResourceCard({ resource, index = 0 }: ResourceCardProps)
           scale: 0.84,
           filter: 'blur(6px)',
         }}
-        animate={{
+        whileInView={{
           opacity: 1,
           x: 0,
           y: 0,
@@ -117,12 +117,13 @@ export default function ResourceCard({ resource, index = 0 }: ResourceCardProps)
           scale: 1,
           filter: 'blur(0px)',
         }}
+        viewport={{ once: true, margin: '-30px' }}
         transition={{
           type: 'spring',
           stiffness: 220,
           damping: 17,
           mass: 0.8,
-          delay: index * 0.08,
+          delay: Math.min(index * 0.06, 0.4),
         }}
         whileHover={{ y: -6, transition: { duration: 0.2, ease: 'easeOut' } }}
         className="h-full flex flex-col"
