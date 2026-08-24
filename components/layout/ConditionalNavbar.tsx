@@ -7,9 +7,7 @@ const HIDDEN_PATHS = ['/login', '/register', '/banned', '/complete-profile'];
 export default function ConditionalNavbar() {
   const pathname = usePathname();
 
-  const hidden =
-    HIDDEN_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/')) ||
-    pathname.startsWith('/admin');
+  const hidden = HIDDEN_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
 
   if (hidden) return null;
   return <Navbar />;
