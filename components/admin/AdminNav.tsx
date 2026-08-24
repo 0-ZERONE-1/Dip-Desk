@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { motion } from 'framer-motion';
-import AnimatedSelect from '@/components/AnimatedSelect';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   BookOpen,
@@ -18,6 +17,7 @@ import {
   Bell,
   ShieldAlert,
   Zap,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DipDeskLogo from '@/components/layout/DipDeskLogo';
@@ -41,6 +41,7 @@ export default function AdminNav() {
   const { data: session } = useSession();
   const user = session?.user;
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetchPendingCount();
@@ -73,21 +74,66 @@ export default function AdminNav() {
 
   return (
     <>
-      {/* Mobile Section Switcher Dropdown */}
-      <div className="md:hidden sticky top-14 z-30 bg-white/95 backdrop-blur-md border-b border-surface-200/90 px-4 py-2.5 shadow-2xs mb-4">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            Admin Section
-          </span>
-          <div className="relative flex-1 max-w-[240px]">
-            <AnimatedSelect
-              options={selectOptions}
-              value={currentOption}
-              onChange={(val) => router.push(val)}
-            />
+      {/* Mobile Section Switcher Dropdown — matches student dashboard style */}
+      {(() => {
+        const currentItem = navItems.find(({ href, exact }) => isActive(href, exact)) || navItems[0];
+        const CurrentIcon = currentItem.icon;
+        return (
+          <div className="md:hidden w-full px-3.5 pt-2 mb-1 sticky top-15 z-30">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-surface-200/90 shadow-sm p-1.5 relative">
+              <button
+                onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface-50 hover:bg-surface-100/80 border border-surface-200/80 transition-all font-bold text-xs text-gray-900"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center flex-shrink-0 font-bold">
+                    <CurrentIcon className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="truncate">{currentItem.label}</span>
+                </div>
+                <div className="flex items-center gap-1 text-gray-500 text-[11px] font-semibold flex-shrink-0">
+                  <span className="text-gray-400">Switch Section</span>
+                  <ChevronDown className={cn('w-4 h-4 transition-transform duration-200', mobileDropdownOpen && 'rotate-180')} />
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {mobileDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-2xl border border-surface-200 shadow-xl z-50 overflow-hidden p-2 grid grid-cols-2 gap-1.5"
+                  >
+                    {navItems.map(({ href, label, icon: Icon, exact }) => {
+                      const active = isActive(href, exact);
+                      return (
+                        <button
+                          key={href}
+                          onClick={() => {
+                            router.push(href);
+                            setMobileDropdownOpen(false);
+                          }}
+                          className={cn(
+                            'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left',
+                            active
+                              ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-sm'
+                              : 'text-gray-700 hover:bg-surface-100'
+                          )}
+                        >
+                          <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span className="truncate">{label}</span>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Desktop Sticky Sidebar Card - Fixed position locked to viewport */}
       <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 fixed top-20 left-3.5 sm:left-6 lg:left-8 z-30 h-[calc(100vh-80px)] overflow-y-auto pb-6 pt-2 space-y-3">

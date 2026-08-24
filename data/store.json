@@ -3,7 +3,12 @@
   "departments": [],
   "subjects": [],
   "resources": [],
-  "notices": [],
+  "notices": [
+    {
+      "_id": "notice_1786903702590",
+      "isPinned": false
+    }
+  ],
   "deletedIds": [],
   "users": [
     {
@@ -23,7 +28,7 @@
     }
   ],
   "heroStats": {
-    "totalVisitors": 70
+    "totalVisitors": 102
   },
   "requests": [
     {

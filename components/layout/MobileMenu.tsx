@@ -24,7 +24,7 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
     { href: '/browse', label: 'Browse Resources', icon: BookOpen },
     { href: '/notices', label: 'Notice Board', icon: Bell },
     { href: '/developers', label: 'Developers', icon: Code2 },
-    { href: '/about', label: 'About App', icon: Info },
+    { href: '/about', label: 'About Page', icon: Info },
     ...(session && !isAdmin ? [{ href: '/dashboard', label: 'User Panel', icon: Bookmark }] : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin Panel', icon: Settings }] : []),
   ];
@@ -63,23 +63,41 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
               </button>
             </div>
 
-            {/* User Info */}
-            {session && (
+            {/* User Info / Sign In Banner */}
+            {session ? (
               <div className="px-5 py-4 border-b border-surface-100 bg-surface-50">
                 <div className="flex items-center gap-3">
                   {user?.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.image} alt={user.name} className="w-10 h-10 rounded-full" />
+                    <img src={user.image} alt={user.name} className="w-10 h-10 rounded-full flex-shrink-0" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold flex-shrink-0">
                       {user?.name?.[0]?.toUpperCase()}
                     </div>
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                   </div>
+                  <button
+                    onClick={() => { signOut({ callbackUrl: '/' }); onClose(); }}
+                    className="p-2 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all flex-shrink-0"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
                 </div>
+              </div>
+            ) : (
+              <div className="px-4 py-3 border-b border-surface-100 bg-surface-50/50">
+                <Link
+                  href="/login"
+                  onClick={onClose}
+                  className="btn-primary w-full shadow-md shadow-primary-500/20"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Link>
               </div>
             )}
 
@@ -104,28 +122,6 @@ export default function MobileMenu({ open, onClose, session, hasRecentNotice }: 
                 </Link>
               ))}
             </nav>
-
-            {/* Footer Auth */}
-            <div className="px-3 py-4 border-t border-surface-200">
-              {session ? (
-                <button
-                  onClick={() => { signOut({ callbackUrl: '/' }); onClose(); }}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 w-full transition-all duration-150"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </button>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={onClose}
-                  className="btn-primary w-full"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </Link>
-              )}
-            </div>
           </motion.div>
         </>
       )}
