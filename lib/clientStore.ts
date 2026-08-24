@@ -48,6 +48,16 @@ export function saveClientCustomItem(category: string, item: any) {
   } catch {}
 }
 
+export function removeClientCustomItem(category: string, itemId: string) {
+  if (typeof window === 'undefined' || !category || !itemId) return;
+  try {
+    const key = CUSTOM_PREFIX + category;
+    const existing: any[] = getClientCustomItems(category);
+    const updated = existing.filter((i) => i._id !== itemId);
+    localStorage.setItem(key, JSON.stringify(updated));
+  } catch {}
+}
+
 export function getClientCustomItems<T = any>(category: string): T[] {
   if (typeof window === 'undefined') return [];
   try {

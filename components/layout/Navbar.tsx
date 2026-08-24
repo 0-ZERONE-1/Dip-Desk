@@ -1,16 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Menu, X, BookOpen, LogOut, Settings, Bookmark, User } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NavbarSearch from '@/components/NavbarSearch';
 import MobileMenu from './MobileMenu';
 import DipDeskLogo from './DipDeskLogo';
-
-let hasNavAnimatedThisHardLoad = false;
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -18,12 +16,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [isFirstLoad] = useState(() => !hasNavAnimatedThisHardLoad);
-
-  useEffect(() => {
-    hasNavAnimatedThisHardLoad = true;
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -42,17 +34,11 @@ export default function Navbar() {
     { href: '/about', label: 'About', exact: true },
   ];
 
-  const motionProps = isFirstLoad
-    ? {
-        initial: { y: -90, opacity: 0 },
-        animate: { y: 0, opacity: 1 },
-        transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 1.5 },
-      }
-    : {
-        initial: false,
-        animate: { y: 0, opacity: 1 },
-        transition: { duration: 0 },
-      };
+  const motionProps = {
+    initial: { y: -20, opacity: 0 },
+    animate: { y: 0, opacity: 1 },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+  };
 
   const handleAccountClick = () => {
     if (status === 'unauthenticated') {
@@ -66,67 +52,60 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Mobile Single Joint Header Panel (Full-width single bar on mobile) */}
+      {/* ========================================================================= */}
+      {/* MOBILE UNIFIED SINGLE JOINT HEADER PANEL (md:hidden)                      */}
+      {/* ========================================================================= */}
       <motion.header
         {...motionProps}
-        className="md:hidden fixed top-0 inset-x-0 w-full z-50 pointer-events-auto"
+        className="md:hidden fixed top-0 inset-x-0 z-50 pointer-events-auto bg-white/95 backdrop-blur-xl border-b border-surface-200/90 shadow-sm px-3.5 py-2 flex items-center justify-between gap-2"
       >
-        <div
-          className={cn(
-            'w-full transition-all duration-300 px-3 py-2 flex items-center justify-between gap-2 border-b shadow-md shadow-gray-900/5',
-            scrolled
-              ? 'bg-white/95 backdrop-blur-xl border-surface-200/90 shadow-primary-900/10'
-              : 'bg-white/90 backdrop-blur-lg border-surface-200/80 shadow-gray-900/5'
-          )}
-        >
-          {/* Left: Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <DipDeskLogo className="h-7" />
-          </Link>
+        <Link href="/" className="flex-shrink-0">
+          <DipDeskLogo />
+        </Link>
 
-          {/* Center: Search Input */}
-          <div className="flex-1 min-w-0 max-w-[210px] xs:max-w-[260px]">
-            <NavbarSearch />
-          </div>
+        <div className="flex-1 max-w-[190px] xs:max-w-[220px] sm:max-w-[260px] min-w-0">
+          <NavbarSearch />
+        </div>
 
-          {/* Right: Auth / Account Avatar & Mobile Menu Toggle */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {status === 'loading' ? (
-              <div className="w-7 h-7 skeleton rounded-full" />
-            ) : status === 'authenticated' ? (
-              <button
-                id="mobile-header-profile-btn"
-                onClick={handleAccountClick}
-                title={isAdmin ? 'Go to Admin Panel' : 'Go to Student Panel'}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border-2 border-surface-200 hover:border-primary-400 transition-all cursor-pointer"
-              >
-                {user?.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xs font-bold">
-                    {user?.name?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                )}
-              </button>
-            ) : (
-              <Link href="/login" className="btn-primary rounded-full px-3 py-1 text-xs">
-                Sign In
-              </Link>
-            )}
-
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {status === 'loading' ? (
+            <div className="w-8 h-8 skeleton rounded-full" />
+          ) : status === 'authenticated' ? (
             <button
-              id="mobile-header-menu-btn"
-              className="btn-ghost p-1.5 rounded-full"
-              onClick={() => setMobileOpen(!mobileOpen)}
+              id="profile-menu-btn-mobile"
+              onClick={handleAccountClick}
+              className="w-8 h-8 rounded-full overflow-hidden border-2 border-surface-200 focus:outline-none cursor-pointer"
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {user?.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xs font-bold">
+                  {user?.name?.[0]?.toUpperCase() || 'U'}
+                </div>
+              )}
             </button>
-          </div>
+          ) : (
+            <Link href="/login" className="btn-primary rounded-full px-3 py-1 text-xs">
+              Sign In
+            </Link>
+          )}
+
+          <button
+            id="mobile-menu-btn"
+            className="btn-ghost p-1.5 rounded-full"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </motion.header>
 
-      {/* Desktop Top-Left Logo Island */}
+      {/* ========================================================================= */}
+      {/* DESKTOP HEADER ISLANDS (hidden md:block / md:flex)                        */}
+      {/* ========================================================================= */}
+
+      {/* Top-Left Logo Island */}
       <motion.div
         {...motionProps}
         className="hidden md:block fixed top-0 left-0 z-50 pointer-events-auto"
@@ -145,7 +124,7 @@ export default function Navbar() {
         </div>
       </motion.div>
 
-      {/* Desktop Top-Center Navigation Bar Island */}
+      {/* Top-Center Navigation Bar Island */}
       <motion.header
         {...motionProps}
         className="hidden md:flex fixed top-0 inset-x-0 mx-auto z-40 pointer-events-auto w-fit justify-center"
@@ -198,7 +177,7 @@ export default function Navbar() {
         </div>
       </motion.header>
 
-      {/* Desktop Top-Right Account / Profile Island */}
+      {/* Top-Right Account / Profile Island */}
       <motion.div
         {...motionProps}
         className="hidden md:block fixed top-0 right-0 z-50 pointer-events-auto"
@@ -211,7 +190,6 @@ export default function Navbar() {
               : 'bg-white/90 backdrop-blur-lg border-surface-200/80 shadow-gray-900/5'
           )}
         >
-          {/* Auth Section */}
           {status === 'loading' ? (
             <div className="w-8 h-8 skeleton rounded-full" />
           ) : status === 'authenticated' ? (
@@ -238,8 +216,8 @@ export default function Navbar() {
         </div>
       </motion.div>
 
-      {/* Spacer matching floating navbar height */}
-      <div className="h-16 sm:h-20 md:h-24" />
+      {/* Spacer matching header height */}
+      <div className="h-14 sm:h-16 md:h-24" />
 
       {/* Mobile Menu Overlay */}
       <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} session={session} />
