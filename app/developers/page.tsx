@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import Navbar from '@/components/layout/Navbar';
 import {
   motion,
   useMotionValue,
@@ -338,7 +337,6 @@ export default function DevelopersPage() {
 
   return (
     <>
-      <Navbar />
       <main className="container-max px-4 py-10 flex-1 overflow-x-hidden">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-10">

@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Navbar from '@/components/layout/Navbar';
 import SemesterPage from '@/components/pages/SemesterPage';
 
 interface Props {
@@ -21,7 +20,6 @@ export default async function SemesterRoute({ params }: Props) {
   const semesterNumber = parseInt(semester.replace('semester-', '')) || 1;
   return (
     <>
-      <Navbar />
       <main className="w-full px-4 sm:px-8 lg:px-12 py-8 flex-1">
         <SemesterPage branchSlug={branch} semesterNumber={semesterNumber} />
       </main>

@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/layout/Navbar';
 import Link from 'next/link';
 import { BookOpen, ArrowRight, Loader2, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -70,7 +69,6 @@ export default function BrowsePage() {
 
   return (
     <>
-      <Navbar />
       <main className="w-full max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-12 flex-1 overflow-x-hidden">
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
           <motion.h1

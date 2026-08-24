@@ -1,9 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/layout/Navbar';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { getRawImageUrl } from '@/lib/utils';
+import { getCachedCustomLogo, setCachedCustomLogo } from '@/lib/logoCache';
+
+const AboutLottieLoader = dynamic(
+  () => import('@/components/AboutLottieLoader'),
+  { ssr: false }
+);
+
 import {
   Code2,
   Cpu,
@@ -217,22 +224,29 @@ const howToGuideSteps = [
     ],
   },
 ];
-
 function AboutLogoWatermark() {
   const [logoUrl, setLogoUrl] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    const cached = getCachedCustomLogo();
+    if (cached) setLogoUrl(cached);
+
     fetch('/api/stats')
       .then((res) => res.json())
       .then((data) => {
         if (data.customLogoUrl) {
           setLogoUrl(data.customLogoUrl);
+          setCachedCustomLogo(data.customLogoUrl);
         }
       })
-      .catch(() => { });
+      .catch(() => {});
   }, []);
 
-  const rawUrl = getRawImageUrl(logoUrl);
+  const rawUrl = logoUrl ? getRawImageUrl(logoUrl) : null;
+
+  if (!mounted) return null;
 
   if (rawUrl) {
     return (
@@ -249,9 +263,16 @@ function AboutLogoWatermark() {
 }
 
 export default function AboutPage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1800);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
-      <Navbar />
+      <AboutLottieLoader visible={loading} />
       <main className="container-max px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full max-w-full overflow-x-hidden relative">
         {/* ZERONE - Fixed position background logo watermark */}
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[950px] lg:w-[1150px] h-[750px] sm:h-[950px] lg:h-[1150px] opacity-[0.06] sm:opacity-[0.1] pointer-events-none select-none z-0 flex items-center justify-center blur-[1px]">

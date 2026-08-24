@@ -10,24 +10,12 @@ import NavbarSearch from '@/components/NavbarSearch';
 import MobileMenu from './MobileMenu';
 import DipDeskLogo from './DipDeskLogo';
 
-// Persistent client-side flag to disable entrance animations on route transitions
-let hasNavbarAnimated = false;
-
 export default function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
-
-  useEffect(() => {
-    if (!hasNavbarAnimated) {
-      setShouldAnimate(true);
-      hasNavbarAnimated = true;
-    }
-  }, []);
-
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
@@ -45,30 +33,29 @@ export default function Navbar() {
     { href: '/about', label: 'About', exact: true },
   ];
 
-  // Entrance animations only on hard load/refresh — skipped on route changes
-  const centerNavProps = shouldAnimate ? {
+  const centerNavProps = {
     initial: { y: -65, opacity: 0 },
     animate: { y: 0, opacity: 1 },
     transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 0.9 },
-  } : {};
+  };
 
-  const topLeftLogoProps = shouldAnimate ? {
+  const topLeftLogoProps = {
     initial: { x: -85, opacity: 0 },
     animate: { x: 0, opacity: 1 },
     transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 1.0 },
-  } : {};
+  };
 
-  const topRightAccountProps = shouldAnimate ? {
+  const topRightAccountProps = {
     initial: { x: 85, opacity: 0 },
     animate: { x: 0, opacity: 1 },
     transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 1.0 },
-  } : {};
+  };
 
-  const mobileNavProps = shouldAnimate ? {
+  const mobileNavProps = {
     initial: { y: -50, opacity: 0 },
     animate: { y: 0, opacity: 1 },
     transition: { duration: 1.2, ease: [0.42, 0, 0.58, 1], delay: 0.9 },
-  } : {};
+  };
 
   const handleAccountClick = () => {
     if (status === 'unauthenticated') {
@@ -157,7 +144,7 @@ export default function Navbar() {
       {/* Top-Center Navigation Bar Island (slides down from top) */}
       <motion.header
         {...centerNavProps}
-        className="hidden md:flex fixed top-0 inset-x-0 mx-auto z-40 pointer-events-auto w-fit justify-center"
+        className="hidden md:flex fixed top-0 inset-x-0 mx-auto z-50 pointer-events-auto w-fit justify-center"
       >
         <div
           className={cn(

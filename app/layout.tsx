@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
+import ConditionalNavbar from '@/components/layout/ConditionalNavbar';
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
@@ -23,9 +24,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
-      <body className="min-h-full flex flex-col bg-surface-50 font-sans antialiased text-gray-900">
+      <body className="min-h-full flex flex-col bg-white font-sans antialiased text-gray-900">
         <Providers>
           <div className="flex-1 flex flex-col min-h-screen">
+            <ConditionalNavbar />
             {children}
           </div>
           <Toaster

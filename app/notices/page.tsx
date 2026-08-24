@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/layout/Navbar';
 import { Bell, Pin, ExternalLink, Calendar, Search, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { syncAndFilterItems } from '@/lib/clientStore';
@@ -91,7 +90,6 @@ export default function PublicNoticesPage() {
 
   return (
     <>
-      <Navbar />
       <main className="w-full max-w-[1400px] mx-auto px-3.5 sm:px-6 py-6 sm:py-10 flex-1 overflow-x-hidden">
         {/* Hero Header */}
         <div className="text-center max-w-4xl mx-auto mb-6 sm:mb-10">

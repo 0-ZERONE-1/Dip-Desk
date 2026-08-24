@@ -3,16 +3,24 @@
 import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import { getRawImageUrl } from '@/lib/utils';
+import { getCachedCustomLogo, setCachedCustomLogo } from '@/lib/logoCache';
 
 export default function DipDeskLogo({ className = 'h-8', showText = true }: { className?: string; showText?: boolean }) {
   const [customLogo, setCustomLogo] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    const cached = getCachedCustomLogo();
+    if (cached) {
+      setCustomLogo(cached);
+    }
     fetch('/api/stats')
       .then((res) => res.json())
       .then((data) => {
         if (data.customLogoUrl) {
           setCustomLogo(data.customLogoUrl);
+          setCachedCustomLogo(data.customLogoUrl);
         }
       })
       .catch(() => {});
@@ -21,10 +29,10 @@ export default function DipDeskLogo({ className = 'h-8', showText = true }: { cl
   const rawLogoUrl = getRawImageUrl(customLogo);
 
   return (
-    <div className="flex items-center gap-2.5 flex-shrink-0 group cursor-pointer select-none">
+    <div className="flex items-center gap-2.5 flex-shrink-0 group cursor-pointer select-none" suppressHydrationWarning>
       {/* ZERONE - Render custom branding logo image or simple book icon fallback */}
-      <div className="relative flex items-center justify-center">
-        {rawLogoUrl ? (
+      <div className="relative flex items-center justify-center" suppressHydrationWarning>
+        {mounted && rawLogoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={rawLogoUrl}

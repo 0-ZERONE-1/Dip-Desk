@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import Navbar from '@/components/layout/Navbar';
 import ResourceCard from '@/components/ResourceCard';
 import GenericLottieLoader from '@/components/GenericLottieLoader';
 import AnimatedSelect from '@/components/AnimatedSelect';
@@ -240,7 +239,6 @@ export default function StudentPanelPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface-50">
-      <Navbar />
 
       {/* Mobile Student Section Switcher Dropdown (Replaces old top sliding bar) */}
       {(() => {
