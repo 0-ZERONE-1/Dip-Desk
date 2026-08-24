@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   BookOpen,
@@ -17,6 +17,7 @@ import {
   Bell,
   ShieldAlert,
   Zap,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DipDeskLogo from '@/components/layout/DipDeskLogo';
@@ -39,6 +40,7 @@ export default function AdminNav() {
   const { data: session } = useSession();
   const user = session?.user;
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetchPendingCount();
@@ -61,46 +63,73 @@ export default function AdminNav() {
       : (pathname.startsWith(href) && href !== '/admin') ||
         (pathname === '/admin' && href === '/admin');
 
+  const currentItem = navItems.find((item) => isActive(item.href, item.exact)) || navItems[0];
+  const CurrentIcon = currentItem.icon;
+
   return (
     <>
-      {/* Mobile Horizontal Sub-Navigation Tabs Bar */}
-      <div className="md:hidden w-full overflow-x-auto no-scrollbar py-2 -mx-3.5 px-3.5 flex items-center gap-1.5 border-b border-surface-200/80 bg-white sticky top-16 z-30 shadow-2xs">
-        {navItems.map(({ href, label, icon: Icon, exact }) => {
-          const active = isActive(href, exact);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors duration-150 shadow-2xs',
-                active
-                  ? 'text-white'
-                  : 'bg-surface-50 text-gray-700 hover:bg-surface-100 border border-surface-200/90'
-              )}
-            >
-              {active && (
-                <motion.span
-                  layoutId="mobile-admin-pill"
-                  layout="position"
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-600 to-accent-600 shadow-md shadow-primary-500/25"
-                  transition={{ type: 'spring', stiffness: 380, damping: 34 }}
-                />
-              )}
-              <Icon className="relative z-10 w-3.5 h-3.5 flex-shrink-0" />
-              <span className="relative z-10">{label}</span>
-              {label === 'Requests' && pendingCount > 0 && (
-                <span
-                  className={cn(
-                    'relative z-10 ml-0.5 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full',
-                    active ? 'bg-white text-primary-700' : 'bg-amber-500 text-white'
-                  )}
-                >
+      {/* Mobile Admin Section Module Switcher Dropdown (Replaces old top sliding bar) */}
+      <div className="md:hidden w-full mb-3 sticky top-15 z-30">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-surface-200/90 shadow-sm p-1.5 relative">
+          <button
+            onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+            className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface-50 hover:bg-surface-100/80 border border-surface-200/80 transition-all font-bold text-xs text-gray-900"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-6.5 h-6.5 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center flex-shrink-0 font-bold">
+                <CurrentIcon className="w-3.5 h-3.5" />
+              </div>
+              <span className="truncate">{currentItem.label}</span>
+              {currentItem.label === 'Requests' && pendingCount > 0 && (
+                <span className="bg-amber-500 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full">
                   {pendingCount}
                 </span>
               )}
-            </Link>
-          );
-        })}
+            </div>
+            <div className="flex items-center gap-1 text-gray-500 text-[11px] font-semibold flex-shrink-0">
+              <span className="text-gray-400">Switch Section</span>
+              <ChevronDown className={cn('w-4 h-4 transition-transform duration-200', mobileDropdownOpen && 'rotate-180')} />
+            </div>
+          </button>
+
+          {/* Module Grid Dropdown Overlay */}
+          <AnimatePresence>
+            {mobileDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-2xl border border-surface-200 shadow-xl z-50 overflow-hidden p-2 grid grid-cols-2 gap-1.5"
+              >
+                {navItems.map(({ href, label, icon: Icon, exact }) => {
+                  const active = isActive(href, exact);
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMobileDropdownOpen(false)}
+                      className={cn(
+                        'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all',
+                        active
+                          ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-sm'
+                          : 'text-gray-700 hover:bg-surface-100'
+                      )}
+                    >
+                      <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{label}</span>
+                      {label === 'Requests' && pendingCount > 0 && (
+                        <span className={cn('ml-auto text-[10px] px-1.5 py-0.2 rounded-full font-black', active ? 'bg-white text-primary-700' : 'bg-amber-500 text-white')}>
+                          {pendingCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Desktop Sticky Sidebar Card */}

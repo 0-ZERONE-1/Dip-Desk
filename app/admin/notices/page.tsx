@@ -560,7 +560,74 @@ export default function AdminNoticesPage() {
         </div>
       ) : (
         <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
-          <div className="overflow-x-auto">
+          {/* Mobile Stacked Card View */}
+          <div className="md:hidden divide-y divide-surface-100">
+            {filtered.map((n) => (
+              <div key={n._id} className={`p-4 space-y-3 transition-colors ${n.isPinned ? 'bg-amber-50/20' : 'hover:bg-primary-50/20'}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${getBadgeStyle(n.badge)}`}>
+                        {n.badge}
+                      </span>
+                      {n.isPinned && (
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 flex items-center gap-1 border border-amber-200">
+                          <Pin className="w-2.5 h-2.5 fill-amber-700 text-amber-800" /> Pinned
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-sm leading-snug break-words">{n.title}</h3>
+                    <p className="text-xs text-gray-500 line-clamp-2 mt-1">{n.content}</p>
+                  </div>
+                  <button
+                    onClick={() => toggleActive(n)}
+                    className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border flex-shrink-0 ${
+                      n.isActive !== false
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                    }`}
+                  >
+                    {n.isActive !== false ? 'Active' : 'Inactive'}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-surface-100 text-xs text-gray-500">
+                  <span className="text-[11px] font-medium">
+                    {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : ''}
+                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => togglePin(n)}
+                      className={`px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 transition-all ${
+                        n.isPinned ? 'bg-amber-500 text-white border-amber-600' : 'bg-amber-50 text-amber-800 border-amber-200'
+                      }`}
+                    >
+                      <Pin className="w-3 h-3" />
+                      {n.isPinned ? 'Pinned' : 'Pin'}
+                    </button>
+                    <button
+                      onClick={() => handleEdit(n)}
+                      className="px-2.5 py-1 text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 flex items-center gap-1 transition-all"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(n._id)}
+                      className="px-2.5 py-1 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 flex items-center gap-1 transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
                 <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">

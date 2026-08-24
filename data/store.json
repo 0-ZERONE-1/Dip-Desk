@@ -569,17 +569,12 @@
       "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
       "category": "Notes",
       "upvotes": 0,
-      "downvotes": 1,
+      "downvotes": 0,
       "isActive": true,
       "createdAt": "2026-08-08T23:02:12.267Z",
       "subjectId": "sub_cst_3_1",
       "tags": [],
-      "ratings": [
-        {
-          "userId": "user_1787169236156",
-          "vote": "down"
-        }
-      ]
+      "ratings": []
     },
     {
       "_id": "res_2",
@@ -730,6 +725,6 @@
     }
   ],
   "heroStats": {
-    "totalVisitors": 20
+    "totalVisitors": 28
   }
 }

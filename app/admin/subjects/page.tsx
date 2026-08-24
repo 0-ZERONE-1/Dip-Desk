@@ -324,12 +324,68 @@ export default function AdminSubjectsPage() {
         )}
       </div>
 
-      {/* Subjects Table */}
+      {/* Subjects Container: Mobile Card View + Desktop Table View */}
       {loading ? (
         <GenericLottieLoader text="Loading Subjects..." />
       ) : (
         <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
-          <div className="overflow-x-auto">
+          {/* Mobile Stacked Card View */}
+          <div className="md:hidden divide-y divide-surface-100">
+            {filtered.map((s) => {
+              const deptName = getDeptName(s.departmentId, departments);
+              return (
+                <div key={s._id} className="p-4 space-y-3 hover:bg-primary-50/20 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-gray-900 text-sm leading-snug break-words">{s.name}</h3>
+                      {s.description && (
+                        <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">{s.description}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => toggleActive(s)}
+                      className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border flex-shrink-0 ${
+                        s.isActive !== false
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-red-50 text-red-700 border-red-200'
+                      }`}
+                    >
+                      {s.isActive !== false ? 'Active' : 'Inactive'}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-surface-100 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 font-medium flex-wrap">
+                      <span className="bg-surface-100 text-gray-700 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                        Sem {s.semesterNumber}
+                      </span>
+                      <span className="truncate max-w-[140px] text-gray-600 font-semibold">{deptName}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleEdit(s)}
+                        className="px-2.5 py-1 text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 flex items-center gap-1 transition-all"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setDeleteId(s._id)}
+                        className="px-2.5 py-1 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 flex items-center gap-1 transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
@@ -343,7 +399,6 @@ export default function AdminSubjectsPage() {
               <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
                 {filtered.map((s) => {
                   const deptName = getDeptName(s.departmentId, departments);
-                  const isAllDept = deptName === 'All Departments' || getDeptIdStr(s.departmentId) === 'all';
                   return (
                     <tr
                       key={s._id}

@@ -6,7 +6,7 @@ import ResourceCard from '@/components/ResourceCard';
 import GenericLottieLoader from '@/components/GenericLottieLoader';
 import AnimatedSelect from '@/components/AnimatedSelect';
 import {
-  Bookmark, BookOpen, ThumbsUp, ThumbsDown, MessageSquarePlus, User, Edit3, Save, Loader2, CheckCircle, Clock, ShieldCheck, GraduationCap, X, Camera, LogOut, ExternalLink, Building2, Link as LinkIcon, LayoutDashboard, Bell, ArrowRight, ShieldAlert, AlertTriangle, Trash2, XCircle
+  Bookmark, BookOpen, ThumbsUp, ThumbsDown, MessageSquarePlus, User, Edit3, Save, Loader2, CheckCircle, Clock, ShieldCheck, GraduationCap, X, Camera, LogOut, ExternalLink, Building2, Link as LinkIcon, LayoutDashboard, Bell, ArrowRight, ShieldAlert, AlertTriangle, Trash2, XCircle, ChevronDown
 } from 'lucide-react';
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,6 +45,7 @@ interface UserProfile {
 export default function StudentPanelPage() {
   const { data: session, update: updateSession } = useSession();
   const [activeTab, setActiveTab] = useState<ActiveTab>('profile');
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [allResources, setAllResources] = useState<ResourceItem[]>([]);
@@ -241,44 +242,78 @@ export default function StudentPanelPage() {
     <div className="min-h-screen flex flex-col bg-surface-50">
       <Navbar />
 
-      {/* Mobile Navigation Horizontal Bar */}
-      <div className="md:hidden w-full overflow-x-auto no-scrollbar py-2 px-3.5 flex items-center gap-1.5 border-b border-surface-200/80 bg-white sticky top-16 z-30 shadow-2xs">
-        {[
+      {/* Mobile Student Section Switcher Dropdown (Replaces old top sliding bar) */}
+      {(() => {
+        const studentTabs = [
           { id: 'profile', label: 'Dashboard', icon: LayoutDashboard },
           { id: 'saved', label: 'Saved Resources', icon: Bookmark },
           { id: 'liked', label: 'Liked Resources', icon: ThumbsUp },
           { id: 'disliked', label: 'Disliked Resources', icon: ThumbsDown },
           { id: 'requests', label: 'My Requests', icon: MessageSquarePlus },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const active = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as ActiveTab)}
-              className={cn(
-                'relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors duration-150 shadow-2xs',
-                active
-                  ? 'text-white'
-                  : 'bg-surface-50 text-gray-700 hover:bg-surface-100 border border-surface-200/90'
-              )}
-            >
-              {active && (
-                <motion.span
-                  layoutId="mobile-student-pill"
-                  layout="position"
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-600 to-accent-600 shadow-md shadow-primary-500/25"
-                  transition={{ type: 'spring', stiffness: 380, damping: 34 }}
-                />
-              )}
-              <Icon className="relative z-10 w-3.5 h-3.5 flex-shrink-0" />
-              <span className="relative z-10">{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+        ];
+        const currentTabItem = studentTabs.find((t) => t.id === activeTab) || studentTabs[0];
+        const CurrentTabIcon = currentTabItem.icon;
 
-      <main className="flex-1 w-full max-w-[1700px] mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7">
+        return (
+          <div className="md:hidden w-full px-3.5 pt-2 mb-1 sticky top-15 z-30">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-surface-200/90 shadow-sm p-1.5 relative">
+              <button
+                onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface-50 hover:bg-surface-100/80 border border-surface-200/80 transition-all font-bold text-xs text-gray-900"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center flex-shrink-0 font-bold">
+                    <CurrentTabIcon className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="truncate">{currentTabItem.label}</span>
+                </div>
+                <div className="flex items-center gap-1 text-gray-500 text-[11px] font-semibold flex-shrink-0">
+                  <span className="text-gray-400">Switch Section</span>
+                  <ChevronDown className={cn('w-4 h-4 transition-transform duration-200', mobileDropdownOpen && 'rotate-180')} />
+                </div>
+              </button>
+
+              {/* Module Grid Dropdown Overlay */}
+              <AnimatePresence>
+                {mobileDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-2xl border border-surface-200 shadow-xl z-50 overflow-hidden p-2 grid grid-cols-2 gap-1.5"
+                  >
+                    {studentTabs.map((tab) => {
+                      const Icon = tab.icon;
+                      const active = activeTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => {
+                            setActiveTab(tab.id as ActiveTab);
+                            setMobileDropdownOpen(false);
+                          }}
+                          className={cn(
+                            'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left',
+                            active
+                              ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-sm'
+                              : 'text-gray-700 hover:bg-surface-100'
+                          )}
+                        >
+                          <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span className="truncate">{tab.label}</span>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        );
+      })()}
+
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-3.5 sm:px-6 lg:px-8 pt-2 pb-6 sm:py-7">
         {/* Prominent Banned Warning Banner */}
         {profile?.isBanned && (
           <div className="w-full mb-6 p-4 rounded-3xl bg-red-50/90 border-2 border-red-200/90 text-red-800 flex items-start gap-3.5 shadow-md animate-fade-in">

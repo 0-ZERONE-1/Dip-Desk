@@ -239,7 +239,7 @@ export default function Navbar() {
       </motion.div>
 
       {/* Spacer matching floating navbar height */}
-      <div className="h-20 sm:h-24" />
+      <div className="h-16 sm:h-20 md:h-24" />
 
       {/* Mobile Menu Overlay */}
       <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} session={session} />

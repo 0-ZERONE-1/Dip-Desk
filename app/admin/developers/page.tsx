@@ -354,7 +354,72 @@ export default function AdminDevelopersPage() {
         </div>
       ) : (
         <div className="card p-0 overflow-hidden shadow-card border border-surface-200/90 rounded-2xl">
-          <div className="overflow-x-auto">
+          {/* Mobile Stacked Card View */}
+          <div className="md:hidden divide-y divide-surface-100">
+            {filtered.map((dev) => (
+              <div key={dev._id} className="p-4 space-y-3 hover:bg-primary-50/20 transition-colors">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-surface-100 border border-surface-200 flex items-center justify-center overflow-hidden flex-shrink-0 aspect-square shadow-2xs">
+                      {dev.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={formatImageUrl(dev.imageUrl)}
+                          alt={dev.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-sm">
+                          {dev.name?.[0]?.toUpperCase() || 'D'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-gray-900 text-sm leading-snug break-words">{dev.name}</h3>
+                      <span className="badge-primary text-[10px] px-2 py-0.5 font-semibold mt-0.5 inline-block">
+                        {dev.role}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => toggleActive(dev)}
+                    className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all border flex-shrink-0 ${
+                      dev.isActive !== false
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                    }`}
+                  >
+                    {dev.isActive !== false ? 'Active' : 'Inactive'}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-surface-100 text-xs">
+                  <span className="text-[11px] text-gray-500 font-medium">Order #{dev.order || 1}</span>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => openEditModal(dev)}
+                      className="px-2.5 py-1 text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 flex items-center gap-1 transition-all"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(dev._id)}
+                      className="px-2.5 py-1 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 flex items-center gap-1 transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
                 <tr className="bg-surface-50/80 border-b border-surface-200/80 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
