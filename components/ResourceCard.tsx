@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { ThumbsUp, ThumbsDown, Bookmark, BookmarkCheck, ExternalLink, Eye, BookOpen } from 'lucide-react';
 import { cn, categoryColor, categoryIcon, formatImageUrl, isImageUrl } from '@/lib/utils';
+import { saveClientCustomItem } from '@/lib/clientStore';
 import toast from 'react-hot-toast';
 import PDFViewer from './PDFViewer';
 
@@ -21,6 +22,7 @@ interface ResourceCardProps {
     createdAt: string;
     userVote?: 'up' | 'down' | null;
     isBookmarked?: boolean;
+    ratings?: { userId: string; vote: 'up' | 'down' }[];
   };
   index?: number;
 }
@@ -29,14 +31,36 @@ export default function ResourceCard({ resource, index = 0 }: ResourceCardProps)
   const { data: session } = useSession();
   const user = session?.user as any;
 
+  const computeInitialVote = (): 'up' | 'down' | null => {
+    if (resource.userVote !== undefined) return resource.userVote;
+    if (user && resource.ratings?.length) {
+      const uid = user.id || user.email;
+      const matched = resource.ratings.find(
+        (r: any) => r.userId === uid || r.userId === user.email || r.userId === user.id
+      );
+      if (matched) return matched.vote;
+    }
+    return null;
+  };
+
   const [upvotes, setUpvotes] = useState(resource.upvotes);
   const [downvotes, setDownvotes] = useState(resource.downvotes);
-  const [userVote, setUserVote] = useState<'up' | 'down' | null>(resource.userVote ?? null);
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(computeInitialVote());
   const [isBookmarked, setIsBookmarked] = useState(resource.isBookmarked ?? false);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [loadingVote, setLoadingVote] = useState(false);
   const [loadingBookmark, setLoadingBookmark] = useState(false);
   const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    const computed = computeInitialVote();
+    setUserVote(computed);
+    setUpvotes(resource.upvotes);
+    setDownvotes(resource.downvotes);
+    if (resource.isBookmarked !== undefined) {
+      setIsBookmarked(resource.isBookmarked);
+    }
+  }, [resource.userVote, resource.ratings, resource.upvotes, resource.downvotes, resource.isBookmarked, user]);
 
   // Unique alternating document dealing trajectories
   const angles = [-5, 5, -3, 4, -6, 3];
@@ -56,13 +80,51 @@ export default function ResourceCard({ resource, index = 0 }: ResourceCardProps)
     const prevVote = userVote;
     const newVote = userVote === vote ? null : vote;
     setUserVote(newVote);
+
+    let nextUp = upvotes;
+    let nextDown = downvotes;
+
     if (vote === 'up') {
-      setUpvotes((v) => v + (newVote === 'up' ? 1 : -1));
-      if (prevVote === 'down') setDownvotes((v) => v - 1);
+      nextUp = upvotes + (newVote === 'up' ? 1 : -1);
+      setUpvotes(nextUp);
+      if (prevVote === 'down') {
+        nextDown = Math.max(0, downvotes - 1);
+        setDownvotes(nextDown);
+      }
     } else {
-      setDownvotes((v) => v + (newVote === 'down' ? 1 : -1));
-      if (prevVote === 'up') setUpvotes((v) => v - 1);
+      nextDown = downvotes + (newVote === 'down' ? 1 : -1);
+      setDownvotes(nextDown);
+      if (prevVote === 'up') {
+        nextUp = Math.max(0, upvotes - 1);
+        setUpvotes(nextUp);
+      }
     }
+
+    const userIdVal = user.id || user._id || user.email || 'demo_student_id';
+    const existingRatings = resource.ratings ? [...resource.ratings] : [];
+    const existingIndex = existingRatings.findIndex(
+      (r: any) =>
+        String(r.userId) === String(userIdVal) ||
+        (user.email && String(r.userId).toLowerCase() === user.email.toLowerCase())
+    );
+
+    if (newVote === null) {
+      if (existingIndex !== -1) existingRatings.splice(existingIndex, 1);
+    } else {
+      if (existingIndex !== -1) {
+        existingRatings[existingIndex] = { userId: userIdVal, vote: newVote };
+      } else {
+        existingRatings.push({ userId: userIdVal, vote: newVote });
+      }
+    }
+
+    saveClientCustomItem('resources', {
+      ...resource,
+      upvotes: nextUp,
+      downvotes: nextDown,
+      ratings: existingRatings,
+      userVote: newVote,
+    });
 
     try {
       await fetch(`/api/resources/${resource._id}/vote`, {

@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+import { syncAndFilterItems } from '@/lib/clientStore';
 
 type ActiveTab = 'profile' | 'saved' | 'liked' | 'disliked' | 'requests';
 
@@ -28,6 +29,7 @@ interface ResourceItem {
   createdAt: string;
   ratings?: { userId: string; vote: 'up' | 'down' }[];
   isBookmarked?: boolean;
+  userVote?: 'up' | 'down' | null;
 }
 
 interface UserProfile {
@@ -141,7 +143,8 @@ export default function StudentPanelPage() {
     try {
       const res = await fetch('/api/resources');
       const data = await res.json();
-      setAllResources(data.resources || []);
+      const raw = data.resources || [];
+      setAllResources(syncAndFilterItems('resources', raw));
     } catch { }
   };
 
@@ -217,12 +220,20 @@ export default function StudentPanelPage() {
   const currentUserId = (session?.user as any)?.id || 'demo_student_id';
   const userEmail = session?.user?.email;
 
+  const isUserRatingMatch = (rtUserId: any) => {
+    if (!rtUserId) return false;
+    const str = String(typeof rtUserId === 'object' ? rtUserId._id || rtUserId : rtUserId);
+    if (currentUserId && str === String(currentUserId)) return true;
+    if (userEmail && str.toLowerCase() === userEmail.toLowerCase()) return true;
+    return false;
+  };
+
   // ZERONE - Filter resources liked or disliked by student
   const likedResources = allResources.filter((r) =>
-    r.ratings?.some((rt) => (rt.userId === currentUserId || (userEmail && rt.userId === userEmail)) && rt.vote === 'up')
+    r.ratings?.some((rt) => isUserRatingMatch(rt.userId) && rt.vote === 'up')
   );
   const dislikedResources = allResources.filter((r) =>
-    r.ratings?.some((rt) => (rt.userId === currentUserId || (userEmail && rt.userId === userEmail)) && rt.vote === 'down')
+    r.ratings?.some((rt) => isUserRatingMatch(rt.userId) && rt.vote === 'down')
   );
   const myRequests = requests.filter(
     (rq) =>
@@ -630,9 +641,12 @@ export default function StudentPanelPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {profile.bookmarks.map((resource) => (
-                      <ResourceCard key={resource._id} resource={{ ...resource, isBookmarked: true }} />
-                    ))}
+                    {profile.bookmarks.map((resource) => {
+                      const computedVote = resource.userVote ?? (resource.ratings?.find((rt: any) => (rt.userId === currentUserId || (userEmail && rt.userId === userEmail)))?.vote ?? null);
+                      return (
+                        <ResourceCard key={resource._id} resource={{ ...resource, isBookmarked: true, userVote: computedVote }} />
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -652,7 +666,7 @@ export default function StudentPanelPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {likedResources.map((resource) => (
-                      <ResourceCard key={resource._id} resource={resource} />
+                      <ResourceCard key={resource._id} resource={{ ...resource, userVote: 'up' }} />
                     ))}
                   </div>
                 )}
@@ -673,7 +687,7 @@ export default function StudentPanelPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {dislikedResources.map((resource) => (
-                      <ResourceCard key={resource._id} resource={resource} />
+                      <ResourceCard key={resource._id} resource={{ ...resource, userVote: 'down' }} />
                     ))}
                   </div>
                 )}
