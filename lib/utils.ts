@@ -50,13 +50,6 @@ export function getDepartmentNameBySlug(slug: string): string {
   if (KNOWN_DEPARTMENTS[normalized]) {
     return KNOWN_DEPARTMENTS[normalized];
   }
-  if (typeof window !== 'undefined') {
-    try {
-      const customDepts = JSON.parse(localStorage.getItem('dipdesk_custom_departments') || '[]');
-      const found = customDepts.find((d: any) => d.slug === slug || d.slug === normalized);
-      if (found && found.name) return found.name;
-    } catch {}
-  }
   return slug
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

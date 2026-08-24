@@ -10,6 +10,7 @@ import NavbarSearch from '@/components/NavbarSearch';
 import MobileMenu from './MobileMenu';
 import DipDeskLogo from './DipDeskLogo';
 
+// Persistent client-side flag to disable entrance animations on route transitions
 let hasNavbarAnimated = false;
 
 export default function Navbar() {
@@ -18,10 +19,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isFirstLoad] = useState(() => !hasNavbarAnimated);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
 
   useEffect(() => {
-    hasNavbarAnimated = true;
+    if (!hasNavbarAnimated) {
+      setShouldAnimate(true);
+      hasNavbarAnimated = true;
+    }
   }, []);
 
   useEffect(() => {
@@ -42,29 +46,29 @@ export default function Navbar() {
   ];
 
   // Entrance animations only on hard load/refresh — skipped on route changes
-  const centerNavProps = {
-    initial: isFirstLoad ? { y: -65, opacity: 0 } : false,
+  const centerNavProps = shouldAnimate ? {
+    initial: { y: -65, opacity: 0 },
     animate: { y: 0, opacity: 1 },
     transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 0.9 },
-  };
+  } : {};
 
-  const topLeftLogoProps = {
-    initial: isFirstLoad ? { x: -85, opacity: 0 } : false,
+  const topLeftLogoProps = shouldAnimate ? {
+    initial: { x: -85, opacity: 0 },
     animate: { x: 0, opacity: 1 },
     transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 1.0 },
-  };
+  } : {};
 
-  const topRightAccountProps = {
-    initial: isFirstLoad ? { x: 85, opacity: 0 } : false,
+  const topRightAccountProps = shouldAnimate ? {
+    initial: { x: 85, opacity: 0 },
     animate: { x: 0, opacity: 1 },
     transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 1.0 },
-  };
+  } : {};
 
-  const mobileNavProps = {
-    initial: isFirstLoad ? { y: -50, opacity: 0 } : false,
+  const mobileNavProps = shouldAnimate ? {
+    initial: { y: -50, opacity: 0 },
     animate: { y: 0, opacity: 1 },
     transition: { duration: 1.2, ease: [0.42, 0, 0.58, 1], delay: 0.9 },
-  };
+  } : {};
 
   const handleAccountClick = () => {
     if (status === 'unauthenticated') {

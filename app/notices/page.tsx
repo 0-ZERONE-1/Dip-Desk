@@ -83,8 +83,8 @@ export default function PublicNoticesPage() {
 
   const filteredNotices = notices.filter((n) => {
     const matchesSearch =
-      n.title.toLowerCase().includes(search.toLowerCase()) ||
-      n.content.toLowerCase().includes(search.toLowerCase());
+      (n.title || '').toLowerCase().includes(search.toLowerCase()) ||
+      (n.content || '').toLowerCase().includes(search.toLowerCase());
     const matchesBadge = selectedBadge === 'All' || n.badge === selectedBadge;
     return matchesSearch && matchesBadge;
   });

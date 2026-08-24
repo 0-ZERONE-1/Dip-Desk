@@ -22,6 +22,7 @@ interface Subject {
   description: string;
   departmentId: Department;
   isActive?: boolean;
+  departmentSlug?: string;
 }
 
 const emptyForm = {
@@ -333,6 +334,9 @@ export default function AdminSubjectsPage() {
           <div className="md:hidden divide-y divide-surface-100">
             {filtered.map((s) => {
               const deptName = getDeptName(s.departmentId, departments);
+              const deptSlug = (typeof s.departmentId === 'object' && s.departmentId?.slug)
+                ? s.departmentId.slug
+                : s.departmentSlug || getDeptIdStr(s.departmentId) || 'all';
               return (
                 <div key={s._id} className="p-4 space-y-3 hover:bg-primary-50/20 transition-colors">
                   <div className="flex items-start justify-between gap-2">
@@ -341,6 +345,9 @@ export default function AdminSubjectsPage() {
                       {s.description && (
                         <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">{s.description}</p>
                       )}
+                      <div className="text-[11px] font-mono text-primary-600 bg-primary-50/50 px-2 py-0.5 rounded border border-primary-100/50 w-fit mt-1.5">
+                        /{deptSlug}/semester-{s.semesterNumber}/{s.slug}
+                      </div>
                     </div>
                     <button
                       onClick={() => toggleActive(s)}
@@ -392,6 +399,7 @@ export default function AdminSubjectsPage() {
                   <th className="py-3.5 px-5">Subject</th>
                   <th className="py-3.5 px-5 hidden md:table-cell">Department</th>
                   <th className="py-3.5 px-5">Semester</th>
+                  <th className="py-3.5 px-5">URL Path / Code</th>
                   <th className="py-3.5 px-5">Status</th>
                   <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
@@ -399,6 +407,9 @@ export default function AdminSubjectsPage() {
               <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
                 {filtered.map((s) => {
                   const deptName = getDeptName(s.departmentId, departments);
+                  const deptSlug = (typeof s.departmentId === 'object' && s.departmentId?.slug)
+                    ? s.departmentId.slug
+                    : s.departmentSlug || getDeptIdStr(s.departmentId) || 'all';
                   return (
                     <tr
                       key={s._id}
@@ -415,6 +426,11 @@ export default function AdminSubjectsPage() {
                       </td>
                       <td className="py-3.5 px-5 text-gray-600 whitespace-nowrap">
                         Sem {s.semesterNumber}
+                      </td>
+                      <td className="py-3.5 px-5">
+                        <span className="font-mono text-xs text-primary-600 bg-primary-50 px-2.5 py-1 rounded-lg font-semibold border border-primary-100/80">
+                          /{deptSlug}/semester-{s.semesterNumber}/{s.slug}
+                        </span>
                       </td>
                       <td className="py-3.5 px-5 whitespace-nowrap">
                         <button
@@ -465,7 +481,7 @@ export default function AdminSubjectsPage() {
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-gray-400">
+                    <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
                       No subjects found matching the selected filters.
                     </td>
                   </tr>

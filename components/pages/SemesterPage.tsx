@@ -147,6 +147,15 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
             <AlertTriangle className="w-4 h-4 text-red-500" />
             Feature Restricted
           </button>
+        ) : session?.user && (session.user as any).role === 'admin' ? (
+          <button
+            onClick={() => toast.error('Administrators cannot submit requests.', { icon: '🚫' })}
+            className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 border border-amber-200/95 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm shadow-xs flex items-center gap-2 flex-shrink-0 self-start sm:self-center transition-all relative z-10 cursor-not-allowed opacity-80"
+            title="Admins cannot submit requests"
+          >
+            <PlusCircle className="w-4 h-4 text-amber-600" />
+            Admins cannot request
+          </button>
         ) : (
           <button
             id="request-subject-btn"

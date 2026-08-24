@@ -1,15 +1,50 @@
 {
   "developers": [],
-  "departments": [],
-  "subjects": [],
+  "departments": [
+    {
+      "_id": "dept_1787590091951",
+      "name": "213 vxd",
+      "slug": "-1d2-w2d",
+      "description": "2 d q2d",
+      "icon": "",
+      "isActive": true
+    },
+    {
+      "_id": "dept_1787590098689",
+      "name": "asdcd sdc",
+      "slug": "a-f",
+      "description": "vd c",
+      "icon": "",
+      "isActive": true
+    }
+  ],
+  "subjects": [
+    {
+      "_id": "sub_1787590108532",
+      "slug": "sdf-sd",
+      "isActive": true,
+      "name": "sd sdf",
+      "semesterNumber": 1,
+      "departmentId": "dept_1787590091951",
+      "description": "fse v"
+    }
+  ],
   "resources": [],
   "notices": [
     {
-      "_id": "notice_1786903702590",
-      "isPinned": false
+      "_id": "notice_1787592143399",
+      "badge": "Important",
+      "isPinned": false,
+      "isActive": true,
+      "createdAt": "2026-08-24T17:22:23.399Z",
+      "title": "sdcsdc SD",
+      "content": "sDF sdvc dsVC SDVCsC DSCSDC",
+      "link": ""
     }
   ],
-  "deletedIds": [],
+  "deletedIds": [
+    "notice_1786903702590"
+  ],
   "users": [
     {
       "_id": "user_1787572662242",
@@ -28,86 +63,11 @@
     }
   ],
   "heroStats": {
-    "totalVisitors": 106
-  },
-  "requests": [
-    {
-      "_id": "req_1787572722215",
-      "status": "Pending",
-      "createdAt": "2026-08-24T11:58:42.215Z",
-      "studentId": "user_1787572662242",
-      "studentEmail": "admin@dipdesk.com",
-      "subjectTitle": "WE Cew C",
-      "category": "Subject Request",
-      "description": "EW C",
-      "department": "12345",
-      "semester": "Semester 1",
-      "url": ""
-    },
-    {
-      "_id": "req_1787572718616",
-      "status": "Pending",
-      "createdAt": "2026-08-24T11:58:38.616Z",
-      "studentId": "user_1787572662242",
-      "studentEmail": "admin@dipdesk.com",
-      "subjectTitle": "FW EFC CWE",
-      "category": "Subject Request",
-      "description": "WE FCWE C",
-      "department": "12345",
-      "semester": "Semester 1",
-      "url": ""
-    },
-    {
-      "_id": "req_1787572705288",
-      "status": "Pending",
-      "createdAt": "2026-08-24T11:58:25.288Z",
-      "studentId": "user_1787572662242",
-      "studentEmail": "admin@dipdesk.com",
-      "subjectTitle": "WEF WE F",
-      "category": "Subject Request",
-      "description": "WE FWE F",
-      "department": "Electronics & Tele-communication Engineering",
-      "semester": "Semester 1",
-      "url": ""
-    },
-    {
-      "_id": "req_1787572702312",
-      "status": "Pending",
-      "createdAt": "2026-08-24T11:58:22.312Z",
-      "studentId": "user_1787572662242",
-      "studentEmail": "admin@dipdesk.com",
-      "subjectTitle": "EW FCWE F",
-      "category": "Subject Request",
-      "description": "E FWW",
-      "department": "Electronics & Tele-communication Engineering",
-      "semester": "Semester 1",
-      "url": ""
-    },
-    {
-      "_id": "req_1787572698656",
-      "status": "Pending",
-      "createdAt": "2026-08-24T11:58:18.656Z",
-      "studentId": "user_1787572662242",
-      "studentEmail": "admin@dipdesk.com",
-      "subjectTitle": "f ewf",
-      "category": "Subject Request",
-      "description": "we fwe f",
-      "department": "Electronics & Tele-communication Engineering",
-      "semester": "Semester 1",
-      "url": ""
-    },
-    {
-      "_id": "req_1787572694640",
-      "status": "Pending",
-      "createdAt": "2026-08-24T11:58:14.640Z",
-      "studentId": "user_1787572662242",
-      "studentEmail": "admin@dipdesk.com",
-      "subjectTitle": "wedrwr",
-      "category": "Subject Request",
-      "description": "wefc wef",
-      "department": "Electronics & Tele-communication Engineering",
-      "semester": "Semester 1",
-      "url": ""
-    }
-  ]
+    "totalVisitors": 18,
+    "overrideResources": null,
+    "overrideSubjects": null,
+    "overrideStudents": null,
+    "overrideVisitors": null,
+    "customLogoUrl": "https://raw.githubusercontent.com/0-ZERONE-1/Assets_01/144c26fa103e1a052fd50b50b48a5543d3f3b012/Dip-Desk/Site%20Logo/Dip-Desk%20Logo%20V1.svg"
+  }
 }
