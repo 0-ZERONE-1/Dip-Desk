@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   BookOpen, Mail, Lock, ArrowRight, Loader2,
-  GraduationCap, ShieldCheck, Eye, EyeOff, UserPlus, LogIn, User
+  GraduationCap, ShieldCheck, Eye, EyeOff, UserPlus, LogIn, User, ArrowLeft, Home
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -157,6 +158,22 @@ export default function LoginPage() {
       >
         {/* Logo Header */}
         <div className="text-center mb-6">
+          {/* Home Icon Button above website logo */}
+          <div className="flex justify-center mb-3">
+            <Link
+              href="/"
+              title="Go to Homepage"
+              className={cn(
+                "p-2.5 rounded-full transition-all duration-200 shadow-xs flex items-center justify-center group",
+                isAdmin
+                  ? "bg-gray-900/90 text-purple-300 hover:text-white hover:bg-gray-800 border border-purple-800/60 shadow-purple-950/40"
+                  : "bg-white/90 text-gray-600 hover:text-primary-600 hover:bg-white border border-surface-200/90 shadow-gray-900/5 hover:shadow-md"
+              )}
+            >
+              <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+            </Link>
+          </div>
+
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg transition-all duration-500 ${
             isAdmin
               ? 'bg-gradient-to-br from-purple-600 to-violet-700 shadow-purple-600/30'
