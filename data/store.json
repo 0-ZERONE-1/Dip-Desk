@@ -1,734 +1,108 @@
 {
-  "developers": [
-    {
-      "_id": "dev_1",
-      "name": "advsdvsdvdsvsdvsdvsdvdsvs",
-      "role": "11111111111111111111111111111111111sdvsdvsdvsdvsdv",
-      "bio": "123131231fesd gfersdvb ergkhearg vkjsardfh vksadujvhrsdiuv hjkvh gifud vhukyfgvukyfdsg vuyhjukjmkjkhjkhjkhjkhjkhjkhjkhjkhjkkk jjhkjhkjhkhjkjkhjkhjkjhk",
-      "imageUrl": "",
-      "githubUrl": "",
-      "linkedinUrl": "https://linkedin.com",
-      "instagramUrl": "https://instagram.com",
-      "emailUrl": "mailto:developer@diplomahub.com",
-      "portfolioUrl": "https://diplomahub.com",
-      "order": 1,
-      "isActive": true,
-      "updatedAt": "2026-08-17T06:42:50.346Z"
-    },
-    {
-      "_id": "dev_1787425560559",
-      "name": "ssssfds",
-      "role": "sfsdf",
-      "bio": "",
-      "imageUrl": "",
-      "githubUrl": "",
-      "linkedinUrl": "",
-      "instagramUrl": "",
-      "emailUrl": "",
-      "portfolioUrl": "",
-      "order": 2,
-      "isActive": true,
-      "createdAt": "2026-08-22T19:06:00.559Z",
-      "updatedAt": "2026-08-22T19:06:00.559Z"
-    },
-    {
-      "_id": "dev_1787425564360",
-      "name": "vdsc",
-      "role": "sdfcds",
-      "bio": "",
-      "imageUrl": "",
-      "githubUrl": "",
-      "linkedinUrl": "",
-      "instagramUrl": "",
-      "emailUrl": "",
-      "portfolioUrl": "",
-      "order": 3,
-      "isActive": true,
-      "createdAt": "2026-08-22T19:06:04.360Z",
-      "updatedAt": "2026-08-22T19:06:04.360Z"
-    },
-    {
-      "_id": "dev_1787425568392",
-      "name": "sfds",
-      "role": "sd",
-      "bio": "",
-      "imageUrl": "",
-      "githubUrl": "",
-      "linkedinUrl": "",
-      "instagramUrl": "",
-      "emailUrl": "",
-      "portfolioUrl": "",
-      "order": 4,
-      "isActive": true,
-      "createdAt": "2026-08-22T19:06:08.392Z",
-      "updatedAt": "2026-08-22T19:06:08.392Z"
-    }
-  ],
-  "departments": [
-    {
-      "_id": "dept_cst",
-      "name": "Computer Science & Technology",
-      "slug": "cst",
-      "description": "Programming, databases, networking, and software development",
-      "icon": "",
-      "color": "#6366f1",
-      "isActive": true
-    },
-    {
-      "_id": "dept_ee",
-      "name": "Electrical Engineering",
-      "slug": "ee",
-      "description": "Circuits, power systems, electrical machines, and electronics",
-      "icon": "⚡",
-      "color": "#f59e0b",
-      "isActive": true
-    },
-    {
-      "_id": "dept_etc",
-      "name": "Electronics & Tele-communication Engineering",
-      "slug": "etc",
-      "description": "Communication systems, signal processing, and electronic devices",
-      "icon": "",
-      "color": "#10b981",
-      "isActive": true
-    },
-    {
-      "_id": "dept_1786949667729",
-      "name": "12345",
-      "description": "sgfsfgv",
-      "icon": "https://github.com/0-ZERONE-1/Assets_01/blob/435bcad3b3721cc7bba04fc66bd9c772f7ea1b84/Dip-Desk/Developes/Nikhil%20Mandal.png",
-      "color": "#6366f1",
-      "slug": "12345",
-      "isActive": true
-    },
-    {
-      "_id": "dept_1787459432813",
-      "name": "123",
-      "slug": "123",
-      "description": "123",
-      "icon": "",
-      "isActive": true
-    }
-  ],
-  "subjects": [
-    {
-      "_id": "sub_cst_1_3",
-      "name": "English Communication",
-      "slug": "english-communication",
-      "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Professional grammar and communication",
-      "isActive": true
-    },
-    {
-      "_id": "sub_cst_1_4",
-      "name": "Basic Electronics",
-      "slug": "basic-electronics",
-      "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Semiconductor devices and circuits"
-    },
-    {
-      "_id": "sub_cst_1_5",
-      "name": "Computer Fundamentals",
-      "slug": "computer-fundamentals",
-      "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Introduction to hardware and OS"
-    },
-    {
-      "_id": "sub_cst_2_1",
-      "name": "Mathematics-II",
-      "slug": "mathematics-ii",
-      "semesterNumber": 2,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Differential equations and vector calculus"
-    },
-    {
-      "_id": "sub_cst_2_2",
-      "name": "Chemistry",
-      "slug": "chemistry",
-      "semesterNumber": 2,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Applied chemistry concepts"
-    },
-    {
-      "_id": "sub_cst_2_3",
-      "name": "Basic Electrical Engineering",
-      "slug": "basic-electrical-engineering",
-      "semesterNumber": 2,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "AC & DC circuits"
-    },
-    {
-      "_id": "sub_cst_2_4",
-      "name": "C Programming",
-      "slug": "c-programming",
-      "semesterNumber": 2,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Fundamentals of C language"
-    },
-    {
-      "_id": "sub_cst_2_5",
-      "name": "Workshop Practice",
-      "slug": "workshop-practice",
-      "semesterNumber": 2,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Practical engineering lab"
-    },
-    {
-      "_id": "sub_cst_3_1",
-      "name": "Data Structures",
-      "slug": "data-structures",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Arrays, linked lists, trees, graphs"
-    },
-    {
-      "_id": "sub_cst_3_2",
-      "name": "Digital Electronics",
-      "slug": "digital-electronics",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Logic gates, flip-flops, counters"
-    },
-    {
-      "_id": "sub_cst_3_3",
-      "name": "Database Management Systems",
-      "slug": "database-management-systems",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "SQL, normalization, indexing"
-    },
-    {
-      "_id": "sub_cst_3_4",
-      "name": "Object Oriented Programming",
-      "slug": "object-oriented-programming",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "C++ & OOP principles"
-    },
-    {
-      "_id": "sub_cst_3_5",
-      "name": "Computer Networks",
-      "slug": "computer-networks",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "OSI model, TCP/IP, routing"
-    },
-    {
-      "_id": "sub_cst_4_1",
-      "name": "Operating Systems",
-      "slug": "operating-systems",
-      "semesterNumber": 4,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Processes, memory management, file systems"
-    },
-    {
-      "_id": "sub_cst_4_2",
-      "name": "Java Programming",
-      "slug": "java-programming",
-      "semesterNumber": 4,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "Core Java, multithreading, collections"
-    },
-    {
-      "_id": "sub_cst_4_3",
-      "name": "Web Technology",
-      "slug": "web-technology",
-      "semesterNumber": 4,
-      "departmentId": {
-        "_id": "dept_cst",
-        "name": "Computer Science & Technology",
-        "slug": "cst",
-        "description": "Programming, databases, networking, and software development",
-        "icon": "💻",
-        "color": "#6366f1",
-        "isActive": true
-      },
-      "description": "HTML, CSS, JavaScript, DOM"
-    },
-    {
-      "_id": "sub_ee_1_1",
-      "name": "Mathematics-I",
-      "slug": "mathematics-i",
-      "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_ee",
-        "name": "Electrical Engineering",
-        "slug": "ee",
-        "description": "Circuits, power systems, electrical machines, and electronics",
-        "icon": "⚡",
-        "color": "#f59e0b",
-        "isActive": true
-      },
-      "description": "Calculus and matrices"
-    },
-    {
-      "_id": "sub_ee_1_2",
-      "name": "Electrical Engineering Fundamentals",
-      "slug": "electrical-engineering-fundamentals",
-      "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_ee",
-        "name": "Electrical Engineering",
-        "slug": "ee",
-        "description": "Circuits, power systems, electrical machines, and electronics",
-        "icon": "⚡",
-        "color": "#f59e0b",
-        "isActive": true
-      },
-      "description": "Basic circuits"
-    },
-    {
-      "_id": "sub_ee_3_1",
-      "name": "Circuit Theory",
-      "slug": "circuit-theory",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_ee",
-        "name": "Electrical Engineering",
-        "slug": "ee",
-        "description": "Circuits, power systems, electrical machines, and electronics",
-        "icon": "⚡",
-        "color": "#f59e0b",
-        "isActive": true
-      },
-      "description": "Network theorems & transient analysis"
-    },
-    {
-      "_id": "sub_ee_3_2",
-      "name": "Electrical Machines-I",
-      "slug": "electrical-machines-i",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_ee",
-        "name": "Electrical Engineering",
-        "slug": "ee",
-        "description": "Circuits, power systems, electrical machines, and electronics",
-        "icon": "⚡",
-        "color": "#f59e0b",
-        "isActive": true
-      },
-      "description": "Transformers & DC machines"
-    },
-    {
-      "_id": "sub_etc_1_1",
-      "name": "Mathematics-I",
-      "slug": "mathematics-i",
-      "semesterNumber": 1,
-      "departmentId": {
-        "_id": "dept_etc",
-        "name": "Electronics & Telecommunication",
-        "slug": "etc",
-        "description": "Communication systems, signal processing, and electronic devices",
-        "icon": "📡",
-        "color": "#10b981",
-        "isActive": true
-      },
-      "description": "Applied mathematics"
-    },
-    {
-      "_id": "sub_etc_3_1",
-      "name": "Electronic Devices & Circuits",
-      "slug": "electronic-devices-circuits",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_etc",
-        "name": "Electronics & Telecommunication",
-        "slug": "etc",
-        "description": "Communication systems, signal processing, and electronic devices",
-        "icon": "📡",
-        "color": "#10b981",
-        "isActive": true
-      },
-      "description": "Diodes, transistors, amplifiers"
-    },
-    {
-      "_id": "sub_etc_3_2",
-      "name": "Communication Engineering",
-      "slug": "communication-engineering",
-      "semesterNumber": 3,
-      "departmentId": {
-        "_id": "dept_etc",
-        "name": "Electronics & Telecommunication",
-        "slug": "etc",
-        "description": "Communication systems, signal processing, and electronic devices",
-        "icon": "📡",
-        "color": "#10b981",
-        "isActive": true
-      },
-      "description": "Analog & digital modulation"
-    },
-    {
-      "_id": "sub_1786233186710",
-      "slug": "mathemetics-ii",
-      "isActive": true,
-      "name": "Mathemetics-ii",
-      "semesterNumber": 2,
-      "departmentId": "dept_cst",
-      "description": "fchgnghn"
-    },
-    {
-      "_id": "sub_1787459388753",
-      "slug": "123",
-      "isActive": true,
-      "name": "123",
-      "semesterNumber": 1,
-      "departmentId": "dept_cst",
-      "description": ""
-    }
-  ],
-  "resources": [
-    {
-      "_id": "res_1786901408737",
-      "upvotes": 0,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-16T17:30:08.737Z",
-      "title": "sdfgdsg",
-      "description": "zfg",
-      "url": "dzfgdfgfgf",
-      "coverImage": "",
-      "category": "Lab Manuals",
-      "subjectId": "sub_cst_3_1",
-      "tags": []
-    },
-    {
-      "_id": "res_1786901244134",
-      "upvotes": 0,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-16T17:27:24.134Z",
-      "title": "ASSADaSD",
-      "description": "DwDWAdWAd",
-      "url": "dADADaWS",
-      "coverImage": "https://github.com/0-ZERONE-1/Image-Asset/blob/7c586c195a2abef604cd847236a7cf81d4f66e17/Dip-Desk/Nikhil%20Mandal.jpg",
-      "category": "Model Question Papers",
-      "subjectId": "sub_cst_3_1",
-      "tags": []
-    },
-    {
-      "_id": "res_1786897108626",
-      "upvotes": 1,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-16T16:18:28.626Z",
-      "title": "cAWFcsef",
-      "description": "dAWD",
-      "url": "SVsdv",
-      "category": "Notes",
-      "subjectId": "sub_cst_3_1",
-      "tags": [],
-      "coverImage": "https://github.com/0-ZERONE-1/Image-Asset/blob/7c586c195a2abef604cd847236a7cf81d4f66e17/Dip-Desk/Nikhil%20Mandal.jpg",
-      "ratings": [
-        {
-          "userId": "user_1787169236156",
-          "vote": "up"
-        }
-      ]
-    },
-    {
-      "_id": "res_1786897094450",
-      "upvotes": 0,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-16T16:18:14.450Z",
-      "title": "sdvdsfvvDS",
-      "description": "SDVdsv",
-      "url": "vsdVsdvsdvsdv.com",
-      "category": "Books",
-      "subjectId": "sub_cst_3_1",
-      "tags": [],
-      "coverImage": "https://github.com/0-ZERONE-1/Image-Asset/blob/7c586c195a2abef604cd847236a7cf81d4f66e17/Dip-Desk/Nikhil%20Mandal.jpg"
-    },
-    {
-      "_id": "res_1",
-      "title": "Data Structures Complete Lecture Notes (PDF)",
-      "description": "Comprehensive chapter-wise handwritten notes covering Stacks, Queues, Trees, and Sorting algorithms.",
-      "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-      "category": "Notes",
-      "upvotes": 0,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-08T23:02:12.267Z",
-      "subjectId": "sub_cst_3_1",
-      "tags": [],
-      "ratings": []
-    },
-    {
-      "_id": "res_2",
-      "title": "2023 DBMS Model Question Paper with Answers",
-      "description": "Official board model question paper with detailed solved answers.",
-      "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-      "category": "Model Question Papers",
-      "upvotes": 0,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-08T23:02:12.267Z",
-      "subjectId": {
-        "_id": "sub_cst_3_3",
-        "name": "Database Management Systems",
-        "slug": "database-management-systems",
-        "semesterNumber": 3,
-        "departmentId": {
-          "_id": "dept_cst",
-          "name": "Computer Science & Technology",
-          "slug": "cst",
-          "description": "Programming, databases, networking, and software development",
-          "icon": "💻",
-          "color": "#6366f1",
-          "isActive": true
-        },
-        "description": "SQL, normalization, indexing"
-      }
-    },
-    {
-      "_id": "res_3",
-      "title": "C Programming Lab Manual & Solution Codes",
-      "description": "All 15 required lab experiment programs with output screenshots.",
-      "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-      "category": "Lab Manuals",
-      "upvotes": 0,
-      "downvotes": 0,
-      "isActive": true,
-      "createdAt": "2026-08-08T23:02:12.267Z",
-      "subjectId": {
-        "_id": "sub_cst_2_4",
-        "name": "C Programming",
-        "slug": "c-programming",
-        "semesterNumber": 2,
-        "departmentId": {
-          "_id": "dept_cst",
-          "name": "Computer Science & Technology",
-          "slug": "cst",
-          "description": "Programming, databases, networking, and software development",
-          "icon": "💻",
-          "color": "#6366f1",
-          "isActive": true
-        },
-        "description": "Fundamentals of C language"
-      }
-    }
-  ],
-  "notices": [
-    {
-      "_id": "notice_1786903702590",
-      "badge": "General",
-      "isPinned": false,
-      "isActive": true,
-      "createdAt": "2026-08-16T18:08:22.590Z",
-      "title": "SDVDSVdfvdvb",
-      "content": "DVdSVsydegfh iersdgufyewsgfywrv7westf8oviwesdf9wesfewsf ywesrf ywesirf wesfeify esfyviusdrhgfviusrfhygikndsfgufvydsgfvuydgrvtyiutgnhdzsukvygdstuyvgfbdfvgdfvhb issdfviudsfy ivdsfviusry grgvirsg s\nsdv dsyds89fusd vudstgviyusd vi\nsd vsdiuv hsiuvysidyv 8sivg uystvgysdvhgsuyztv gsdyg dsg vtvusdvsd gb\ndsgfdgdf\nsdsfgdfgdfg\nsgfgdgdfg\ndfgdfgdfgrdb ghdrhy grd",
-      "link": "https://dip-desk.vercel.app/admin/resources"
-    },
-    {
-      "_id": "notice_1786903684450",
-      "badge": "Update",
-      "isPinned": false,
-      "isActive": true,
-      "createdAt": "2026-08-16T18:08:04.450Z",
-      "title": "rgzrsdfgv",
-      "content": "vsdvsv",
-      "link": "SDVsdvds"
-    },
-    {
-      "_id": "notice_1786903678117",
-      "badge": "Exam",
-      "isPinned": false,
-      "isActive": true,
-      "createdAt": "2026-08-16T18:07:58.117Z",
-      "title": "EFFSEFsef",
-      "content": "SEFSEFF",
-      "link": "FSEFf"
-    },
-    {
-      "_id": "notice_1786903670704",
-      "badge": "Important",
-      "isPinned": false,
-      "isActive": true,
-      "createdAt": "2026-08-16T18:07:50.704Z",
-      "title": "fSEFsF",
-      "content": "SEFsef",
-      "link": "fESfsEF"
-    }
-  ],
-  "deletedIds": [
-    "notice_2",
-    "dept_1786233140390",
-    "dev_2",
-    "sub_cst_1_2",
-    "notice_1786903695930",
-    "res_1786902133436",
-    "sub_cst_1_1"
-  ],
+  "developers": [],
+  "departments": [],
+  "subjects": [],
+  "resources": [],
+  "notices": [],
+  "deletedIds": [],
   "users": [
     {
-      "_id": "demo_student_id",
-      "email": "student@dipdesk.com",
-      "name": "Nikhil Mandal",
-      "title": "Student",
-      "institute": "Itahar Gov Poly",
-      "regNumber": "D242535681",
-      "isProfileComplete": true,
-      "isBanned": false
-    },
-    {
-      "_id": "user_1787163752303",
-      "role": "student",
-      "isProfileComplete": true,
-      "createdAt": "2026-08-19T18:22:32.303Z",
-      "name": "admin",
-      "email": "admin@diplomahub.com",
-      "password": "Admin@123",
-      "hashedPassword": "$2a$10$VI6IkuCJ7tEburR0/9CuI.euIyFGwNeiM1wk3t1l59MNuNjWxrcoK"
-    },
-    {
-      "_id": "user_1787169236156",
-      "role": "student",
-      "isProfileComplete": true,
-      "createdAt": "2026-08-19T19:53:56.156Z",
-      "name": "Student #123",
-      "email": "admin@dipdesk.com",
-      "password": "Admin.DipDesk",
-      "hashedPassword": "$2a$10$8WZ8EVcgdMi2tZ4OHzR.xuBXUa9uuN/qGcJpzbpbm24cijCLsjwZ.",
-      "title": "Student",
-      "institute": "sadcds",
-      "regNumber": "DSACdsc",
-      "image": "",
+      "_id": "user_1787572662242",
+      "designation": "Student",
       "isBanned": false,
-      "bookmarks": [
-        "res_1786897108626",
-        "res_1"
-      ],
-      "bannedUntil": null
+      "isProfileComplete": true,
+      "bookmarks": [],
+      "resourceRequests": [],
+      "upvotedResources": [],
+      "downvotedResources": [],
+      "createdAt": "2026-08-24T11:57:42.242Z",
+      "name": "admin",
+      "email": "admin@dipdesk.com",
+      "hashedPassword": "$2a$12$O4ygov2YCwhB.4De814TQOPW9pmrOKtZ3A6tD08HTKvxthduIk8He",
+      "role": "student"
     }
   ],
   "heroStats": {
-<<<<<<< Updated upstream
-    "totalVisitors": 28
-=======
-    "totalVisitors": 2
->>>>>>> Stashed changes
-  }
+    "totalVisitors": 70
+  },
+  "requests": [
+    {
+      "_id": "req_1787572722215",
+      "status": "Pending",
+      "createdAt": "2026-08-24T11:58:42.215Z",
+      "studentId": "user_1787572662242",
+      "studentEmail": "admin@dipdesk.com",
+      "subjectTitle": "WE Cew C",
+      "category": "Subject Request",
+      "description": "EW C",
+      "department": "12345",
+      "semester": "Semester 1",
+      "url": ""
+    },
+    {
+      "_id": "req_1787572718616",
+      "status": "Pending",
+      "createdAt": "2026-08-24T11:58:38.616Z",
+      "studentId": "user_1787572662242",
+      "studentEmail": "admin@dipdesk.com",
+      "subjectTitle": "FW EFC CWE",
+      "category": "Subject Request",
+      "description": "WE FCWE C",
+      "department": "12345",
+      "semester": "Semester 1",
+      "url": ""
+    },
+    {
+      "_id": "req_1787572705288",
+      "status": "Pending",
+      "createdAt": "2026-08-24T11:58:25.288Z",
+      "studentId": "user_1787572662242",
+      "studentEmail": "admin@dipdesk.com",
+      "subjectTitle": "WEF WE F",
+      "category": "Subject Request",
+      "description": "WE FWE F",
+      "department": "Electronics & Tele-communication Engineering",
+      "semester": "Semester 1",
+      "url": ""
+    },
+    {
+      "_id": "req_1787572702312",
+      "status": "Pending",
+      "createdAt": "2026-08-24T11:58:22.312Z",
+      "studentId": "user_1787572662242",
+      "studentEmail": "admin@dipdesk.com",
+      "subjectTitle": "EW FCWE F",
+      "category": "Subject Request",
+      "description": "E FWW",
+      "department": "Electronics & Tele-communication Engineering",
+      "semester": "Semester 1",
+      "url": ""
+    },
+    {
+      "_id": "req_1787572698656",
+      "status": "Pending",
+      "createdAt": "2026-08-24T11:58:18.656Z",
+      "studentId": "user_1787572662242",
+      "studentEmail": "admin@dipdesk.com",
+      "subjectTitle": "f ewf",
+      "category": "Subject Request",
+      "description": "we fwe f",
+      "department": "Electronics & Tele-communication Engineering",
+      "semester": "Semester 1",
+      "url": ""
+    },
+    {
+      "_id": "req_1787572694640",
+      "status": "Pending",
+      "createdAt": "2026-08-24T11:58:14.640Z",
+      "studentId": "user_1787572662242",
+      "studentEmail": "admin@dipdesk.com",
+      "subjectTitle": "wedrwr",
+      "category": "Subject Request",
+      "description": "wefc wef",
+      "department": "Electronics & Tele-communication Engineering",
+      "semester": "Semester 1",
+      "url": ""
+    }
+  ]
 }

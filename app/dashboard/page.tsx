@@ -332,8 +332,8 @@ export default function StudentPanelPage() {
         {/* Outer Layout: Sticky Left Sidebar + Main Content Area */}
         <div className="w-full flex flex-col md:flex-row gap-5 lg:gap-7 items-start">
 
-          {/* ===== LEFT SIDEBAR ===== */}
-          <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 sticky top-[92px] self-start space-y-4">
+          {/* ===== LEFT SIDEBAR — fixed, locked to viewport ===== */}
+          <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 fixed top-20 left-3.5 sm:left-6 lg:left-8 z-30 h-[calc(100vh-80px)] overflow-y-auto pb-6 pt-2 space-y-4">
 
             {/* 1. Profile Avatar Card */}
             <div className="card p-5 text-center">
@@ -425,31 +425,16 @@ export default function StudentPanelPage() {
                 })}
               </nav>
 
-              {/* Footer Utilities */}
-              <div className="pt-3 mt-2 border-t border-surface-100">
-                <div className="flex items-center justify-between px-2 pt-1">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {displayAvatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={displayAvatar} alt="User Avatar" className="w-7 h-7 rounded-full object-cover border border-primary-200 flex-shrink-0" />
-                    ) : (
-                      <div className="w-7 h-7 rounded-full bg-primary-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
-                        {profile?.name?.[0]?.toUpperCase() || session?.user?.name?.[0]?.toUpperCase() || 'S'}
-                      </div>
-                    )}
-                    <div className="truncate min-w-0">
-                      <p className="text-xs font-bold text-gray-900 truncate">{profile?.name || session?.user?.name || 'User'}</p>
-                      <p className="text-[11px] text-gray-400 truncate">{profile?.email || session?.user?.email}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => signOut({ callbackUrl: '/login' })}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all flex-shrink-0"
-                    title="Sign Out"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* Sign Out Button */}
+              <div className="pt-2 border-t border-surface-100 mt-2">
+                <button
+                  id="student-signout-btn"
+                  onClick={() => signOut({ callbackUrl: '/login' })}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-bold text-rose-600 bg-rose-50/80 hover:bg-rose-100 border border-rose-200/80 transition-all duration-150 group"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500 group-hover:scale-110 transition-transform" />
+                  <span>Sign Out</span>
+                </button>
               </div>
 
             </div>
@@ -457,7 +442,7 @@ export default function StudentPanelPage() {
 
 
           {/* ===== RIGHT MAIN CONTENT AREA ===== */}
-          <div className="flex-1 w-full min-w-0">
+          <div className="flex-1 w-full min-w-0 md:ml-64 lg:ml-72">
 
             {/* Header Title Section (Matching Admin Dashboard Header 1:1) */}
             <div className="mb-6 sm:mb-8">

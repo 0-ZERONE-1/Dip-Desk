@@ -10,12 +10,19 @@ import NavbarSearch from '@/components/NavbarSearch';
 import MobileMenu from './MobileMenu';
 import DipDeskLogo from './DipDeskLogo';
 
+let hasNavbarAnimated = false;
+
 export default function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isFirstLoad] = useState(() => !hasNavbarAnimated);
+
+  useEffect(() => {
+    hasNavbarAnimated = true;
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -34,10 +41,29 @@ export default function Navbar() {
     { href: '/about', label: 'About', exact: true },
   ];
 
-  const motionProps = {
-    initial: { y: -20, opacity: 0 },
+  // Entrance animations only on hard load/refresh — skipped on route changes
+  const centerNavProps = {
+    initial: isFirstLoad ? { y: -65, opacity: 0 } : false,
     animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 0.9 },
+  };
+
+  const topLeftLogoProps = {
+    initial: isFirstLoad ? { x: -85, opacity: 0 } : false,
+    animate: { x: 0, opacity: 1 },
+    transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 1.0 },
+  };
+
+  const topRightAccountProps = {
+    initial: isFirstLoad ? { x: 85, opacity: 0 } : false,
+    animate: { x: 0, opacity: 1 },
+    transition: { duration: 1.4, ease: [0.42, 0, 0.58, 1], delay: 1.0 },
+  };
+
+  const mobileNavProps = {
+    initial: isFirstLoad ? { y: -50, opacity: 0 } : false,
+    animate: { y: 0, opacity: 1 },
+    transition: { duration: 1.2, ease: [0.42, 0, 0.58, 1], delay: 0.9 },
   };
 
   const handleAccountClick = () => {
@@ -56,7 +82,7 @@ export default function Navbar() {
       {/* MOBILE UNIFIED SINGLE JOINT HEADER PANEL (md:hidden)                      */}
       {/* ========================================================================= */}
       <motion.header
-        {...motionProps}
+        {...mobileNavProps}
         className="md:hidden fixed top-0 inset-x-0 z-50 pointer-events-auto bg-white/95 backdrop-blur-xl border-b border-surface-200/90 shadow-sm px-3.5 py-2 flex items-center justify-between gap-2"
       >
         <Link href="/" className="flex-shrink-0">
@@ -105,9 +131,9 @@ export default function Navbar() {
       {/* DESKTOP HEADER ISLANDS (hidden md:block / md:flex)                        */}
       {/* ========================================================================= */}
 
-      {/* Top-Left Logo Island */}
+      {/* Top-Left Logo Island (slides in from left) */}
       <motion.div
-        {...motionProps}
+        {...topLeftLogoProps}
         className="hidden md:block fixed top-0 left-0 z-50 pointer-events-auto"
       >
         <div
@@ -124,9 +150,9 @@ export default function Navbar() {
         </div>
       </motion.div>
 
-      {/* Top-Center Navigation Bar Island */}
+      {/* Top-Center Navigation Bar Island (slides down from top) */}
       <motion.header
-        {...motionProps}
+        {...centerNavProps}
         className="hidden md:flex fixed top-0 inset-x-0 mx-auto z-40 pointer-events-auto w-fit justify-center"
       >
         <div
@@ -177,9 +203,9 @@ export default function Navbar() {
         </div>
       </motion.header>
 
-      {/* Top-Right Account / Profile Island */}
+      {/* Top-Right Account / Profile Island (slides in from right) */}
       <motion.div
-        {...motionProps}
+        {...topRightAccountProps}
         className="hidden md:block fixed top-0 right-0 z-50 pointer-events-auto"
       >
         <div

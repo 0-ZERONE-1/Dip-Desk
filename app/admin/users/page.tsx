@@ -153,14 +153,6 @@ export default function AdminUsersPage() {
 
       {/* Filter and Search Bar */}
       <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 flex-wrap">
-        <input
-          id="user-search"
-          type="text"
-          placeholder="Search by name, email, or institute..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="input text-sm flex-1 min-w-[200px]"
-        />
         <AnimatedSelect
           id="filter-user-status"
           value={filterStatus}
@@ -172,6 +164,14 @@ export default function AdminUsersPage() {
           ]}
           placeholder="All Status"
           className="min-w-[150px]"
+        />
+        <input
+          id="user-search"
+          type="text"
+          placeholder="Search by name, email, or institute..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="input text-sm flex-1 min-w-[200px]"
         />
         {hasActiveFilters && (
           <button

@@ -54,14 +54,14 @@ export default function AdminNav() {
         const pending = data.requests.filter((r: any) => r.status?.toLowerCase() === 'pending').length;
         setPendingCount(pending);
       }
-    } catch {}
+    } catch { }
   };
 
   const isActive = (href: string, exact?: boolean) =>
     exact
       ? pathname === href
       : (pathname.startsWith(href) && href !== '/admin') ||
-        (pathname === '/admin' && href === '/admin');
+      (pathname === '/admin' && href === '/admin');
 
   const currentOption = navItems.find(({ href, exact }) => isActive(href, exact))?.href || '/admin';
 
@@ -89,8 +89,8 @@ export default function AdminNav() {
         </div>
       </div>
 
-      {/* Desktop Sticky Sidebar Card */}
-      <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 sticky top-20 self-start space-y-3">
+      {/* Desktop Sticky Sidebar Card - Fixed position locked to viewport */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 fixed top-20 left-3.5 sm:left-6 lg:left-8 z-30 h-[calc(100vh-80px)] overflow-y-auto pb-6 pt-2 space-y-3">
         {/* Logo Option Over Admin Controls Box */}
         <div className="card px-4 py-3 border border-surface-200/90 shadow-card rounded-2xl bg-white flex items-center justify-between">
           <Link href="/" title="Go to Platform Home">
@@ -172,6 +172,18 @@ export default function AdminNav() {
               );
             })}
           </nav>
+
+          {/* Sign Out Button */}
+          <div className="pt-2 border-t border-surface-100 mt-2">
+            <button
+              id="admin-signout-btn"
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-bold text-rose-600 bg-rose-50/80 hover:bg-rose-100 border border-rose-200/80 transition-all duration-150 group"
+            >
+              <LogOut className="w-4 h-4 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </div>
       </aside>
     </>
