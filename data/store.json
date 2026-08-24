@@ -490,16 +490,86 @@
       "description": "fchgnghn"
     },
     {
-      "_id": "sub_1787459388753",
-      "slug": "123",
+      "_id": "sub_1787553023099",
+      "slug": "111",
       "isActive": true,
-      "name": "123",
+      "name": "111",
       "semesterNumber": 1,
-      "departmentId": "dept_cst",
-      "description": ""
+      "departmentId": "dept_1787459432813",
+      "description": "1212121"
     }
   ],
   "resources": [
+    {
+      "_id": "res_1787553118755",
+      "upvotes": 0,
+      "downvotes": 0,
+      "isActive": true,
+      "createdAt": "2026-08-24T06:31:58.755Z",
+      "title": "savfd sdv",
+      "description": "v desac",
+      "url": "https://dip-desk.vercel.app/",
+      "coverImage": "",
+      "category": "Lab Manuals",
+      "subjectId": "sub_1787553023099",
+      "tags": []
+    },
+    {
+      "_id": "res_1787553108012",
+      "upvotes": 0,
+      "downvotes": 0,
+      "isActive": true,
+      "createdAt": "2026-08-24T06:31:48.012Z",
+      "title": "DW AD aWD",
+      "description": "sdvdsv",
+      "url": "https://dip-desk.vercel.app/",
+      "coverImage": "",
+      "category": "Model Question Papers",
+      "subjectId": "sub_1787553023099",
+      "tags": []
+    },
+    {
+      "_id": "res_1787553094829",
+      "upvotes": 0,
+      "downvotes": 0,
+      "isActive": true,
+      "createdAt": "2026-08-24T06:31:34.829Z",
+      "title": "sdfvsdf",
+      "description": "d AW AWSD",
+      "url": "https://dip-desk.vercel.app/",
+      "coverImage": "",
+      "category": "Books",
+      "subjectId": "sub_1787553023099",
+      "tags": []
+    },
+    {
+      "_id": "res_1787553080757",
+      "upvotes": 0,
+      "downvotes": 0,
+      "isActive": true,
+      "createdAt": "2026-08-24T06:31:20.757Z",
+      "title": "feqwdqwd",
+      "description": "d dvcdsvc",
+      "url": "https://dip-desk.vercel.app/",
+      "coverImage": "",
+      "category": "Notes",
+      "subjectId": "sub_1787553023099",
+      "tags": []
+    },
+    {
+      "_id": "res_1787553058439",
+      "upvotes": 0,
+      "downvotes": 0,
+      "isActive": true,
+      "createdAt": "2026-08-24T06:30:58.439Z",
+      "title": "qweqweqwe",
+      "description": "qweqweqweqw",
+      "url": "https://dip-desk.vercel.app/",
+      "coverImage": "",
+      "category": "Syllabus",
+      "subjectId": "sub_1787553023099",
+      "tags": []
+    },
     {
       "_id": "res_1786901408737",
       "upvotes": 0,
@@ -680,7 +750,8 @@
     "sub_cst_1_2",
     "notice_1786903695930",
     "res_1786902133436",
-    "sub_cst_1_1"
+    "sub_cst_1_1",
+    "sub_1787459388753"
   ],
   "users": [
     {
