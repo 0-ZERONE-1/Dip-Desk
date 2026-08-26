@@ -248,17 +248,13 @@ function AboutLogoWatermark() {
 
   if (!mounted) return null;
 
-  if (rawUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={rawUrl} alt="" className="w-full h-full object-contain filter drop-shadow-xl" />
-    );
-  }
-
   return (
-    <div className="w-full h-full flex items-center justify-center text-primary-600">
-      <BookOpen className="w-full h-full stroke-[0.6]" />
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={rawUrl || '/logo.svg'}
+      alt="Dip-Desk Logo"
+      className="w-full h-full object-contain filter drop-shadow-xl"
+    />
   );
 }
 

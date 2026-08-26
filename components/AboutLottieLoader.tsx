@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen } from 'lucide-react';
 import { getRawImageUrl } from '@/lib/utils';
 import { getCachedCustomLogo, setCachedCustomLogo } from '@/lib/logoCache';
 
@@ -79,18 +78,12 @@ export default function AboutLottieLoader({ visible }: Props) {
             }}
             className="relative w-[85vw] sm:w-[90vw] md:w-[92vw] h-[60vh] sm:h-[75vh] md:h-[85vh] max-w-[1200px] max-h-[800px] px-4 sm:px-6 flex items-center justify-center z-10"
           >
-            {rawLogoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={rawLogoUrl}
-                alt="Website Logo"
-                className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(59,130,246,0.3)]"
-              />
-            ) : fetched ? (
-              <div className="w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full bg-gradient-to-br from-primary-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-2xl shadow-primary-500/30">
-                <BookOpen className="w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 text-white stroke-[1.5]" />
-              </div>
-            ) : null}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={rawLogoUrl || '/logo.svg'}
+              alt="Dip-Desk Logo"
+              className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(59,130,246,0.3)]"
+            />
           </motion.div>
         </motion.div>
       )}

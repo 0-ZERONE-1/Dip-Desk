@@ -23,7 +23,7 @@ export default function DipDeskLogo({ className = 'h-8', showText = true }: { cl
           setCachedCustomLogo(data.customLogoUrl);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const rawLogoUrl = getRawImageUrl(customLogo);
@@ -40,9 +40,11 @@ export default function DipDeskLogo({ className = 'h-8', showText = true }: { cl
             className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-xl drop-shadow-md group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 bg-gradient-to-br from-primary-600 to-accent-500 rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300">
-            <BookOpen className="w-4 h-4 text-white" />
-          </div>
+          <img
+            src="/logo.svg"
+            alt="Dip-Desk Logo"
+            className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-xl drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+          />
         )}
       </div>
 
