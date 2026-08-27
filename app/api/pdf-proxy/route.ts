@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getResourceById } from '@/lib/store';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
   const targetUrl = searchParams.get('url');
 
-  if (!targetUrl) {
-    return new NextResponse('Missing url parameter', { status: 400 });
+  let rawUrl = targetUrl || '';
+
+  if (id) {
+    const resource = await getResourceById(id);
+    if (resource && resource.url) {
+      rawUrl = resource.url;
+    }
+  }
+
+  if (!rawUrl) {
+    return new NextResponse('Missing url or id parameter', { status: 400 });
   }
 
   try {
-    const decodedUrl = decodeURIComponent(targetUrl).trim();
+    const decodedUrl = decodeURIComponent(rawUrl).trim();
 
     // SSRF Guard: validate URL protocol and IP blocklist
     let parsedUrl: URL;
@@ -53,11 +64,6 @@ export async function GET(request: NextRequest) {
         fetchUrl = `https://drive.google.com/uc?id=${fileIdMatch[1]}&export=download`;
       }
     }
-
-
-
-    console.log('PDF Proxy: Original url:', decodedUrl);
-    console.log('PDF Proxy: Fetching url:', fetchUrl);
 
     // Fetch the target resource with 15s timeout
     const controller = new AbortController();

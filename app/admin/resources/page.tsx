@@ -762,7 +762,7 @@ export default function AdminResourcesPage() {
                             {r.coverImage ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
-                                src={formatImageUrl(r.coverImage)}
+                                src={`/api/image-proxy?id=${r._id}`}
                                 alt={r.title}
                                 className="w-full h-full object-cover rounded-lg"
                               />

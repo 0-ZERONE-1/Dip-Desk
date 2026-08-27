@@ -561,6 +561,20 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
   return list;
 }
 
+export async function getResourceById(id: string) {
+  const store = readLocalStore();
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      const res = await Resource.findById(id);
+      if (res) return res;
+    }
+  } catch (err) {
+    console.error('Failed to fetch resource by ID from DB:', err);
+  }
+  return (store.resources || []).find((r) => r._id === id);
+}
+
 export async function createResourceStore(data: any) {
   const isDb = await isDbConnected();
   let subId = data.subjectId;
