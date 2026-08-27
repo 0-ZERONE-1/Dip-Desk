@@ -7,13 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function getRawImageUrl(url: string): string {
   if (!url) return '';
-  let cleanUrl = url.trim();
-  if (cleanUrl.includes('github.com') && cleanUrl.includes('/blob/')) {
-    cleanUrl = cleanUrl
-      .replace('github.com', 'raw.githubusercontent.com')
-      .replace('/blob/', '/');
-  }
-  return cleanUrl;
+  return url.trim();
 }
 
 export function slugify(text: string): string {
@@ -133,16 +127,6 @@ export function formatImageUrl(url: string): string {
   // ZERONE - PostImages webpage link proxying
   if (trimmed.includes('postimg.cc/') && !trimmed.includes('i.postimg.cc/')) {
     return `/api/image-proxy?url=${encodeURIComponent(trimmed)}`;
-  }
-
-  // ZERONE - GitHub Blob & Permalink raw image conversion
-  if (trimmed.includes('github.com/')) {
-    if (trimmed.includes('/blob/')) {
-      return trimmed.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
-    }
-    if (trimmed.includes('/raw/')) {
-      return trimmed.replace('github.com', 'raw.githubusercontent.com').replace('/raw/', '/');
-    }
   }
 
   return trimmed;

@@ -48,11 +48,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ZERONE - GitHub Blob raw image redirect
-    if (decodedUrl.includes('github.com/') && decodedUrl.includes('/blob/')) {
-      const rawUrl = decodedUrl.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
-      return NextResponse.redirect(rawUrl, 302);
-    }
+
 
     // ZERONE - Fetch external image with strict timeout
     const controller = new AbortController();

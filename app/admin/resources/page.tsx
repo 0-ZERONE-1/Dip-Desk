@@ -138,7 +138,7 @@ export default function AdminResourcesPage() {
   const [filterSubject, setFilterSubject] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
 
-  const requiresCoverImage = ['Books', 'Model Question Papers', 'Syllabus'].includes(form.category);
+  const requiresCoverImage = true;
 
   useEffect(() => {
     loadAll();
@@ -756,8 +756,41 @@ export default function AdminResourcesPage() {
                       key={r._id}
                       className="hover:bg-primary-50/30 transition-colors group"
                     >
-                      <td className="py-3.5 px-5 font-bold text-gray-900 max-w-[220px]">
-                        <div className="truncate group-hover:text-primary-600 transition-colors text-sm sm:text-base">{r.title}</div>
+                      <td className="py-2.5 px-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-surface-200 bg-surface-100 shadow-2xs aspect-[3/4]">
+                            {r.coverImage ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={formatImageUrl(r.coverImage)}
+                                alt={r.title}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-black text-xs">
+                                {r.category === 'Model Question Papers'
+                                  ? 'QP'
+                                  : r.category === 'Syllabus'
+                                  ? 'SY'
+                                  : r.category === 'Notes'
+                                  ? 'NO'
+                                  : r.category === 'Lab Manuals'
+                                  ? 'LM'
+                                  : 'BK'}
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-gray-900 group-hover:text-primary-600 transition-colors text-sm sm:text-base truncate max-w-[180px]" title={r.title}>
+                              {r.title}
+                            </div>
+                            {r.description && (
+                              <div className="text-[10px] text-gray-400 font-normal truncate max-w-[180px]">
+                                {r.description}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="py-3.5 px-5 text-gray-700 font-semibold whitespace-nowrap">
                         <span className="badge-primary text-xs px-2.5 py-1 font-semibold">

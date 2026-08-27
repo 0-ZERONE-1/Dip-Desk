@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ExternalLink, Loader2, FileWarning, Globe } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -17,7 +17,7 @@ interface EmbedResult {
 }
 
 // Convert various Google Drive / Dropbox / PDF links to embed-friendly URLs and prevent iframe recursion
-function toEmbedUrl(rawUrl: string): EmbedResult {
+function toEmbedUrl(rawUrl: string, useAlt: boolean): EmbedResult {
   if (!rawUrl || typeof rawUrl !== 'string') {
     return { embedUrl: null, directUrl: '#', isValid: false };
   }
@@ -45,11 +45,29 @@ function toEmbedUrl(rawUrl: string): EmbedResult {
       return { embedUrl: null, directUrl: trimmed, isValid: false };
     }
 
-    // Google Drive: https://drive.google.com/file/d/FILE_ID/view -> embed preview
-    const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/]+)/) || trimmed.match(/drive\.google\.com\/open\?id=([^&]+)/);
-    if (driveMatch && driveMatch[1]) {
+    // Google Drive Links -> use local PDF proxy for native rendering in client
+    const isDrive = trimmed.includes('drive.google.com');
+    const isDirectPdf = trimmed.toLowerCase().endsWith('.pdf') || trimmed.toLowerCase().includes('.pdf?');
+
+    // Convert GitHub blob URL to direct /raw/ URL (bypasses X-Frame-Options and loads natively)
+    if (trimmed.includes('github.com') && trimmed.includes('/blob/')) {
+      const rawGithub = trimmed.replace('/blob/', '/raw/');
       return {
-        embedUrl: `https://drive.google.com/file/d/${driveMatch[1]}/preview`,
+        embedUrl: rawGithub,
+        directUrl: trimmed,
+        isValid: true,
+      };
+    }
+
+    if (isDrive || isDirectPdf) {
+      // If user toggles alt view, fall back to Google Drive standard view
+      const fileIdMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+      const fileId = fileIdMatch ? fileIdMatch[1] : '';
+
+      return {
+        embedUrl: useAlt && fileId
+          ? `https://drive.google.com/file/d/${fileId}/preview`
+          : `/api/pdf-proxy?url=${encodeURIComponent(trimmed)}`,
         directUrl: trimmed,
         isValid: true,
       };
@@ -57,32 +75,15 @@ function toEmbedUrl(rawUrl: string): EmbedResult {
 
     // Dropbox: change dl=0 to raw=1
     if (trimmed.includes('dropbox.com')) {
+      const rawDropbox = trimmed.replace('dl=0', 'raw=1').replace('dl=1', 'raw=1');
       return {
-        embedUrl: trimmed.replace('dl=0', 'raw=1').replace('dl=1', 'raw=1'),
+        embedUrl: `/api/pdf-proxy?url=${encodeURIComponent(rawDropbox)}`,
         directUrl: trimmed,
         isValid: true,
       };
     }
 
-    // Direct PDF URL -> Google Docs PDF embedded viewer
-    if (trimmed.toLowerCase().endsWith('.pdf') || trimmed.toLowerCase().includes('.pdf?')) {
-      return {
-        embedUrl: `https://docs.google.com/viewer?url=${encodeURIComponent(trimmed)}&embedded=true`,
-        directUrl: trimmed,
-        isValid: true,
-      };
-    }
-
-    // Google Docs / Sheets / Slides view links
-    if (trimmed.includes('docs.google.com')) {
-      return {
-        embedUrl: trimmed.replace(/\/edit.*$/, '/preview'),
-        directUrl: trimmed,
-        isValid: true,
-      };
-    }
-
-    // Standard valid external URL -> use Google Docs preview wrapper for documents
+    // Default fallback
     return {
       embedUrl: `https://docs.google.com/viewer?url=${encodeURIComponent(trimmed)}&embedded=true`,
       directUrl: trimmed,
@@ -95,7 +96,43 @@ function toEmbedUrl(rawUrl: string): EmbedResult {
 
 export default function PDFViewer({ url, title, open, onClose }: PDFViewerProps) {
   const [loaded, setLoaded] = useState(false);
-  const { embedUrl, directUrl, isValid } = toEmbedUrl(url);
+  const [showSlowWarning, setShowSlowWarning] = useState(false);
+  const [useAlt, setUseAlt] = useState(false);
+  const { embedUrl, directUrl, isValid } = toEmbedUrl(url, useAlt);
+
+  useEffect(() => {
+    if (!open) {
+      setLoaded(false);
+      setShowSlowWarning(false);
+      setUseAlt(false);
+      return;
+    }
+
+    setLoaded(false);
+    setShowSlowWarning(false);
+    setUseAlt(false);
+
+    // If iframe onLoad takes longer than 3.5 seconds, show direct link helper
+    const warnTimer = setTimeout(() => {
+      setShowSlowWarning(true);
+    }, 3500);
+
+    // Auto-reveal the iframe after 6 seconds so user is never permanently stuck behind spinner
+    const dismissTimer = setTimeout(() => {
+      setLoaded(true);
+    }, 6000);
+
+    return () => {
+      clearTimeout(warnTimer);
+      clearTimeout(dismissTimer);
+    };
+  }, [url, open]);
+
+  useEffect(() => {
+    if (open) {
+      setLoaded(false);
+    }
+  }, [useAlt]);
 
   return (
     <AnimatePresence>
@@ -123,6 +160,18 @@ export default function PDFViewer({ url, title, open, onClose }: PDFViewerProps)
                 <p className="text-xs text-gray-400 truncate mt-0.5">{url}</p>
               </div>
               <div className="flex items-center gap-2">
+                {url.includes('drive.google.com') && (
+                  <button
+                    onClick={() => setUseAlt(!useAlt)}
+                    className={`py-2 px-3 text-xs font-bold flex items-center gap-1.5 rounded-xl transition-all border ${
+                      !useAlt
+                        ? 'bg-primary-50 border-primary-200 text-primary-700 hover:bg-primary-100 shadow-xs'
+                        : 'bg-white hover:bg-surface-50 border-surface-200 text-gray-700 shadow-xs'
+                    }`}
+                  >
+                    <span>{!useAlt ? '⚡ Native Viewer Active' : '🌐 Switch to Native Viewer'}</span>
+                  </button>
+                )}
                 {directUrl && directUrl !== '#' && (
                   <a
                     href={directUrl}
@@ -150,17 +199,48 @@ export default function PDFViewer({ url, title, open, onClose }: PDFViewerProps)
               {isValid && embedUrl ? (
                 <>
                   {!loaded && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 bg-surface-50/80 backdrop-blur-xs">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 bg-surface-50/90 backdrop-blur-xs p-6 text-center">
                       <Loader2 className="w-9 h-9 text-primary-600 animate-spin" />
-                      <p className="text-sm font-semibold text-gray-600">Loading document preview...</p>
+                      <p className="text-sm font-semibold text-gray-700">Loading document preview...</p>
+                      {showSlowWarning && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 flex flex-col items-center gap-2 max-w-sm"
+                        >
+                          <p className="text-xs text-gray-500">
+                            If the preview doesn't load, make sure the file is set to <strong className="text-gray-700">"Anyone with the link can view"</strong> on Google Drive.
+                          </p>
+                          {url.includes('drive.google.com') && useAlt && (
+                            <button
+                              onClick={() => setUseAlt(false)}
+                              className="btn-primary py-2 px-4 text-xs font-bold shadow-xs inline-flex items-center gap-1.5 mt-1"
+                            >
+                              <span>⚡ Switch to Native Viewer (Brave Fix)</span>
+                            </button>
+                          )}
+                          {directUrl && directUrl !== '#' && (
+                            <a
+                              href={directUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn-secondary py-2 px-4 text-xs font-bold shadow-xs inline-flex items-center gap-1.5 mt-1"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              Open in New Tab
+                            </a>
+                          )}
+                        </motion.div>
+                      )}
                     </div>
                   )}
                   <iframe
                     src={embedUrl}
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 bg-white"
                     onLoad={() => setLoaded(true)}
                     title={title}
-                    allow="autoplay"
+                    allow="autoplay; encrypted-media; fullscreen"
+                    allowFullScreen
                     id="pdf-preview-iframe"
                   />
                 </>

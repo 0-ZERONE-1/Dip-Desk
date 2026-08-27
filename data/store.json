@@ -2,34 +2,31 @@
   "developers": [],
   "departments": [
     {
-      "_id": "dept_1787590091951",
-      "name": "213 vxd",
-      "slug": "-1d2-w2d",
-      "description": "2 d q2d",
-      "icon": "",
-      "isActive": true
-    },
-    {
-      "_id": "dept_1787590098689",
-      "name": "asdcd sdc",
-      "slug": "a-f",
-      "description": "vd c",
+      "_id": "dept_1787822351080",
+      "name": "123",
+      "slug": "123",
+      "description": "123",
       "icon": "",
       "isActive": true
     }
   ],
-  "subjects": [
+  "subjects": [],
+  "resources": [
     {
-      "_id": "sub_1787590108532",
-      "slug": "sdf-sd",
+      "_id": "res_1787822420664",
+      "upvotes": 0,
+      "downvotes": 0,
       "isActive": true,
-      "name": "sd sdf",
-      "semesterNumber": 1,
-      "departmentId": "dept_1787590091951",
-      "description": "fse v"
+      "createdAt": "2026-08-27T09:20:20.664Z",
+      "title": "111112313",
+      "description": "",
+      "url": "https://drive.google.com/file/d/1dnKrFCJTfC5h3n7ocDqCNbYiJNorQpGD/view?usp=drive_link",
+      "coverImage": "",
+      "category": "Syllabus",
+      "subjectId": "sub_1787553023099",
+      "tags": []
     }
   ],
-  "resources": [],
   "notices": [
     {
       "_id": "notice_1787592143399",
@@ -43,7 +40,20 @@
     }
   ],
   "deletedIds": [
-    "notice_1786903702590"
+    "notice_1786903702590",
+    "dept_1787590098689",
+    "dept_1787590091951",
+    "sub_1787590108532",
+    "res_1786897094450",
+    "res_1786897108626",
+    "res_1786901244134",
+    "res_1786901408737",
+    "res_1",
+    "res_1787553058439",
+    "res_1787553080757",
+    "res_1787553094829",
+    "res_1787553108012",
+    "res_1787553118755"
   ],
   "users": [
     {
@@ -61,8 +71,5 @@
       "hashedPassword": "$2a$12$O4ygov2YCwhB.4De814TQOPW9pmrOKtZ3A6tD08HTKvxthduIk8He",
       "role": "student"
     }
-  ],
-  "heroStats": {
-    "totalVisitors": 30
-  }
+  ]
 }

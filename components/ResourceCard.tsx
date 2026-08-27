@@ -2,11 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { ThumbsUp, ThumbsDown, Bookmark, BookmarkCheck, ExternalLink, Eye, BookOpen, AlertTriangle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Bookmark, BookmarkCheck, Download, Eye, BookOpen, AlertTriangle } from 'lucide-react';
 import { cn, formatImageUrl, isImageUrl } from '@/lib/utils';
 import { saveClientCustomItem, removeClientCustomItem, getClientCustomItems } from '@/lib/clientStore';
 import toast from 'react-hot-toast';
-import PDFViewer from './PDFViewer';
 
 interface ResourceCardProps {
   resource: {
@@ -27,6 +26,24 @@ interface ResourceCardProps {
   index?: number;
   onVoteChange?: (updatedResource: any) => void;
   onBookmarkChange?: (resourceId: string, isBookmarked: boolean) => void;
+}
+
+function getDownloadUrl(url: string): string {
+  if (!url) return '#';
+  const trimmed = url.trim();
+  
+  // Google Drive url conversion
+  const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/]+)/) || trimmed.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (driveMatch && driveMatch[1]) {
+    return `https://drive.google.com/uc?id=${driveMatch[1]}&export=download`;
+  }
+  
+  // Dropbox conversion
+  if (trimmed.includes('dropbox.com')) {
+    return trimmed.replace('dl=0', 'dl=1').replace('raw=1', 'dl=1');
+  }
+  
+  return trimmed;
 }
 
 export default function ResourceCard({
@@ -60,7 +77,6 @@ export default function ResourceCard({
   const [downvotes, setDownvotes] = useState(resource.downvotes);
   const [userVote, setUserVote] = useState<'up' | 'down' | null>(computeInitialVote());
   const [isBookmarked, setIsBookmarked] = useState<boolean>(computeInitialBookmark());
-  const [pdfOpen, setPdfOpen] = useState(false);
   const [loadingVote, setLoadingVote] = useState(false);
   const [loadingBookmark, setLoadingBookmark] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -388,26 +404,28 @@ export default function ResourceCard({
               {isBookmarked ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
             </button>
 
-            {/* Preview */}
-            <button
-              id={`preview-${resource._id}`}
-              onClick={() => setPdfOpen(true)}
-              className="p-1 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200"
-              title="Preview"
-            >
-              <Eye className="w-3.5 h-3.5" />
-            </button>
-
+            {/* View Link (Opens in New Tab) */}
             <a
               href={resource.url}
               target="_blank"
               rel="noopener noreferrer"
+              id={`preview-${resource._id}`}
+              className="p-1 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 flex items-center justify-center"
+              title="Open View"
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </a>
+
+            {/* Direct Download Link */}
+            <a
+              href={getDownloadUrl(resource.url)}
               id={`open-${resource._id}`}
               className="btn-primary p-1.5 rounded-lg shadow-xs flex items-center justify-center hover:scale-105 transition-all"
-              title="Open resource in new tab"
-              aria-label="Open resource"
+              title="Download File"
+              aria-label="Download File"
+              download
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5" />
             </a>
           </div>
 
@@ -419,8 +437,6 @@ export default function ResourceCard({
           )}
         </div>
       </motion.div>
-
-      <PDFViewer url={resource.url} title={resource.title} open={pdfOpen} onClose={() => setPdfOpen(false)} />
     </>
   );
 }
