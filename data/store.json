@@ -71,5 +71,8 @@
       "hashedPassword": "$2a$12$O4ygov2YCwhB.4De814TQOPW9pmrOKtZ3A6tD08HTKvxthduIk8He",
       "role": "student"
     }
-  ]
+  ],
+  "heroStats": {
+    "totalVisitors": 21
+  }
 }
