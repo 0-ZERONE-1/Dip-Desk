@@ -327,6 +327,15 @@ export default function AdminResourcesPage() {
     return dId === formDept || dId === 'all';
   });
 
+  const filteredFilterSubjects = subjects.filter((s) => {
+    if (filterDept && filterDept !== 'all') {
+      const dId = typeof s.departmentId === 'object' ? s.departmentId?._id : s.departmentId;
+      if (dId !== filterDept && dId !== 'all') return false;
+    }
+    if (filterSem && s.semesterNumber !== Number(filterSem)) return false;
+    return true;
+  });
+
   const hasActiveFilters = Boolean(filterCategory || filterDept || filterSem || filterSubject || filterStatus);
 
   const resetFilters = () => {
@@ -417,6 +426,19 @@ export default function AdminResourcesPage() {
           ]}
           placeholder="All Semesters"
           className="min-w-[140px]"
+        />
+
+        {/* Subject Filter */}
+        <AnimatedSelect
+          id="filter-subject"
+          value={filterSubject}
+          onChange={(val) => setFilterSubject(val)}
+          options={[
+            { value: '', label: 'All Subjects' },
+            ...filteredFilterSubjects.map((s) => ({ value: s._id, label: s.name })),
+          ]}
+          placeholder="All Subjects"
+          className="min-w-[160px]"
         />
 
         {/* Status / Visibility Filter */}
