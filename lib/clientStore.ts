@@ -178,7 +178,7 @@ export function syncAndFilterItems<T = any>(
     filtered = filtered.filter((item: any) => {
       // Always keep server-returned items (exempt from strict client-side department/semester matching)
       if (!item._isClientCustom) {
-        if (filters.category && item.category && item.category !== filters.category) return false;
+        if (filters.category && filters.category !== 'All' && item.category && item.category !== filters.category) return false;
         if (filters.subjectId) {
           const itemSubId = typeof item.subjectId === 'object'
             ? (item.subjectId?._id || item.subjectId?.slug)
@@ -188,7 +188,7 @@ export function syncAndFilterItems<T = any>(
         return true;
       }
 
-      if (filters.category && item.category && item.category !== filters.category) return false;
+      if (filters.category && filters.category !== 'All' && item.category && item.category !== filters.category) return false;
 
       if (filters.subjectId) {
         const itemSubId = typeof item.subjectId === 'object'

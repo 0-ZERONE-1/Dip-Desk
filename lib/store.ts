@@ -542,7 +542,7 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
   try {
     await dbConnect();
     const filter: any = {};
-    if (category) filter.category = category;
+    if (category && category !== 'All') filter.category = category;
     if (subjectId) {
       filter.$or = [
         { subjectId: mongoose.Types.ObjectId.isValid(subjectId) ? subjectId : undefined },
@@ -565,7 +565,7 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
   }
 
   let list = (store.resources || []).filter((r) => !deleted.includes(r._id));
-  if (category) list = list.filter((r) => r.category === category);
+  if (category && category !== 'All') list = list.filter((r) => r.category === category);
   if (subjectId) list = list.filter((r) => r.subjectId?._id === subjectId || r.subjectId === subjectId || r.subjectId?.slug === subjectId);
   return list;
 }
