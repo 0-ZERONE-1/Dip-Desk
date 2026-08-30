@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getResourceById } from '@/lib/store';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
   const targetUrl = searchParams.get('url');
 
-  if (!targetUrl) {
-    return new NextResponse('Missing url parameter', { status: 400 });
+  let rawUrl = targetUrl || '';
+
+  if (id) {
+    const resource = await getResourceById(id);
+    if (resource && resource.coverImage) {
+      rawUrl = resource.coverImage;
+    }
+  }
+
+  if (!rawUrl) {
+    return new NextResponse('Missing url or id parameter', { status: 400 });
   }
 
   try {
-    const decodedUrl = decodeURIComponent(targetUrl).trim();
+    const decodedUrl = decodeURIComponent(rawUrl).trim();
 
-    // ZERONE - SSRF Guard: validate URL protocol and IP blocklist
+    // SSRF Guard: validate URL protocol and IP blocklist
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(decodedUrl);
@@ -40,7 +51,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Access to local/private network addresses is forbidden', { status: 403 });
     }
 
-    // ZERONE - Google Drive direct image URL redirect
+    // Google Drive direct image URL redirect (safe CDN lookup)
     if (decodedUrl.includes('drive.google.com')) {
       const fileIdMatch = decodedUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || decodedUrl.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
@@ -48,9 +59,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-
-
-    // ZERONE - Fetch external image with strict timeout
+    // Fetch external image with strict timeout
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 6000);
 
@@ -70,7 +79,7 @@ export async function GET(request: NextRequest) {
 
     const contentType = res.headers.get('content-type') || '';
 
-    // ZERONE - Stream image response if direct image content type
+    // Stream image response if direct image content type
     if (contentType.startsWith('image/')) {
       const buffer = await res.arrayBuffer();
       return new NextResponse(buffer, {
@@ -81,7 +90,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // ZERONE - Extract og:image meta tag from HTML image host webpages (ImgBB, PostImages)
+    // Extract og:image meta tag from HTML image host webpages (ImgBB, PostImages)
     const htmlText = await res.text();
 
     const ogImageMatch =
@@ -94,7 +103,7 @@ export async function GET(request: NextRequest) {
     if (ogImageMatch && ogImageMatch[1]) {
       let directImageUrl = ogImageMatch[1];
 
-      // ZERONE - Fix relative protocol URLs
+      // Fix relative protocol URLs
       if (directImageUrl.startsWith('//')) {
         directImageUrl = 'https:' + directImageUrl;
       }

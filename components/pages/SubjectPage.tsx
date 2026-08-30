@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -10,6 +10,7 @@ import { BookOpen, Loader2, PlusCircle, FileText, Sparkles, AlertTriangle } from
 import dynamic from 'next/dynamic';
 import { cn, CATEGORIES, categoryIcon, getDepartmentNameBySlug } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import AnimatedSelect from '@/components/AnimatedSelect';
 
 const ResourceLottieLoader = dynamic(
   () => import('@/components/ResourceLottieLoader'),
@@ -66,10 +67,24 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
   }, [session]);
   const [subject, setSubject] = useState<Subject | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>(CATEGORIES[0]);
+  const [activeCategory, setActiveCategory] = useState<string>('All');
   const [loading, setLoading] = useState(true);
   const [resourcesLoading, setResourcesLoading] = useState(false);
   const [showRequestForm, setShowRequestForm] = useState(false);
+  const [sortBy, setSortBy] = useState('az');
+
+  const sortedResources = useMemo(() => {
+    const list = [...resources];
+    switch(sortBy) {
+      case 'az': list.sort((a, b) => a.title.localeCompare(b.title)); break;
+      case 'za': list.sort((a, b) => b.title.localeCompare(a.title)); break;
+      case 'upvotes': list.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0)); break;
+      case 'downvotes': list.sort((a, b) => (b.downvotes || 0) - (a.downvotes || 0)); break;
+      case 'newest': list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); break;
+      case 'oldest': list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); break;
+    }
+    return list;
+  }, [resources, sortBy]);
 
   // Load subject info
   useEffect(() => {
@@ -174,26 +189,44 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
         <ResourceLottieLoader />
       ) : (
         <>
-          {/* Category Tabs Bar */}
-          <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
-            {CATEGORIES.map((cat) => {
-              const isActive = activeCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  id={`tab-${cat.toLowerCase().replace(/\s+/g, '-')}`}
-                  onClick={() => setActiveCategory(cat)}
-                  className={cn(
-                    'px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-200 shadow-2xs flex-shrink-0',
-                    isActive
-                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.02]'
-                      : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
-                  )}
-                >
-                  {cat}
-                </button>
-              );
-            })}
+          {/* Category Tabs & Sort Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 sm:mx-0 sm:px-0 flex-1">
+              {['All', ...CATEGORIES].map((cat) => {
+                const isActive = activeCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    id={`tab-${cat.toLowerCase().replace(/\s+/g, '-')}`}
+                    onClick={() => setActiveCategory(cat)}
+                    className={cn(
+                      'px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-200 shadow-2xs flex-shrink-0',
+                      isActive
+                        ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-md shadow-primary-500/25 scale-[1.02]'
+                        : 'bg-white border border-surface-200/90 text-gray-700 hover:bg-surface-100 hover:border-surface-300'
+                    )}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <div className="flex-shrink-0 z-20 self-end sm:self-auto min-w-[200px]">
+              <AnimatedSelect
+                id="resource-sort"
+                value={sortBy}
+                onChange={setSortBy}
+                options={[
+                  { value: 'az', label: 'Alphabetical (A-Z)' },
+                  { value: 'za', label: 'Alphabetical (Z-A)' },
+                  { value: 'newest', label: 'Newest Added' },
+                  { value: 'oldest', label: 'Oldest Added' },
+                  { value: 'upvotes', label: 'Most Upvoted' },
+                  { value: 'downvotes', label: 'Most Downvoted' },
+                ]}
+              />
+            </div>
           </div>
 
           {/* Resources Main Panel */}
@@ -237,7 +270,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
               onClick={() => setShowRequestForm(true)}
               className="btn-primary px-6 py-3 rounded-2xl font-bold text-sm sm:text-base shadow-md inline-flex items-center gap-2 hover:scale-105 transition-all"
             >
-              <Sparkles className="w-4 h-4" /> Request {activeCategory}
+              <Sparkles className="w-4 h-4" /> Request {activeCategory === 'All' ? CATEGORIES[0] : activeCategory}
             </button>
           )}
         </motion.div>
@@ -250,7 +283,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-3.5 sm:gap-4.5"
           >
-            {resources.map((resource, i) => (
+            {sortedResources.map((resource, i) => (
               <ResourceCard key={resource._id} resource={resource} index={i} />
             ))}
           </motion.div>
@@ -266,7 +299,7 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
           subjectName={subject.name}
           departmentName={deptName}
           semesterNumber={semesterNumber}
-          defaultCategory={activeCategory}
+          defaultCategory={activeCategory === 'All' ? CATEGORIES[0] : activeCategory}
           onClose={() => setShowRequestForm(false)}
         />
       )}

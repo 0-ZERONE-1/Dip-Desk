@@ -5,6 +5,7 @@ export interface ISubject extends Document {
   slug: string;
   semesterNumber: number;
   departmentId: mongoose.Types.ObjectId;
+  departmentSlug: string;
   description: string;
   isActive: boolean;
   createdAt: Date;
@@ -15,7 +16,8 @@ const SubjectSchema = new Schema<ISubject>(
     name: { type: String, required: true },
     slug: { type: String, required: true, lowercase: true },
     semesterNumber: { type: Number, required: true, min: 1, max: 6 },
-    departmentId: { type: Schema.Types.ObjectId, ref: 'Department', required: true },
+    departmentId: { type: Schema.Types.ObjectId, ref: 'Department', required: false, default: null },
+    departmentSlug: { type: String, default: '' },
     description: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
   },

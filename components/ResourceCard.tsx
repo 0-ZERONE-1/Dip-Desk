@@ -99,8 +99,7 @@ export default function ResourceCard({
   const initialRotate = angles[index % angles.length];
   const initialX = xOffsets[index % xOffsets.length];
 
-  const formattedCover = resource.coverImage ? formatImageUrl(resource.coverImage) : '';
-  const showCoverImage = Boolean(formattedCover && isImageUrl(formattedCover) && !imgError);
+  const showCoverImage = Boolean(resource.coverImage && !imgError);
 
   const handleVote = async (vote: 'up' | 'down') => {
     if (!user) { toast.error('Sign in to vote'); return; }
@@ -275,7 +274,7 @@ export default function ResourceCard({
             {showCoverImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={formattedCover}
+                src={`/api/image-proxy?id=${resource._id}`}
                 alt={resource.title}
                 onError={() => setImgError(true)}
                 className="w-full h-full object-cover rounded-xl sm:rounded-2xl group-hover:scale-105 transition-transform duration-500"
@@ -418,7 +417,7 @@ export default function ResourceCard({
 
             {/* Direct Download Link */}
             <a
-              href={getDownloadUrl(resource.url)}
+              href={`/api/pdf-proxy?id=${resource._id}`}
               id={`open-${resource._id}`}
               className="btn-primary p-1.5 rounded-lg shadow-xs flex items-center justify-center hover:scale-105 transition-all"
               title="Download File"

@@ -24,7 +24,8 @@
       "coverImage": "",
       "category": "Syllabus",
       "subjectId": "sub_1787553023099",
-      "tags": []
+      "tags": [],
+      "ratings": []
     }
   ],
   "notices": [
@@ -70,9 +71,14 @@
       "email": "admin@dipdesk.com",
       "hashedPassword": "$2a$12$O4ygov2YCwhB.4De814TQOPW9pmrOKtZ3A6tD08HTKvxthduIk8He",
       "role": "student"
+    },
+    {
+      "_id": "admin_default_id",
+      "email": "admin_default_id",
+      "bookmarks": []
     }
   ],
   "heroStats": {
-    "totalVisitors": 21
+    "totalVisitors": 2
   }
 }

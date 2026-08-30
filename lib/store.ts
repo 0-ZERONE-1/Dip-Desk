@@ -355,16 +355,14 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
 
       filter.$or = [
         { departmentId: { $in: matchedIds } },
-        { departmentId: { $in: matchedSlugs } },
         { departmentSlug: { $in: matchedSlugs } },
-        { departmentId: cleanSlug },
         { departmentSlug: cleanSlug },
-        { departmentId: 'all' },
         { departmentSlug: 'all' },
+        { departmentId: null, departmentSlug: '' },
+        { departmentId: null, departmentSlug: { $exists: false } },
       ];
       if (knownSlug) {
         filter.$or.push({ departmentSlug: knownSlug });
-        filter.$or.push({ departmentId: knownSlug });
       }
     }
 
@@ -383,6 +381,8 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
       finalSubjects = allSemSubjects.filter((s: any) => {
         const sDeptSlug = (s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId : '')).toLowerCase();
         const sDeptName = (s.departmentId?.name || '').toLowerCase();
+        // Orphaned subject with no department info — include it (safe since repair will fix later)
+        if (!s.departmentId && !sDeptSlug) return true;
         if (sDeptSlug === 'all' || s.departmentId === 'all') return true;
         if (sDeptSlug === cleanTarget || sDeptSlug.includes(cleanTarget)) return true;
         if (sDeptName.includes(cleanTarget) || cleanTarget.includes(sDeptSlug)) return true;
@@ -433,19 +433,28 @@ export async function createSubjectStore(data: any) {
   let deptId = data.departmentId;
   if (typeof deptId === 'object' && deptId?._id) deptId = deptId._id;
 
+  const rawSlug = (typeof data.departmentId === 'string' && !mongoose.Types.ObjectId.isValid(data.departmentId))
+    ? data.departmentId
+    : (data.departmentSlug || '');
+
   try {
     await dbConnect();
-    let foundDept = null;
+    let foundDept: any = null;
     if (typeof deptId === 'string') {
-      foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }, { _id: mongoose.Types.ObjectId.isValid(deptId) ? deptId : undefined }].filter(Boolean) });
+      const conditions: any[] = [{ slug: deptId }, { name: deptId }];
+      if (mongoose.Types.ObjectId.isValid(deptId)) conditions.push({ _id: deptId });
+      foundDept = await Department.findOne({ $or: conditions });
       if (foundDept) deptId = foundDept._id;
+      else deptId = null;
     }
+
+    const deptSlug = foundDept?.slug || rawSlug || '';
 
     const created = await Subject.create({
       ...data,
       slug,
       departmentId: deptId,
-      departmentSlug: foundDept?.slug || data.departmentSlug || (typeof data.departmentId === 'string' ? data.departmentId : undefined),
+      departmentSlug: deptSlug,
       isActive: data.isActive !== undefined ? data.isActive : true,
     });
     return created;
@@ -533,7 +542,7 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
   try {
     await dbConnect();
     const filter: any = {};
-    if (category) filter.category = category;
+    if (category && category !== 'All') filter.category = category;
     if (subjectId) {
       filter.$or = [
         { subjectId: mongoose.Types.ObjectId.isValid(subjectId) ? subjectId : undefined },
@@ -556,9 +565,23 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
   }
 
   let list = (store.resources || []).filter((r) => !deleted.includes(r._id));
-  if (category) list = list.filter((r) => r.category === category);
+  if (category && category !== 'All') list = list.filter((r) => r.category === category);
   if (subjectId) list = list.filter((r) => r.subjectId?._id === subjectId || r.subjectId === subjectId || r.subjectId?.slug === subjectId);
   return list;
+}
+
+export async function getResourceById(id: string) {
+  const store = readLocalStore();
+  try {
+    await dbConnect();
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      const res = await Resource.findById(id);
+      if (res) return res;
+    }
+  } catch (err) {
+    console.error('Failed to fetch resource by ID from DB:', err);
+  }
+  return (store.resources || []).find((r) => r._id === id);
 }
 
 export async function createResourceStore(data: any) {
