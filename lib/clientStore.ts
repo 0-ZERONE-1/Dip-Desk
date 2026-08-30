@@ -161,14 +161,14 @@ export function syncAndFilterItems<T = any>(
   const customList = getClientCustomItems<any>(category);
   const deletedIds = getClientDeletedIds();
 
-  // Merge custom created/edited items into rawList if they aren't already covered by server API
+  // Merge custom created/edited items into rawList
   customList.forEach((customItem) => {
     if (deletedIds.includes(String(customItem._id))) return; // Skip locally deleted custom items
     const index = rawList.findIndex((item: any) => item._id === customItem._id || (item.slug && item.slug === customItem.slug));
     if (index !== -1) {
       rawList[index] = { ...rawList[index], ...customItem };
-    } else if (!hasServerItems) {
-      rawList.unshift(customItem);
+    } else {
+      rawList.unshift({ ...customItem, _isClientCustom: true });
     }
   });
 
@@ -176,6 +176,18 @@ export function syncAndFilterItems<T = any>(
 
   if (filters) {
     filtered = filtered.filter((item: any) => {
+      // Always keep server-returned items (exempt from strict client-side department/semester matching)
+      if (!item._isClientCustom) {
+        if (filters.category && item.category && item.category !== filters.category) return false;
+        if (filters.subjectId) {
+          const itemSubId = typeof item.subjectId === 'object'
+            ? (item.subjectId?._id || item.subjectId?.slug)
+            : item.subjectId;
+          if (itemSubId && itemSubId !== filters.subjectId) return false;
+        }
+        return true;
+      }
+
       if (filters.category && item.category && item.category !== filters.category) return false;
 
       if (filters.subjectId) {
