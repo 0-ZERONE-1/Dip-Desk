@@ -103,6 +103,7 @@ export default function ResourceCard({
 
   const handleVote = async (vote: 'up' | 'down') => {
     if (!user) { toast.error('Sign in to vote'); return; }
+    if (user.role === 'admin') { toast.error('Admins cannot vote on resources', { icon: '🚫' }); return; }
     if (loadingVote) return;
     setLoadingVote(true);
 
@@ -176,6 +177,7 @@ export default function ResourceCard({
 
   const handleBookmark = async () => {
     if (!user) { toast.error('Sign in to bookmark resources'); return; }
+    if (user.role === 'admin') { toast.error('Admins cannot save resources', { icon: '🚫' }); return; }
     if (loadingBookmark) return;
     setLoadingBookmark(true);
     const prev = isBookmarked;
