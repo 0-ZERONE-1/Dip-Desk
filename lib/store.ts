@@ -361,6 +361,8 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
         { departmentSlug: cleanSlug },
         { departmentId: 'all' },
         { departmentSlug: 'all' },
+        { departmentId: null, departmentSlug: '' },
+        { departmentId: null, departmentSlug: { $exists: false } },
       ];
       if (knownSlug) {
         filter.$or.push({ departmentSlug: knownSlug });
@@ -383,6 +385,8 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
       finalSubjects = allSemSubjects.filter((s: any) => {
         const sDeptSlug = (s.departmentSlug || s.departmentId?.slug || (typeof s.departmentId === 'string' ? s.departmentId : '')).toLowerCase();
         const sDeptName = (s.departmentId?.name || '').toLowerCase();
+        // Orphaned subject with no department info — include it (safe since repair will fix later)
+        if (!s.departmentId && !sDeptSlug) return true;
         if (sDeptSlug === 'all' || s.departmentId === 'all') return true;
         if (sDeptSlug === cleanTarget || sDeptSlug.includes(cleanTarget)) return true;
         if (sDeptName.includes(cleanTarget) || cleanTarget.includes(sDeptSlug)) return true;
