@@ -355,18 +355,14 @@ export async function getSubjectsStore(departmentSlug?: string, semesterNumber?:
 
       filter.$or = [
         { departmentId: { $in: matchedIds } },
-        { departmentId: { $in: matchedSlugs } },
         { departmentSlug: { $in: matchedSlugs } },
-        { departmentId: cleanSlug },
         { departmentSlug: cleanSlug },
-        { departmentId: 'all' },
         { departmentSlug: 'all' },
         { departmentId: null, departmentSlug: '' },
         { departmentId: null, departmentSlug: { $exists: false } },
       ];
       if (knownSlug) {
         filter.$or.push({ departmentSlug: knownSlug });
-        filter.$or.push({ departmentId: knownSlug });
       }
     }
 
