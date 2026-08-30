@@ -433,19 +433,28 @@ export async function createSubjectStore(data: any) {
   let deptId = data.departmentId;
   if (typeof deptId === 'object' && deptId?._id) deptId = deptId._id;
 
+  const rawSlug = (typeof data.departmentId === 'string' && !mongoose.Types.ObjectId.isValid(data.departmentId))
+    ? data.departmentId
+    : (data.departmentSlug || '');
+
   try {
     await dbConnect();
-    let foundDept = null;
+    let foundDept: any = null;
     if (typeof deptId === 'string') {
-      foundDept = await Department.findOne({ $or: [{ slug: deptId }, { name: deptId }, { _id: mongoose.Types.ObjectId.isValid(deptId) ? deptId : undefined }].filter(Boolean) });
+      const conditions: any[] = [{ slug: deptId }, { name: deptId }];
+      if (mongoose.Types.ObjectId.isValid(deptId)) conditions.push({ _id: deptId });
+      foundDept = await Department.findOne({ $or: conditions });
       if (foundDept) deptId = foundDept._id;
+      else deptId = null;
     }
+
+    const deptSlug = foundDept?.slug || rawSlug || '';
 
     const created = await Subject.create({
       ...data,
       slug,
       departmentId: deptId,
-      departmentSlug: foundDept?.slug || data.departmentSlug || (typeof data.departmentId === 'string' ? data.departmentId : undefined),
+      departmentSlug: deptSlug,
       isActive: data.isActive !== undefined ? data.isActive : true,
     });
     return created;
