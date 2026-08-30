@@ -80,29 +80,6 @@ export default function AdminSubjectsPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [repairing, setRepairing] = useState(false);
-
-  const handleRepairOrphaned = async () => {
-    setRepairing(true);
-    try {
-      const res = await fetch('/api/admin/repair-subjects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ defaultSlug: 'cst' }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        toast.success(`Fixed ${data.fixed} orphaned subjects!`);
-        load();
-      } else {
-        toast.error(data.error || 'Repair failed');
-      }
-    } catch {
-      toast.error('Repair request failed');
-    } finally {
-      setRepairing(false);
-    }
-  };
 
   useEffect(() => {
     load();
@@ -287,28 +264,17 @@ export default function AdminSubjectsPage() {
               : `${subjects.length} ${subjects.length === 1 ? 'Subject' : 'Subjects'}`}
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={handleRepairOrphaned}
-            disabled={repairing}
-            title="Fix subjects missing a department assignment"
-            className="flex items-center gap-1.5 text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 font-semibold transition-all disabled:opacity-60"
-          >
-            {repairing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
-            Fix Orphaned
-          </button>
-          <button
-            id="add-subject-btn"
-            onClick={() => {
-              setShowForm(true);
-              setEditId(null);
-              setForm(emptyForm);
-            }}
-            className="btn-primary flex-shrink-0 text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4"
-          >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add Subject
-          </button>
-        </div>
+        <button
+          id="add-subject-btn"
+          onClick={() => {
+            setShowForm(true);
+            setEditId(null);
+            setForm(emptyForm);
+          }}
+          className="btn-primary flex-shrink-0 text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4"
+        >
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Add Subject
+        </button>
       </div>
 
       {/* Filters */}
