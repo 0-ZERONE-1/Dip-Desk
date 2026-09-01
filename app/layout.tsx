@@ -5,6 +5,7 @@ import ConditionalNavbar from '@/components/layout/ConditionalNavbar';
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://dip-desk.vercel.app'),
   title: {
     default: 'Dip-Desk — User Resource Platform',
     template: '%s | Dip-Desk',
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
     description: 'Access free study materials for Diploma users across all branches and semesters.',
     images: [
       {
-        url: '/og-image.png',
+        url: 'https://dip-desk.vercel.app/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Dip-Desk Logo',
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Dip-Desk — User Resource Platform',
     description: 'Access free study materials for Diploma users across all branches and semesters.',
-    images: ['/og-image.png'],
+    images: ['https://dip-desk.vercel.app/og-image.png'],
   },
 };
 
