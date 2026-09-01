@@ -18,6 +18,20 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     title: 'Dip-Desk — User Resource Platform',
     description: 'Access free study materials for Diploma users across all branches and semesters.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Dip-Desk Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dip-Desk — User Resource Platform',
+    description: 'Access free study materials for Diploma users across all branches and semesters.',
+    images: ['/og-image.png'],
   },
 };
 
