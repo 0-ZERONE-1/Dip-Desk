@@ -544,13 +544,31 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
     const filter: any = {};
     if (category && category !== 'All') filter.category = category;
     if (subjectId) {
-      filter.$or = [
-        { subjectId: mongoose.Types.ObjectId.isValid(subjectId) ? subjectId : undefined },
-      ].filter((c) => c.subjectId !== undefined);
-      if (!filter.$or.length) {
-        const foundSub = await Subject.findOne({ slug: subjectId });
-        if (foundSub) filter.subjectId = foundSub._id;
+      let targetDept = null;
+      let targetSem = null;
+      let targetSubId = null;
+
+      if (mongoose.Types.ObjectId.isValid(subjectId)) {
+        targetSubId = subjectId;
+        const sub = await Subject.findById(subjectId);
+        if (sub) { targetDept = sub.departmentId; targetSem = sub.semesterNumber; }
+      } else {
+        const sub = await Subject.findOne({ slug: subjectId });
+        if (sub) { targetSubId = sub._id; targetDept = sub.departmentId; targetSem = sub.semesterNumber; }
       }
+
+      filter.$or = [];
+      if (targetSubId) {
+        filter.$or.push({ subjectId: targetSubId });
+      } else if (mongoose.Types.ObjectId.isValid(subjectId)) {
+        filter.$or.push({ subjectId });
+      }
+
+      if (targetDept && targetSem) {
+        filter.$or.push({ subjectId: null, departmentId: targetDept, semesterNumber: targetSem });
+      }
+
+      if (!filter.$or.length) delete filter.$or;
     }
     const resList = await Resource.find(filter)
       .populate({
@@ -566,7 +584,18 @@ export async function getResourcesStore(category?: string, subjectId?: string) {
 
   let list = (store.resources || []).filter((r) => !deleted.includes(r._id));
   if (category && category !== 'All') list = list.filter((r) => r.category === category);
-  if (subjectId) list = list.filter((r) => r.subjectId?._id === subjectId || r.subjectId === subjectId || r.subjectId?.slug === subjectId);
+  if (subjectId) {
+    const targetSub = (store.subjects || []).find((s) => s._id === subjectId || s.slug === subjectId);
+    list = list.filter((r) => {
+      if (r.subjectId?._id === subjectId || r.subjectId === subjectId || r.subjectId?.slug === subjectId) return true;
+      if (targetSub && !r.subjectId) {
+        const dId = typeof targetSub.departmentId === 'object' ? targetSub.departmentId?._id : targetSub.departmentId;
+        const rDId = typeof r.departmentId === 'object' ? r.departmentId?._id : r.departmentId;
+        if (rDId === dId && r.semesterNumber === targetSub.semesterNumber) return true;
+      }
+      return false;
+    });
+  }
   return list;
 }
 
@@ -591,7 +620,9 @@ export async function createResourceStore(data: any) {
 
   if (isDb) {
     try {
-      if (typeof subId === 'string' && !mongoose.Types.ObjectId.isValid(subId)) {
+      if (subId === 'COMMON') {
+        subId = null;
+      } else if (typeof subId === 'string' && !mongoose.Types.ObjectId.isValid(subId)) {
         const foundSub = await Subject.findOne({ $or: [{ slug: subId }, { name: subId }] });
         if (foundSub) subId = foundSub._id;
       }
@@ -600,6 +631,8 @@ export async function createResourceStore(data: any) {
       const created = await Resource.create({
         ...data,
         subjectId: subId,
+        departmentId: data.departmentId || null,
+        semesterNumber: data.semesterNumber || null,
         uploaderId: data.uploaderId || defaultUploaderId,
         isActive: true,
         upvotes: 0,

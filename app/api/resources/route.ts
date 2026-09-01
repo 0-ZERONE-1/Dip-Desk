@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { title, url, category, subjectId, description } = body;
+    const { title, url, category, subjectId, description, departmentId, semesterNumber } = body;
 
     if (!title || !url || !category || !subjectId) {
       return NextResponse.json({ error: 'Title, URL, category, and subject are required' }, { status: 400 });
@@ -54,6 +54,8 @@ export async function POST(req: NextRequest) {
       category: cleanCategory,
       subjectId: cleanSubject,
       description: cleanDesc,
+      departmentId: departmentId || null,
+      semesterNumber: semesterNumber ? Number(semesterNumber) : null,
     });
     return NextResponse.json({ resource }, { status: 201 });
   } catch (error) {

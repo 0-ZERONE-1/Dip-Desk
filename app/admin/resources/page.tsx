@@ -29,7 +29,9 @@ interface Resource {
   url: string;
   coverImage?: string;
   category: string;
-  subjectId: Subject | string;
+  subjectId?: Subject | string | null;
+  departmentId?: Department | string | null;
+  semesterNumber?: number | null;
   tags?: string[];
   createdAt: string;
   upvotes?: number;
@@ -127,6 +129,7 @@ export default function AdminResourcesPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [formDept, setFormDept] = useState('');
+  const [formSem, setFormSem] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -174,6 +177,10 @@ export default function AdminResourcesPage() {
       toast.error('Title, URL, and Subject are required');
       return;
     }
+    if (form.subjectId === 'COMMON' && (!formDept || !formSem)) {
+      toast.error('Department and Semester are required for Semester-Level Resources');
+      return;
+    }
 
     if (!isValidUrl(form.url)) {
       toast.error('Please enter a valid Resource URL (e.g. https://drive.google.com/...)');
@@ -190,7 +197,7 @@ export default function AdminResourcesPage() {
       const normalizedUrl = normalizeUrl(form.url);
       const normalizedCover = requiresCoverImage ? normalizeUrl(form.coverImage) : '';
 
-      const body = {
+      const body: any = {
         ...form,
         title: sanitizeText(form.title).trim(),
         description: sanitizeOneLineText(form.description).trim(),
@@ -198,6 +205,11 @@ export default function AdminResourcesPage() {
         coverImage: normalizedCover,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
       };
+
+      if (form.subjectId === 'COMMON') {
+        body.departmentId = formDept;
+        body.semesterNumber = formSem;
+      }
 
       const url = editId ? `/api/resources/${editId}` : '/api/resources';
       const method = editId ? 'PUT' : 'POST';
@@ -228,6 +240,7 @@ export default function AdminResourcesPage() {
       setShowForm(false);
       setEditId(null);
       setForm(emptyForm);
+      setFormSem('');
       loadAll();
     } catch {
       toast.error('Failed to save resource');
@@ -239,18 +252,28 @@ export default function AdminResourcesPage() {
   const handleEdit = (r: Resource) => {
     setEditId(r._id);
     const subIdStr = getSubjectIdStr(r.subjectId);
-    const subObj = getSubjectObj(r.subjectId, subjects);
-    if (subObj) {
-      const dId = typeof subObj.departmentId === 'object' ? subObj.departmentId?._id : subObj.departmentId;
-      if (dId) setFormDept(String(dId));
+    let dIdToSet = '';
+    
+    if (!r.subjectId) {
+      const depObj = r.departmentId;
+      dIdToSet = typeof depObj === 'object' && depObj !== null ? (depObj as any)._id : String(depObj || '');
+      if (dIdToSet) setFormDept(dIdToSet);
+      if (r.semesterNumber) setFormSem(String(r.semesterNumber));
+    } else {
+      const subObj = getSubjectObj(r.subjectId, subjects);
+      if (subObj) {
+        const dId = typeof subObj.departmentId === 'object' ? subObj.departmentId?._id : subObj.departmentId;
+        if (dId) { dIdToSet = String(dId); setFormDept(dIdToSet); }
+      }
     }
+
     setForm({
       title: r.title,
       description: r.description || '',
       url: r.url,
       coverImage: r.coverImage || '',
       category: r.category,
-      subjectId: subIdStr,
+      subjectId: r.subjectId ? subIdStr : 'COMMON',
       tags: '',
     });
     setShowForm(true);
@@ -322,9 +345,12 @@ export default function AdminResourcesPage() {
   });
 
   const filteredFormSubjects = subjects.filter((s) => {
-    if (!formDept || formDept === 'all') return true;
-    const dId = typeof s.departmentId === 'object' ? s.departmentId?._id : s.departmentId;
-    return dId === formDept || dId === 'all';
+    if (formDept && formDept !== 'all') {
+      const dId = typeof s.departmentId === 'object' ? s.departmentId?._id : s.departmentId;
+      if (dId !== formDept) return false;
+    }
+    if (formSem && s.semesterNumber !== Number(formSem)) return false;
+    return true;
   });
 
   const filteredFilterSubjects = subjects.filter((s) => {
@@ -568,7 +594,7 @@ export default function AdminResourcesPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">Category</label>
                     <select
@@ -588,7 +614,7 @@ export default function AdminResourcesPage() {
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      Department (filter subjects)
+                      Department (filter)
                     </label>
                     <select
                       id="resource-dept-filter"
@@ -600,6 +626,25 @@ export default function AdminResourcesPage() {
                       {departments.map((d) => (
                         <option key={d._id} value={d._id}>
                           {d.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Semester (filter)
+                    </label>
+                    <select
+                      id="resource-sem-filter"
+                      value={formSem}
+                      onChange={(e) => setFormSem(e.target.value)}
+                      className="select"
+                    >
+                      <option value="">All Semesters</option>
+                      {[1, 2, 3, 4, 5, 6].map((s) => (
+                        <option key={s} value={String(s)}>
+                          Semester {s}
                         </option>
                       ))}
                     </select>
@@ -616,6 +661,9 @@ export default function AdminResourcesPage() {
                     className="select"
                   >
                     <option value="">Select subject...</option>
+                    <option value="COMMON" className="font-bold text-primary-600 bg-primary-50">
+                      ⭐ All Subjects in this Semester
+                    </option>
                     {filteredFormSubjects.map((s) => (
                       <option key={s._id} value={s._id}>
                         {s.departmentId?.name || 'All Depts'} · Sem {s.semesterNumber} · {s.name}

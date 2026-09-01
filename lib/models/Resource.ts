@@ -13,7 +13,9 @@ export interface IResource extends Document {
   url: string;
   category: ResourceCategory;
   coverImage?: string;
-  subjectId: mongoose.Types.ObjectId;
+  subjectId?: mongoose.Types.ObjectId | null;
+  departmentId?: mongoose.Types.ObjectId | null;
+  semesterNumber?: number;
   uploaderId: mongoose.Types.ObjectId;
   uploaderModel: 'Admin' | 'User';
   ratings: IRating[];
@@ -45,7 +47,9 @@ const ResourceSchema = new Schema<IResource>(
       enum: ['Syllabus', 'Notes', 'Books', 'Model Question Papers', 'Lab Manuals'],
       required: true,
     },
-    subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: true },
+    subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: false, default: null },
+    departmentId: { type: Schema.Types.ObjectId, ref: 'Department', required: false, default: null },
+    semesterNumber: { type: Number, required: false },
     uploaderId: { type: Schema.Types.ObjectId, required: false },
     uploaderModel: { type: String, enum: ['Admin', 'User'], default: 'Admin' },
     ratings: [RatingSchema],
