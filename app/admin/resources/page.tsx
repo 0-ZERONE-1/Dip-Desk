@@ -228,7 +228,9 @@ export default function AdminResourcesPage() {
         createdAt: new Date().toISOString(),
       };
 
-      if (foundSub) {
+      if (form.subjectId === 'COMMON') {
+        savedObj.subjectId = null;
+      } else if (foundSub) {
         savedObj.subjectId = foundSub;
       } else if (typeof savedObj.subjectId === 'string') {
         const match = subjects.find((s) => s._id === savedObj.subjectId);
@@ -254,7 +256,7 @@ export default function AdminResourcesPage() {
     const subIdStr = getSubjectIdStr(r.subjectId);
     let dIdToSet = '';
     
-    if (!r.subjectId) {
+    if (!r.subjectId || r.subjectId === 'COMMON') {
       const depObj = r.departmentId;
       dIdToSet = typeof depObj === 'object' && depObj !== null ? (depObj as any)._id : String(depObj || '');
       if (dIdToSet) setFormDept(dIdToSet);
