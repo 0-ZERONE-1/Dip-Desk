@@ -661,7 +661,7 @@ export default function AdminResourcesPage() {
                     className="select"
                   >
                     <option value="COMMON" className="font-bold text-primary-600 bg-primary-50">
-                      ⭐ All Subjects in this Semester
+                      All Subjects in this Semester
                     </option>
                     {filteredFormSubjects.map((s) => (
                       <option key={s._id} value={s._id}>
