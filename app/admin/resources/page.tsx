@@ -727,8 +727,14 @@ export default function AdminResourcesPage() {
             {filtered.map((r) => {
               const subObj = getSubjectObj(r.subjectId, subjects);
               const subName = subObj?.name || '—';
-              const deptName = getDeptName(r.subjectId, subjects, departments);
-              const semNum = getSemesterNumber(r.subjectId, subjects);
+              let deptName = getDeptName(r.subjectId, subjects, departments);
+              if (deptName === '—' && r.departmentId) {
+                const depObj = r.departmentId as any;
+                const depIdStr = typeof depObj === 'object' ? depObj._id : depObj;
+                const found = departments.find(d => String(d._id) === String(depIdStr));
+                deptName = found ? found.name : '—';
+              }
+              const semNum = getSemesterNumber(r.subjectId, subjects) || r.semesterNumber || null;
 
               return (
                 <div key={r._id} className="p-4 space-y-3 hover:bg-primary-50/20 transition-colors">
@@ -817,8 +823,14 @@ export default function AdminResourcesPage() {
                 {filtered.map((r) => {
                   const subObj = getSubjectObj(r.subjectId, subjects);
                   const subName = subObj?.name || '—';
-                  const deptName = getDeptName(r.subjectId, subjects, departments);
-                  const semNum = getSemesterNumber(r.subjectId, subjects);
+                  let deptName = getDeptName(r.subjectId, subjects, departments);
+                  if (deptName === '—' && r.departmentId) {
+                    const depObj = r.departmentId as any;
+                    const depIdStr = typeof depObj === 'object' ? depObj._id : depObj;
+                    const found = departments.find(d => String(d._id) === String(depIdStr));
+                    deptName = found ? found.name : '—';
+                  }
+                  const semNum = getSemesterNumber(r.subjectId, subjects) || r.semesterNumber || null;
 
                   return (
                     <tr
