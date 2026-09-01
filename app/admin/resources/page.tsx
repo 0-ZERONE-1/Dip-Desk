@@ -45,7 +45,7 @@ const emptyForm = {
   url: '',
   coverImage: '',
   category: 'Notes',
-  subjectId: '',
+  subjectId: 'COMMON',
   tags: '',
 };
 
@@ -660,7 +660,6 @@ export default function AdminResourcesPage() {
                     onChange={(e) => setForm({ ...form, subjectId: e.target.value })}
                     className="select"
                   >
-                    <option value="">Select subject...</option>
                     <option value="COMMON" className="font-bold text-primary-600 bg-primary-50">
                       ⭐ All Subjects in this Semester
                     </option>
