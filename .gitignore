@@ -33,3 +33,20 @@ next-env.d.ts
 # AI agent meta files (not for public repo)
 CLAUDE.md
 AGENTS.md
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary testing & personal files
+test-query.js
+.agents/
