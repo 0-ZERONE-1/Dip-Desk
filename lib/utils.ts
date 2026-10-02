@@ -50,6 +50,57 @@ export function getDepartmentNameBySlug(slug: string): string {
     .join(' ');
 }
 
+export function findDepartmentBySlug<T extends { _id?: string; name?: string; slug?: string; description?: string; icon?: string }>(
+  departments: T[],
+  slugOrName: string
+): T | null {
+  if (!slugOrName) return null;
+  const target = slugOrName.toLowerCase().trim();
+  if (target === 'all' || target === 'browse' || target === 'departments') return null;
+
+  let found = departments.find(
+    (d) => d.slug?.toLowerCase() === target || d._id?.toLowerCase() === target
+  );
+  if (found) return found;
+
+  const targetSlug = slugify(target);
+  found = departments.find(
+    (d) => slugify(d.slug || '') === targetSlug || slugify(d.name || '') === targetSlug
+  );
+  if (found) return found;
+
+  const aliasName = KNOWN_DEPARTMENTS[target]?.toLowerCase();
+  if (aliasName) {
+    found = departments.find(
+      (d) => (d.name && d.name.toLowerCase().includes(aliasName)) || (d.name && aliasName.includes(d.name.toLowerCase()))
+    );
+    if (found) return found;
+  }
+
+  for (const [key, fullName] of Object.entries(KNOWN_DEPARTMENTS)) {
+    if (target === key || targetSlug === slugify(fullName) || target === slugify(key)) {
+      found = departments.find((d) => {
+        const dSlug = slugify(d.slug || '');
+        const dName = slugify(d.name || '');
+        return dSlug === key || dSlug === slugify(fullName) || dName === slugify(fullName);
+      });
+      if (found) return found;
+    }
+  }
+
+  if (KNOWN_DEPARTMENTS[target]) {
+    return {
+      _id: target,
+      name: KNOWN_DEPARTMENTS[target],
+      slug: target,
+      description: 'Select a semester to access syllabus, notes, model papers, and lab manuals.',
+      icon: '',
+    } as unknown as T;
+  }
+
+  return null;
+}
+
 export function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString('en-IN', {
     day: 'numeric',

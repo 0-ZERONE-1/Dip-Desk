@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -8,7 +9,7 @@ import RequestForm from '@/components/RequestForm';
 import { syncAndFilterItems } from '@/lib/clientStore';
 import { BookOpen, Loader2, PlusCircle, FileText, Sparkles, AlertTriangle } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { cn, CATEGORIES, categoryIcon, getDepartmentNameBySlug } from '@/lib/utils';
+import { cn, CATEGORIES, categoryIcon, getDepartmentNameBySlug, slugify } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import AnimatedSelect from '@/components/AnimatedSelect';
 
@@ -94,8 +95,15 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       .then((data) => {
         const rawList = data.subjects || [];
         const filteredList = syncAndFilterItems<Subject>('subjects', rawList, { departmentSlug: branchSlug, semesterNumber: semesterNumber });
-        const found = filteredList.find((s: Subject) => s.slug === subjectSlug);
-        setSubject(found || null); // update immediately
+        const targetSubSlug = (subjectSlug || '').toLowerCase().trim();
+        const found = filteredList.find(
+          (s: Subject) =>
+            s.slug?.toLowerCase() === targetSubSlug ||
+            slugify(s.slug || '') === targetSubSlug ||
+            slugify(s.name || '') === targetSubSlug ||
+            s._id === subjectSlug
+        );
+        setSubject(found || null);
       })
       .catch(() => {});
     Promise.all([apiFetch, minDelay])
@@ -126,23 +134,59 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
       .catch(() => setResourcesLoading(false));
   }, [subject, activeCategory, branchSlug, semesterNumber]);
 
+  let resolvedBranch = branchSlug?.toLowerCase().trim();
+  if (!resolvedBranch || resolvedBranch === 'all') {
+    if (subject?.departmentId?.slug && subject.departmentId.slug !== 'all') {
+      resolvedBranch = subject.departmentId.slug;
+    } else {
+      resolvedBranch = '';
+    }
+  }
+
+  const deptName =
+    subject?.departmentId?.name && subject.departmentId.name.toLowerCase() !== 'all departments' && subject.departmentId.name.toLowerCase() !== 'all'
+      ? subject.departmentId.name
+      : getDepartmentNameBySlug(resolvedBranch) || 'Departments';
+
+  const branchHref = resolvedBranch ? `/${resolvedBranch}` : '/browse';
+  const semHref = resolvedBranch ? `/${resolvedBranch}/semester-${semesterNumber}` : '/browse';
+
   if (!loading && !subject) {
     return (
-      <div className="text-center py-24">
-        <p className="text-gray-500">Subject not found.</p>
+      <div className="w-full">
+        <Breadcrumb
+          crumbs={[
+            { label: 'Departments', href: '/browse' },
+            ...(resolvedBranch ? [{ label: deptName, href: branchHref }] : []),
+            ...(resolvedBranch ? [{ label: `Semester ${semesterNumber}`, href: semHref }] : []),
+            { label: 'Subject' },
+          ]}
+        />
+        <div className="text-center py-24">
+          <p className="text-gray-500 font-medium">Subject not found.</p>
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <Link
+              href={semHref}
+              className="btn-primary inline-flex text-sm"
+            >
+              {resolvedBranch ? `Back to Semester ${semesterNumber}` : 'Browse Departments'}
+            </Link>
+            <Link href="/browse" className="btn-secondary inline-flex text-sm">
+              All Departments
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
-
-  const deptName = subject?.departmentId?.name || getDepartmentNameBySlug(branchSlug);
-  const deptSlug = subject?.departmentId?.slug || branchSlug;
 
   return (
     <div className="w-full">
       <Breadcrumb
         crumbs={[
-          { label: deptName, href: `/${deptSlug}` },
-          { label: `Semester ${semesterNumber}`, href: `/${deptSlug}/semester-${semesterNumber}` },
+          { label: 'Departments', href: '/browse' },
+          { label: deptName, href: branchHref },
+          { label: `Semester ${semesterNumber}`, href: semHref },
           { label: loading || !subject ? 'Loading...' : subject.name },
         ]}
       />

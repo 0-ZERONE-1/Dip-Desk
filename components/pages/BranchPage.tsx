@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { BookOpen, ArrowRight, Loader2, Sparkles, GraduationCap } from 'lucide-react';
-import { formatImageUrl, isImageUrl, getDepartmentNameBySlug } from '@/lib/utils';
+import { formatImageUrl, isImageUrl, getDepartmentNameBySlug, findDepartmentBySlug } from '@/lib/utils';
 
 import { syncAndFilterItems } from '@/lib/clientStore';
 
@@ -59,16 +59,10 @@ const semesterCardVariants = {
   },
 };
 
-// Derive a readable name from slug as immediate fallback
-function slugToName(slug: string) {
-  return slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
-
 export default function BranchPage({ branchSlug }: Props) {
-  const [dept, setDept] = useState<Department | null>(null);
+  const [dept, setDept] = useState<Department | null>(() => findDepartmentBySlug<Department>([], branchSlug));
   const [loading, setLoading] = useState(true);
 
-  // Immediate display name — uses known mapping instantly, updates if custom name from API
   const displayName = dept?.name || getDepartmentNameBySlug(branchSlug);
 
   useEffect(() => {
@@ -78,18 +72,28 @@ export default function BranchPage({ branchSlug }: Props) {
       .then((data) => {
         const rawList = data.departments || [];
         const filteredList = syncAndFilterItems<Department>('departments', rawList);
-        const found = filteredList.find((d: Department) => d.slug === branchSlug);
-        setDept(found || null); // update name immediately, don't wait for delay
+        const found = findDepartmentBySlug<Department>(filteredList, branchSlug);
+        if (found) {
+          setDept(found);
+        } else {
+          setDept(findDepartmentBySlug<Department>([], branchSlug));
+        }
       })
-      .catch(() => { });
+      .catch(() => {
+        setDept(findDepartmentBySlug<Department>([], branchSlug));
+      });
     Promise.all([apiFetch, minDelay])
       .finally(() => setLoading(false));
   }, [branchSlug]);
 
   return (
     <div className="w-full">
-      {/* Breadcrumb & Header are always visible immediately */}
-      <Breadcrumb crumbs={[{ label: loading ? 'Loading...' : displayName }]} />
+      <Breadcrumb
+        crumbs={[
+          { label: 'Departments', href: '/browse' },
+          { label: loading ? 'Loading...' : displayName },
+        ]}
+      />
 
       {/* Header Banner */}
       <div className="mt-4 mb-6 bg-gradient-to-br from-surface-50 via-white to-primary-50/40 border border-surface-200/90 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
@@ -118,10 +122,13 @@ export default function BranchPage({ branchSlug }: Props) {
       {/* Semester Grid — shows Lottie loader until data is ready */}
       {loading ? (
         <SemesterLottieLoader />
-      ) : !dept ? (
+      ) : !dept && !getDepartmentNameBySlug(branchSlug) ? (
         <div className="text-center py-24">
-          <p className="text-gray-500">Branch not found.</p>
-          <Link href="/" className="btn-primary mt-4 inline-flex">Go Home</Link>
+          <p className="text-gray-500 font-medium">Branch not found.</p>
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <Link href="/browse" className="btn-primary inline-flex text-sm">Choose Department</Link>
+            <Link href="/" className="btn-secondary inline-flex text-sm">Go Home</Link>
+          </div>
         </div>
       ) : (
         <motion.div
@@ -138,7 +145,7 @@ export default function BranchPage({ branchSlug }: Props) {
               className="h-full flex flex-col"
             >
               <Link
-                href={`/${branchSlug}/semester-${sem}`}
+                href={`/${dept?.slug || branchSlug}/semester-${sem}`}
                 id={`semester-${sem}-card`}
                 className="group bg-white rounded-2xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out p-5 sm:p-6 flex flex-col justify-between h-full relative overflow-hidden"
               >

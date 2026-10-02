@@ -9,7 +9,7 @@ import { ArrowRight, BookOpen, Loader2, PlusCircle, AlertTriangle } from 'lucide
 import RequestForm from '@/components/RequestForm';
 
 import { syncAndFilterItems } from '@/lib/clientStore';
-import { getDepartmentNameBySlug } from '@/lib/utils';
+import { getDepartmentNameBySlug, findDepartmentBySlug } from '@/lib/utils';
 
 import dynamic from 'next/dynamic';
 
@@ -100,23 +100,22 @@ export default function SemesterPage({ branchSlug, semesterNumber }: Props) {
       .then(([subData, deptData]) => {
         const subList = syncAndFilterItems<Subject>('subjects', subData.subjects || [], { departmentSlug: branchSlug, semesterNumber: semesterNumber });
         const deptList = syncAndFilterItems<any>('departments', deptData.departments || []);
-        const deptFound = deptList.find((d: any) => d.slug === branchSlug);
-        if (deptFound) setDeptName(deptFound.name); // update name immediately
-        setSubjects(subList); // update subjects immediately
+        const deptFound = findDepartmentBySlug<any>(deptList, branchSlug);
+        if (deptFound) setDeptName(deptFound.name);
+        setSubjects(subList);
       })
       .catch(() => {});
     Promise.all([apiFetch, minDelay])
       .finally(() => setLoading(false));
   }, [branchSlug, semesterNumber]);
 
-  // formattedDeptName is always available immediately
   const formattedDeptName = deptName;
 
   return (
     <div className="w-full">
-      {/* Breadcrumb & Header always visible immediately */}
       <Breadcrumb
         crumbs={[
+          { label: 'Departments', href: '/browse' },
           { label: formattedDeptName, href: `/${branchSlug}` },
           { label: loading ? 'Loading...' : `Semester ${semesterNumber}` },
         ]}

@@ -104,11 +104,18 @@ export default function NavbarSearch() {
   const navigateToResource = useCallback(
     (resource: SearchResult) => {
       const { department, subject, _id, category } = resource as any;
+      const deptSlug =
+        department?.slug && department.slug !== 'all'
+          ? department.slug
+          : subject?.departmentId?.slug && subject.departmentId.slug !== 'all'
+            ? subject.departmentId.slug
+            : 'cst';
+
       if (category === 'Subject') {
-        router.push(`/${department.slug}/semester-${subject.semesterNumber}/${subject.slug}`);
+        router.push(`/${deptSlug}/semester-${subject.semesterNumber}/${subject.slug}`);
       } else {
         router.push(
-          `/${department.slug}/semester-${subject.semesterNumber}/${subject.slug}?resource=${_id}`
+          `/${deptSlug}/semester-${subject.semesterNumber}/${subject.slug}?resource=${_id}`
         );
       }
       setIsOpen(false);

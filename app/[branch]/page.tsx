@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import BranchPage from '@/components/pages/BranchPage';
 
 interface Props {
@@ -7,6 +8,12 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { branch = '' } = (await params) || {};
+  const normalized = branch.toLowerCase().trim();
+  if (normalized === 'all' || normalized === 'browse' || normalized === 'departments') {
+    return {
+      title: 'Departments — Dip-Desk',
+    };
+  }
   const branchUpper = branch ? branch.toUpperCase() : 'BRANCH';
   return {
     title: `${branchUpper} — Dip-Desk`,
@@ -16,6 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BranchRoute({ params }: Props) {
   const { branch = '' } = (await params) || {};
+  const normalized = branch.toLowerCase().trim();
+  if (normalized === 'all' || normalized === 'browse' || normalized === 'departments') {
+    redirect('/browse');
+  }
+
   return (
     <>
       <main className="w-full px-4 sm:px-8 lg:px-12 py-8 flex-1">
