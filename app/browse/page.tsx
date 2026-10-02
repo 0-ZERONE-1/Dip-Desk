@@ -113,7 +113,7 @@ export default function BrowsePage() {
               >
                 <Link
                   href={`/${dept.slug}`}
-                  className="group bg-white p-5 sm:p-6 block border border-surface-200/90 hover:border-primary-300 rounded-3xl relative h-full flex flex-col justify-between shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out overflow-hidden"
+                  className="group bg-white p-5 sm:p-6 block border border-surface-200/90 hover:border-primary-300 rounded-2xl relative h-full flex flex-col justify-between shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out overflow-hidden"
                 >
                   {/* Smooth Rounded Top Accent Gradient Bar blended with card */}
                   <div className="absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />

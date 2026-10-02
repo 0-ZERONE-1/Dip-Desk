@@ -173,12 +173,8 @@ export default function AdminResourcesPage() {
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!form.title.trim() || !form.url.trim() || !form.subjectId) {
-      toast.error('Title, URL, and Subject are required');
-      return;
-    }
-    if (form.subjectId === 'COMMON' && (!formDept || !formSem)) {
-      toast.error('Department and Semester are required for Semester-Level Resources');
+    if (!form.title.trim() || !form.url.trim()) {
+      toast.error('Title and URL are required');
       return;
     }
 
@@ -197,6 +193,10 @@ export default function AdminResourcesPage() {
       const normalizedUrl = normalizeUrl(form.url);
       const normalizedCover = requiresCoverImage ? normalizeUrl(form.coverImage) : '';
 
+      const isCommon = !form.subjectId || form.subjectId === 'COMMON';
+      const cleanDept = formDept && formDept !== 'all' ? formDept : null;
+      const cleanSem = formSem && formSem !== 'all' ? Number(formSem) : null;
+
       const body: any = {
         ...form,
         title: sanitizeText(form.title).trim(),
@@ -204,11 +204,18 @@ export default function AdminResourcesPage() {
         url: normalizedUrl,
         coverImage: normalizedCover,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
+        subjectId: isCommon ? 'COMMON' : form.subjectId,
+        departmentId: cleanDept,
+        semesterNumber: cleanSem,
       };
 
-      if (form.subjectId === 'COMMON') {
-        body.departmentId = formDept;
-        body.semesterNumber = formSem;
+      if (!isCommon) {
+        const foundSub = subjects.find((s) => s._id === form.subjectId || s.slug === form.subjectId);
+        if (foundSub) {
+          const subDept = typeof foundSub.departmentId === 'object' ? foundSub.departmentId?._id : foundSub.departmentId;
+          body.departmentId = subDept || cleanDept;
+          body.semesterNumber = foundSub.semesterNumber || cleanSem;
+        }
       }
 
       const url = editId ? `/api/resources/${editId}` : '/api/resources';
@@ -221,15 +228,17 @@ export default function AdminResourcesPage() {
 
       if (!res.ok) throw new Error();
       const resData = await res.json().catch(() => null);
-      const foundSub = subjects.find((s) => s._id === form.subjectId || s.slug === form.subjectId);
+      const foundSub = !isCommon ? subjects.find((s) => s._id === form.subjectId || s.slug === form.subjectId) : null;
       const savedObj = resData?.resource || resData || {
         _id: editId || `res_${Date.now()}`,
         ...body,
         createdAt: new Date().toISOString(),
       };
 
-      if (form.subjectId === 'COMMON') {
+      if (isCommon) {
         savedObj.subjectId = null;
+        savedObj.departmentId = cleanDept;
+        savedObj.semesterNumber = cleanSem;
       } else if (foundSub) {
         savedObj.subjectId = foundSub;
       } else if (typeof savedObj.subjectId === 'string') {
@@ -242,6 +251,7 @@ export default function AdminResourcesPage() {
       setShowForm(false);
       setEditId(null);
       setForm(emptyForm);
+      setFormDept('');
       setFormSem('');
       loadAll();
     } catch {
@@ -254,30 +264,43 @@ export default function AdminResourcesPage() {
   const handleEdit = (r: Resource) => {
     setEditId(r._id);
     const subIdStr = getSubjectIdStr(r.subjectId);
-    let dIdToSet = '';
     
-    if (!r.subjectId || r.subjectId === 'COMMON') {
+    if (!r.subjectId || subIdStr === 'COMMON' || subIdStr === '') {
       const depObj = r.departmentId;
-      dIdToSet = typeof depObj === 'object' && depObj !== null ? (depObj as any)._id : String(depObj || '');
-      if (dIdToSet) setFormDept(dIdToSet);
-      if (r.semesterNumber) setFormSem(String(r.semesterNumber));
+      const dIdToSet = typeof depObj === 'object' && depObj !== null ? (depObj as any)._id : String(depObj || '');
+      setFormDept(dIdToSet || '');
+      setFormSem(r.semesterNumber ? String(r.semesterNumber) : '');
+      setForm({
+        title: r.title,
+        description: r.description || '',
+        url: r.url,
+        coverImage: r.coverImage || '',
+        category: r.category,
+        subjectId: 'COMMON',
+        tags: Array.isArray(r.tags) ? r.tags.join(', ') : '',
+      });
     } else {
       const subObj = getSubjectObj(r.subjectId, subjects);
       if (subObj) {
         const dId = typeof subObj.departmentId === 'object' ? subObj.departmentId?._id : subObj.departmentId;
-        if (dId) { dIdToSet = String(dId); setFormDept(dIdToSet); }
+        setFormDept(dId ? String(dId) : '');
+        setFormSem(subObj.semesterNumber ? String(subObj.semesterNumber) : '');
+      } else {
+        const depObj = r.departmentId;
+        const dIdToSet = typeof depObj === 'object' && depObj !== null ? (depObj as any)._id : String(depObj || '');
+        setFormDept(dIdToSet || '');
+        setFormSem(r.semesterNumber ? String(r.semesterNumber) : '');
       }
+      setForm({
+        title: r.title,
+        description: r.description || '',
+        url: r.url,
+        coverImage: r.coverImage || '',
+        category: r.category,
+        subjectId: subIdStr,
+        tags: Array.isArray(r.tags) ? r.tags.join(', ') : '',
+      });
     }
-
-    setForm({
-      title: r.title,
-      description: r.description || '',
-      url: r.url,
-      coverImage: r.coverImage || '',
-      category: r.category,
-      subjectId: r.subjectId ? subIdStr : 'COMMON',
-      tags: '',
-    });
     setShowForm(true);
   };
 
@@ -326,32 +349,54 @@ export default function AdminResourcesPage() {
     const subObj = getSubjectObj(r.subjectId, subjects);
     const subIdStr = subObj ? String(subObj._id || subObj.slug) : String(r.subjectId || '');
 
-    if (filterSubject && subIdStr !== filterSubject) return false;
+    // Subject filter
+    if (filterSubject) {
+      if (filterSubject === 'COMMON') {
+        if (r.subjectId && r.subjectId !== 'COMMON') return false;
+      } else if (subIdStr !== filterSubject) {
+        return false;
+      }
+    }
 
+    // Department filter
     if (filterDept) {
       const deptId = getDeptId(r.subjectId, subjects);
-      if (deptId !== 'all' && deptId !== filterDept) {
+      const rDeptId = typeof r.departmentId === 'object' ? (r.departmentId as any)?._id : r.departmentId;
+      const effectiveDept = deptId && deptId !== '—' ? deptId : rDeptId;
+      if (effectiveDept && effectiveDept !== 'all' && effectiveDept !== filterDept) {
         const foundDept = departments.find((d) => d._id === filterDept || d.slug === filterDept);
-        if (!foundDept || (deptId !== foundDept._id && deptId !== foundDept.slug)) {
+        if (!foundDept || (effectiveDept !== foundDept._id && effectiveDept !== foundDept.slug)) {
           return false;
         }
       }
     }
 
+    // Semester filter
     if (filterSem) {
-      const semNum = getSemesterNumber(r.subjectId, subjects);
-      if (semNum !== Number(filterSem)) return false;
+      const semNum = getSemesterNumber(r.subjectId, subjects) || r.semesterNumber;
+      if (semNum && Number(semNum) !== Number(filterSem)) {
+        return false;
+      }
     }
 
     return true;
   });
+
+  const allSubjectsLabel = (() => {
+    const deptObj = departments.find((d) => d._id === formDept || d.slug === formDept);
+    const deptName = deptObj ? deptObj.name : 'All Departments';
+    if (!formDept && !formSem) return 'All Subjects in All Departments & Semesters';
+    if (!formDept && formSem) return `All Subjects in Semester ${formSem} (All Departments)`;
+    if (formDept && !formSem) return `All Subjects in ${deptName} (All Semesters)`;
+    return `All Subjects in ${deptName} · Sem ${formSem}`;
+  })();
 
   const filteredFormSubjects = subjects.filter((s) => {
     if (formDept && formDept !== 'all') {
       const dId = typeof s.departmentId === 'object' ? s.departmentId?._id : s.departmentId;
       if (dId !== formDept) return false;
     }
-    if (formSem && s.semesterNumber !== Number(formSem)) return false;
+    if (formSem && formSem !== 'all' && s.semesterNumber !== Number(formSem)) return false;
     return true;
   });
 
@@ -463,6 +508,7 @@ export default function AdminResourcesPage() {
           onChange={(val) => setFilterSubject(val)}
           options={[
             { value: '', label: 'All Subjects' },
+            { value: 'COMMON', label: 'All Subjects (Common)' },
             ...filteredFilterSubjects.map((s) => ({ value: s._id, label: s.name })),
           ]}
           placeholder="All Subjects"
@@ -663,7 +709,7 @@ export default function AdminResourcesPage() {
                     className="select"
                   >
                     <option value="COMMON" className="font-bold text-primary-600 bg-primary-50">
-                      All Subjects in this Semester
+                      {allSubjectsLabel}
                     </option>
                     {filteredFormSubjects.map((s) => (
                       <option key={s._id} value={s._id}>
@@ -728,15 +774,20 @@ export default function AdminResourcesPage() {
           <div className="md:hidden divide-y divide-surface-100">
             {filtered.map((r) => {
               const subObj = getSubjectObj(r.subjectId, subjects);
-              const subName = subObj?.name || '—';
+              const isCommonSubject = !r.subjectId || r.subjectId === 'COMMON';
+              const subName = subObj?.name || (isCommonSubject ? 'All Subjects' : '—');
               let deptName = getDeptName(r.subjectId, subjects, departments);
-              if (deptName === '—' && r.departmentId) {
+              if ((deptName === '—' || !r.subjectId) && r.departmentId) {
                 const depObj = r.departmentId as any;
                 const depIdStr = typeof depObj === 'object' ? depObj._id : depObj;
-                const found = departments.find(d => String(d._id) === String(depIdStr));
+                const found = departments.find(d => String(d._id) === String(depIdStr) || d.slug === String(depIdStr));
                 deptName = found ? found.name : '—';
               }
+              if (!r.departmentId && isCommonSubject) {
+                deptName = 'All Departments';
+              }
               const semNum = getSemesterNumber(r.subjectId, subjects) || r.semesterNumber || null;
+              const semLabel = semNum ? `Sem ${semNum}` : 'All Semesters';
 
               return (
                 <div key={r._id} className="p-4 space-y-3 hover:bg-primary-50/20 transition-colors">
@@ -746,11 +797,9 @@ export default function AdminResourcesPage() {
                         <span className="badge-primary text-[10px] px-2 py-0.5 font-bold">
                           {r.category}
                         </span>
-                        {semNum && (
-                          <span className="bg-surface-100 text-gray-700 text-[10px] px-2 py-0.5 rounded-md font-bold">
-                            Sem {semNum}
-                          </span>
-                        )}
+                        <span className="bg-surface-100 text-gray-700 text-[10px] px-2 py-0.5 rounded-md font-bold">
+                          {semLabel}
+                        </span>
                       </div>
                       <h3 className="font-bold text-gray-900 text-sm leading-snug break-words">{r.title}</h3>
                       <p className="text-xs text-gray-500 truncate mt-0.5 font-medium">{subName} · {deptName}</p>
@@ -824,13 +873,17 @@ export default function AdminResourcesPage() {
               <tbody className="divide-y divide-surface-100/90 text-xs sm:text-sm">
                 {filtered.map((r) => {
                   const subObj = getSubjectObj(r.subjectId, subjects);
-                  const subName = subObj?.name || '—';
+                  const isCommonSubject = !r.subjectId || r.subjectId === 'COMMON';
+                  const subName = subObj?.name || 'All Subjects';
                   let deptName = getDeptName(r.subjectId, subjects, departments);
-                  if (deptName === '—' && r.departmentId) {
+                  if ((deptName === '—' || !r.subjectId) && r.departmentId) {
                     const depObj = r.departmentId as any;
                     const depIdStr = typeof depObj === 'object' ? depObj._id : depObj;
-                    const found = departments.find(d => String(d._id) === String(depIdStr));
+                    const found = departments.find(d => String(d._id) === String(depIdStr) || d.slug === String(depIdStr));
                     deptName = found ? found.name : '—';
+                  }
+                  if (!r.departmentId && isCommonSubject) {
+                    deptName = 'All Departments';
                   }
                   const semNum = getSemesterNumber(r.subjectId, subjects) || r.semesterNumber || null;
 
@@ -880,10 +933,28 @@ export default function AdminResourcesPage() {
                           {r.category}
                         </span>
                       </td>
-                      <td className="py-3.5 px-5 text-gray-700 font-medium">{subName}</td>
-                      <td className="py-3.5 px-5 text-gray-600 hidden md:table-cell text-xs">{deptName}</td>
+                      <td className="py-3.5 px-5 text-gray-700 font-medium">
+                        {isCommonSubject ? (
+                          <span className="badge-primary bg-purple-50 text-purple-700 border border-purple-200/80 text-[11px] font-bold px-2 py-0.5 rounded-md">
+                            All Subjects
+                          </span>
+                        ) : (
+                          subName
+                        )}
+                      </td>
+                      <td className="py-3.5 px-5 text-gray-600 hidden md:table-cell text-xs">
+                        {deptName === 'All Departments' ? (
+                          <span className="text-purple-600 font-semibold">{deptName}</span>
+                        ) : (
+                          deptName
+                        )}
+                      </td>
                       <td className="py-3.5 px-5 text-gray-600 hidden sm:table-cell text-xs font-medium">
-                        {semNum ? `Sem ${semNum}` : '—'}
+                        {!semNum ? (
+                          <span className="text-purple-600 font-semibold">All Semesters</span>
+                        ) : (
+                          `Sem ${semNum}`
+                        )}
                       </td>
                       <td className="py-3.5 px-5 text-gray-500 hidden lg:table-cell text-xs whitespace-nowrap font-mono">
                         <span className="text-emerald-600 font-bold">▲{r.upvotes || 0}</span>{' '}

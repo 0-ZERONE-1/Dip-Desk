@@ -81,7 +81,7 @@ export default function BranchPage({ branchSlug }: Props) {
         const found = filteredList.find((d: Department) => d.slug === branchSlug);
         setDept(found || null); // update name immediately, don't wait for delay
       })
-      .catch(() => {});
+      .catch(() => { });
     Promise.all([apiFetch, minDelay])
       .finally(() => setLoading(false));
   }, [branchSlug]);
@@ -124,60 +124,60 @@ export default function BranchPage({ branchSlug }: Props) {
           <Link href="/" className="btn-primary mt-4 inline-flex">Go Home</Link>
         </div>
       ) : (
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 w-full"
-      >
-        {[1, 2, 3, 4, 5, 6].map((sem) => (
-          <motion.div
-            key={sem}
-            variants={semesterCardVariants}
-            whileHover={{ y: -6, transition: { duration: 0.25, ease: 'easeOut' } }}
-            className="h-full flex flex-col"
-          >
-            <Link
-              href={`/${branchSlug}/semester-${sem}`}
-              id={`semester-${sem}-card`}
-              className="group bg-white rounded-3xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out p-5 sm:p-6 flex flex-col justify-between h-full relative overflow-hidden"
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 w-full"
+        >
+          {[1, 2, 3, 4, 5, 6].map((sem) => (
+            <motion.div
+              key={sem}
+              variants={semesterCardVariants}
+              whileHover={{ y: -6, transition: { duration: 0.25, ease: 'easeOut' } }}
+              className="h-full flex flex-col"
             >
-              {/* Smooth Rounded Top Accent Gradient Bar blended with card */}
-              <div className="absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
+              <Link
+                href={`/${branchSlug}/semester-${sem}`}
+                id={`semester-${sem}-card`}
+                className="group bg-white rounded-2xl border border-surface-200/90 hover:border-primary-300 shadow-card hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 ease-out p-5 sm:p-6 flex flex-col justify-between h-full relative overflow-hidden"
+              >
+                {/* Smooth Rounded Top Accent Gradient Bar blended with card */}
+                <div className="absolute top-0 inset-x-6 sm:inset-x-8 h-[3px] bg-gradient-to-r from-primary-500/0 via-primary-500 via-accent-500 to-accent-500/0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
 
-              {/* Ambient Soft Glow in corner on Hover */}
-              <div className="absolute -top-10 -right-10 w-28 h-28 bg-primary-500/10 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                {/* Ambient Soft Glow in corner on Hover */}
+                <div className="absolute -top-10 -right-10 w-28 h-28 bg-primary-500/10 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              {/* Main Content Header (Icon on left, text beside it) */}
-              <div className="flex items-center gap-3.5 sm:gap-4 relative z-10 mb-4">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white font-black text-2xl sm:text-3xl shadow-md shadow-primary-500/25 group-hover:scale-105 transition-all duration-300 flex-shrink-0 aspect-square">
-                  {sem}
+                {/* Main Content Header (Icon on left, text beside it) */}
+                <div className="flex items-center gap-3.5 sm:gap-4 relative z-10 mb-4">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#c026d3] flex items-center justify-center text-white font-black text-2xl sm:text-3xl shadow-md shadow-primary-500/25 group-hover:scale-105 transition-all duration-300 flex-shrink-0 aspect-square">
+                    {sem}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug break-words">
+                      Semester {sem} Resources
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                      {sem <= 2
+                        ? 'Foundation & general engineering core subjects for early semesters.'
+                        : sem <= 4
+                          ? 'Core departmental engineering subjects and practical lab modules.'
+                          : 'Advanced specialized subjects, project work & elective modules.'}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-primary-600 transition-colors leading-snug break-words">
-                    Semester {sem} Resources
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
-                    {sem <= 2
-                      ? 'Foundation & general engineering core subjects for early semesters.'
-                      : sem <= 4
-                      ? 'Core departmental engineering subjects and practical lab modules.'
-                      : 'Advanced specialized subjects, project work & elective modules.'}
-                  </p>
-                </div>
-              </div>
 
-              {/* Action Footer */}
-              <div className="flex items-center justify-between w-full pt-4 border-t border-surface-100/90 text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors mt-auto relative z-10">
-                <span className="tracking-tight">View Subjects</span>
-                <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-600 text-primary-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs group-hover:shadow-sm">
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                {/* Action Footer */}
+                <div className="flex items-center justify-between w-full pt-4 border-t border-surface-100/90 text-xs sm:text-sm font-bold text-primary-600 group-hover:text-primary-700 transition-colors mt-auto relative z-10">
+                  <span className="tracking-tight">View Subjects</span>
+                  <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-600 text-primary-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-xs group-hover:shadow-sm">
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
                 </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
       )}
     </div>
   );

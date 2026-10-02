@@ -130,21 +130,12 @@ function itemMatchesDept(customItem: any, targetDeptSlug: string): boolean {
 function itemMatchesSemester(customItem: any, targetSem: number): boolean {
   if (!targetSem) return true;
 
-  const sem = customItem.semesterNumber || customItem.subjectId?.semesterNumber;
-  if (sem) {
-    return Number(sem) === Number(targetSem);
+  const sem = customItem.semesterNumber ?? customItem.subjectId?.semesterNumber;
+  if (sem === null || sem === undefined || sem === '' || sem === 'all' || Number(sem) === 0) {
+    return true;
   }
 
-  if (customItem.subjectId) {
-    const subIdStr = typeof customItem.subjectId === 'object' ? customItem.subjectId._id : customItem.subjectId;
-    const subjects = getClientCustomItems<any>('subjects');
-    const matchedSub = subjects.find((s) => s._id === subIdStr || s.slug === subIdStr);
-    if (matchedSub && matchedSub.semesterNumber) {
-      return Number(matchedSub.semesterNumber) === Number(targetSem);
-    }
-  }
-
-  return true;
+  return Number(sem) === Number(targetSem);
 }
 
 export function syncAndFilterItems<T = any>(
@@ -154,16 +145,12 @@ export function syncAndFilterItems<T = any>(
 ): T[] {
   if (typeof window === 'undefined') return serverItems || [];
   
-  // If server returned items from API database, prioritize server items!
-  const hasServerItems = Array.isArray(serverItems) && serverItems.length > 0;
   const rawList = Array.isArray(serverItems) ? [...serverItems] : [];
-
   const customList = getClientCustomItems<any>(category);
   const deletedIds = getClientDeletedIds();
 
-  // Merge custom created/edited items into rawList
   customList.forEach((customItem) => {
-    if (deletedIds.includes(String(customItem._id))) return; // Skip locally deleted custom items
+    if (deletedIds.includes(String(customItem._id))) return;
     const index = rawList.findIndex((item: any) => item._id === customItem._id || (item.slug && item.slug === customItem.slug));
     if (index !== -1) {
       rawList[index] = { ...rawList[index], ...customItem };
@@ -176,33 +163,32 @@ export function syncAndFilterItems<T = any>(
 
   if (filters) {
     filtered = filtered.filter((item: any) => {
-      // Always keep server-returned items (exempt from strict client-side department/semester matching)
-      if (!item._isClientCustom) {
-        if (filters.category && filters.category !== 'All' && item.category && item.category !== filters.category) return false;
-        if (filters.subjectId) {
-          const itemSubId = typeof item.subjectId === 'object'
-            ? (item.subjectId?._id || item.subjectId?.slug)
-            : item.subjectId;
-          if (itemSubId && itemSubId !== filters.subjectId) return false;
-        }
-        return true;
+      if (filters.category && filters.category !== 'All' && item.category && item.category !== filters.category) {
+        return false;
       }
-
-      if (filters.category && filters.category !== 'All' && item.category && item.category !== filters.category) return false;
 
       if (filters.subjectId) {
         const itemSubId = typeof item.subjectId === 'object'
           ? (item.subjectId?._id || item.subjectId?.slug)
           : item.subjectId;
-        if (itemSubId && itemSubId !== filters.subjectId) return false;
-      }
 
-      if (filters.departmentSlug) {
-        if (!itemMatchesDept(item, filters.departmentSlug)) return false;
-      }
-
-      if (filters.semesterNumber) {
-        if (!itemMatchesSemester(item, filters.semesterNumber)) return false;
+        if (itemSubId && itemSubId !== 'COMMON') {
+          if (String(itemSubId) !== String(filters.subjectId)) return false;
+        } else {
+          if (filters.semesterNumber) {
+            if (!itemMatchesSemester(item, filters.semesterNumber)) return false;
+          }
+          if (filters.departmentSlug) {
+            if (!itemMatchesDept(item, filters.departmentSlug)) return false;
+          }
+        }
+      } else {
+        if (filters.departmentSlug) {
+          if (!itemMatchesDept(item, filters.departmentSlug)) return false;
+        }
+        if (filters.semesterNumber) {
+          if (!itemMatchesSemester(item, filters.semesterNumber)) return false;
+        }
       }
 
       return true;

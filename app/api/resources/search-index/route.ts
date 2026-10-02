@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getResourcesStore, getSubjectsStore } from '@/lib/store';
+import { getResourcesStore, getSubjectsStore, getDepartmentsStore } from '@/lib/store';
 
 // ZERONE - Build lightweight JSON index for client-side Fuse.js global search
 export async function GET() {
   try {
-    const [resources, subjects] = await Promise.all([
+    const [resources, subjects, departments] = await Promise.all([
       getResourcesStore(),
       getSubjectsStore(),
+      getDepartmentsStore(),
     ]);
 
     // ZERONE - Build subject lookup map for quick relational joins
@@ -16,10 +17,16 @@ export async function GET() {
       if (id) subjectMap[id] = s;
     }
 
+    const deptMap: Record<string, any> = {};
+    for (const d of departments) {
+      const id = d._id?.toString();
+      if (id) deptMap[id] = d;
+      if (d.slug) deptMap[d.slug] = d;
+    }
+
     const formattedResources = resources
       .filter((r: any) => r.isActive !== false)
       .map((r: any) => {
-        // ZERONE - Resolve subject object from string ID or populated reference
         let subjectObj: any = null;
         if (typeof r.subjectId === 'object' && r.subjectId !== null) {
           subjectObj = r.subjectId;
@@ -28,8 +35,22 @@ export async function GET() {
         }
 
         const deptObj = subjectObj?.departmentId;
-        const deptName = typeof deptObj === 'object' ? deptObj?.name : '';
-        const deptSlug = typeof deptObj === 'object' ? deptObj?.slug : '';
+        let deptName = typeof deptObj === 'object' ? deptObj?.name : '';
+        let deptSlug = typeof deptObj === 'object' ? deptObj?.slug : '';
+
+        if (!deptName && r.departmentId) {
+          const dId = typeof r.departmentId === 'object' ? r.departmentId?._id?.toString() : r.departmentId;
+          const matchedDept = deptMap[dId];
+          if (matchedDept) {
+            deptName = matchedDept.name;
+            deptSlug = matchedDept.slug;
+          }
+        }
+        if (!deptName && !r.subjectId) {
+          deptName = 'All Departments';
+        }
+
+        const semNumber = subjectObj?.semesterNumber || r.semesterNumber || null;
 
         return {
           _id: r._id?.toString(),
@@ -37,9 +58,9 @@ export async function GET() {
           category: r.category,
           type: 'resource',
           subject: {
-            name: subjectObj?.name || '',
+            name: subjectObj?.name || (semNumber ? `All Subjects (Sem ${semNumber})` : 'All Subjects'),
             slug: subjectObj?.slug || '',
-            semesterNumber: subjectObj?.semesterNumber || 1,
+            semesterNumber: semNumber || 1,
           },
           department: {
             name: deptName,

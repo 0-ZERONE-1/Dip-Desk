@@ -107,17 +107,24 @@ export default function SubjectPage({ branchSlug, semesterNumber, subjectSlug }:
     if (!subject) return;
     setResourcesLoading(true);
     fetch(
-      `/api/resources?subjectId=${subject._id}&category=${encodeURIComponent(activeCategory)}&t=${Date.now()}`,
+      `/api/resources?subjectId=${subject._id}&departmentSlug=${branchSlug}&semester=${semesterNumber}&category=${encodeURIComponent(activeCategory)}&t=${Date.now()}`,
       { cache: 'no-store' }
     )
       .then((r) => r.json())
       .then((data) => {
         const rawList = data.resources || [];
-        setResources(syncAndFilterItems<Resource>('resources', rawList, { subjectId: subject._id, category: activeCategory }));
+        setResources(
+          syncAndFilterItems<Resource>('resources', rawList, {
+            subjectId: subject._id,
+            category: activeCategory,
+            departmentSlug: branchSlug,
+            semesterNumber: semesterNumber,
+          })
+        );
         setResourcesLoading(false);
       })
       .catch(() => setResourcesLoading(false));
-  }, [subject, activeCategory]);
+  }, [subject, activeCategory, branchSlug, semesterNumber]);
 
   if (!loading && !subject) {
     return (
